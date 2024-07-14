@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?> 
+<AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
+    <Type Name="_calc_symbol">
+        <AlternativeType Name="struct _calc_symbol"/>
+        <AlternativeType Name="calc::vm::_calc_symbol"/>
+        <DisplayString Condition="kind == 1">{{ name={name,s}, kind={kind}, width={addr.datatype->width}, align={addr.datatype->align} }}</DisplayString>
+        <DisplayString Condition="kind == 2">{{ name={name,s}, kind={kind}, type={addr.constant->type}, data={addr.constant->data} }}</DisplayString>
+        <Expand>
+            <Item Name="name">name,s</Item>
+            <Item Name="kind">kind</Item>
+            <Item Name="addr">addr.datatype</Item>
+            <Item Name="refs">refs</Item>
+        </Expand>
+    </Type>
+</AutoVisualizer>
