@@ -1,7 +1,5 @@
 #include "calc-virtm.h"
 
-#if CALC_VIRTM_H_
-
 /* =---- Environment -------------------------------------------= */
 
 #pragma region Environment
@@ -371,5 +369,3 @@ symb_t *packlc_symb_local(const char *const name, const symb_t *const type)
 #pragma endregion
 
 /* =------------------------------------------------------------= */
-
-#endif // CALC_VIRTM_H_ ENABLED

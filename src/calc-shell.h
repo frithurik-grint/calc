@@ -8,13 +8,8 @@
 #include "calc-build.h"
 
 #ifdef __cplusplus
-namespace calc::shell
+namespace calc
 {
-using namespace calc::parser;
-using namespace calc::vm;
-using namespace calc::codegen;
-
-using namespace std;
 #endif // __cplusplus
 
 CALC_C_HEADER_BEGIN
@@ -24,9 +19,5 @@ CALC_C_HEADER_END
 #ifdef __cplusplus
 }
 #endif // __cplusplus
-
-#ifdef _CALC_BUILD_AS_ONE
-#   include "calc-shell.c"
-#endif // _CALC_BUILD_AS_ONE
 
 #endif

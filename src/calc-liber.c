@@ -148,8 +148,24 @@ void *callocaz_s(size_t count, size_t size, size_t alignment)
 
 #pragma endregion
 
-/* =------------------------------------------------------------= */
+/* =---- Datatypes Management ----------------------------------= */
 
-#ifdef _CALC_BUILD_AS_ONE
-#	define CALC_LIBER_C_
-#endif // _CALC_BUILD_AS_ONE
+#pragma region Datatypes Management
+
+// String
+
+char *strdcpy(char *const dest, const char *const source, size_t length)
+{
+	char *buf;
+
+	if (!dest)
+		buf = dimz(char, length + 1);
+	else
+		buf = dest, buf[length] = '\0';
+
+	return strncpy(buf, source, length);
+}
+
+#pragma endregion
+
+/* =------------------------------------------------------------= */

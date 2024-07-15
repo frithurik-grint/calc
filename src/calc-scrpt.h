@@ -20,10 +20,4 @@ CALC_C_HEADER_END
 }
 #endif // __cplusplus
 
-#ifdef _CALC_BUILD_AS_ONE
-#   ifndef CALC_SCRPT_C_
-#       include "calc-scrpt.c"
-#   endif // CALC_SCRPT_C_
-#endif // _CALC_BUILD_AS_ONE
-
 #endif

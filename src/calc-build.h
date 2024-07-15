@@ -21,10 +21,4 @@ CALC_C_HEADER_END
 }
 #endif // __cplusplus
 
-#ifdef _CALC_BUILD_AS_ONE
-#   ifndef CALC_BUILD_C_
-#       include "calc-build.c"
-#   endif // CALC_BUILD_C_
-#endif // _CALC_BUILD_AS_ONE
-
 #endif // CALC_BUILD_H_

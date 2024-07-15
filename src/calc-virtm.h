@@ -337,10 +337,4 @@ CALC_C_HEADER_END
 }
 #endif
 
-#ifdef _CALC_BUILD_AS_ONE
-#   ifndef CALC_VIRTM_C_
-#       include "calc-virtm.c"
-#   endif // CALC_VIRTM_C_
-#endif // _CALC_BUILD_AS_ONE
-
 #endif // CALC_VIRTM_H_

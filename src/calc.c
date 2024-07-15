@@ -2,19 +2,21 @@
 
 int main()
 {
-    symb_t *i32 = create_symb_dtype("i32", sizeof(int), sizeof(int));
-    symb_t *i64 = create_symb_dtype("i64", sizeof(long long), sizeof(long long));
+    char buf[BUFSIZ] = { 0 };
 
-    char *names[] = { "a", "b" };
-    symb_t *types[] = { i32, i64 };
+    fgets(buf, BUFSIZ, stdin);
 
-    symbdata_t *membv = create_symbdata_array(2, names, types);
+    dbuf_t *dbuf = create_dbuf(buf, BUFSIZ);
 
-    symb_t *point = create_symb_stype_autosiz("point", 2, membv);
+    int c;
 
-    symb_t *A = malloc_symb_local("A", point);
+    getbufc(dbuf);
 
-    unsigned int size = sizeof_symb(A);
+    char *n = accept(dbuf);
+
+    do
+        c = putchar(getbufc(dbuf));
+    while (c != EOF);
 
     return 0;
 }

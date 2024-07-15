@@ -5,6 +5,10 @@
 #ifndef CALC_LIBER_H_
 #define CALC_LIBER_H_
 
+#ifndef _CRT_SECURE_NO_WARNINGS
+#   define _CRT_SECURE_NO_WARNINGS 1
+#endif
+
 #ifdef __cplusplus
 #   ifndef CALC_C_HEADER_BEGIN
 /// @brief This macro marks the C header beginning for C++ compilers.
@@ -223,6 +227,10 @@ typedef CALC_BYTE_T byte_t;
 ///        byte_t data type.
 #   define BYTE_MAX ((byte_t)0xFF)
 #endif // BYTE_MAX
+
+// String
+
+char *strdcpy(char *const dest, const char *const source, size_t length);
 
 #pragma endregion
 
