@@ -8,11 +8,13 @@
 #include "calc-liber.h"
 
 #ifdef __cplusplus
+#   include <cctype>
 #   include <cstdio>
 
 namespace calc
 {
 #else
+#   include <ctype.h>
 #   include <stdio.h>
 #endif // __cplusplus
 
@@ -21,6 +23,12 @@ CALC_C_HEADER_BEGIN
 /* =---- Lexical Analyzer --------------------------------------= */
 
 #pragma region Lexical Analyzer
+
+// +---- Tokens
+
+#pragma region Tokens
+
+#pragma endregion
 
 // +---- Source Stream
 
@@ -31,31 +39,36 @@ CALC_C_HEADER_BEGIN
 typedef struct _calc_double_buffer
 {
     char        *buf;
-    unsigned int bgn;
     unsigned int fwd;
-    size_t       len;
+    unsigned int pos;
 } dbuf_t;
 
-dbuf_t *create_dbuf(char *const buf, size_t length);
+dbuf_t *create_dbuf(char *const buf, unsigned int length);
 
 int topbufc(const dbuf_t *const dbuf);
 int getbufc(dbuf_t *const dbuf);
 int setbufc(dbuf_t *const dbuf, int c);
 int putbufc(dbuf_t *const dbuf, int c);
 
-char *accept(dbuf_t *const dbuf);
-char *retire(dbuf_t *const dbuf);
+// Lexer
 
-void advance(dbuf_t *const dbuf);
-void retreat(dbuf_t *const dbuf);
+typedef struct _calc_lexer
+{
+    char        *fname;
+    dbuf_t      *dbuff;
+    unsigned int lnpos;
+    unsigned int clpos;
+} lexr_t;
 
-void reset(dbuf_t *const dbuf);
+lexr_t *create_lexr(const char *const fname, dbuf_t *const dbuff);
 
-#pragma endregion
+int toplexc(lexr_t *const lexr);
+int getlexc(lexr_t *const lexr);
 
-// +---- Tokens
+void advance(lexr_t *const lexr);
 
-#pragma region Tokens
+char *accept(lexr_t *const lexr);
+char *retire(lexr_t *const lexr);
 
 #pragma endregion
 
