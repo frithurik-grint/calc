@@ -83,8 +83,28 @@ void *calloc_s(size_t count, size_t size)
 	);
 }
 
+void *mallocz_s(size_t size)
+{
+	return _zerofy_block(_safety_check(
+#ifdef CALC_DEBUG
+		__func__,
+#endif // CALC_DEBUG
+		malloc(size)
+	), size);
+}
+
+void *callocz_s(size_t count, size_t size)
+{
+	return _zerofy_block(_safety_check(
+#ifdef CALC_DEBUG
+		__func__,
+#endif // CALC_DEBUG
+		calloc(count, size)
+	), count * size);
+}
+
 #ifndef _get_aligned_size
-#	define _get_aligned_size(size, alignment) ((size + alignment) & ~(alignment - 1))
+#	define _get_aligned_size(size, alignment) ((size + alignment - 1) & ~(alignment - 1))
 #endif // _get_aligned_size
 
 void *malloca_s(size_t size, size_t alignment)
@@ -107,29 +127,29 @@ void *calloca_s(size_t count, size_t size, size_t alignment)
 	);
 }
 
-#ifdef _get_aligned_size
-#	undef _get_aligned_size
-#endif // undef _get_aligned_size
-
-void *mallocz_s(size_t size)
+void *mallocaz_s(size_t size, size_t alignment)
 {
 	return _zerofy_block(_safety_check(
 #ifdef CALC_DEBUG
 		__func__,
 #endif // CALC_DEBUG
-		malloc(size)
+		malloc(size = _get_aligned_size(size, alignment))
 	), size);
 }
 
-void *callocz_s(size_t count, size_t size)
+void *calloca_s(size_t count, size_t size, size_t alignment)
 {
 	return _zerofy_block(_safety_check(
 #ifdef CALC_DEBUG
 		__func__,
 #endif // CALC_DEBUG
-		calloc(count, size)
+		calloc(count, size = _get_aligned_size(size, alignment))
 	), count * size);
 }
+
+#ifdef _get_aligned_size
+#	undef _get_aligned_size
+#endif // undef _get_aligned_size
 
 #pragma endregion
 
@@ -143,7 +163,8 @@ void *callocz_s(size_t count, size_t size)
 
 static inline bool_t _is_type_kind(const symbkind_t kind)
 {
-	return kind == SYMB_DTYPE;
+	return (kind == SYMB_DTYPE)
+		|| (kind == SYMB_STYPE);
 }
 
 // Generic Symbols
@@ -165,6 +186,10 @@ symb_t *create_symb(const char *const name, const symbkind_t kind)
 	{
 	case SYMB_DTYPE:
 		symb->addr.datatype = alloc(symb_dtype_t);
+		break;
+
+	case SYMB_STYPE:
+		symb->addr.structure = alloc(symb_stype_t);
 		break;
 
 	case SYMB_CONST:
@@ -191,6 +216,134 @@ symb_t *create_symb(const char *const name, const symbkind_t kind)
 	return symb;
 }
 
+byte_t *malloc_symb(const symb_t *const type)
+{
+	return mallocaz_s(sizeof_symb(type), alignof_symb(type));
+}
+
+unsigned int sizeof_symb(const symb_t *const symb)
+{
+	switch (symb->kind)
+	{
+	case SYMB_DTYPE:
+		return symb->addr.datatype->width;
+
+	case SYMB_STYPE:
+		return symb->addr.structure->width;
+
+	case SYMB_CONST:
+		return sizeof_symb(symb->addr.constant->type);
+
+	/*case SYMB_LOCAL:
+		return sizeof_symb(symb->addr.variable->type);
+
+	case SYMB_FUNCT:
+		return sizeof_symb(symb->addr.function->type);
+
+	case SYMB_PARAM:
+		return sizeof_symb(symb->addr.parameter->type);*/
+
+	default:
+		return 0;
+	}
+}
+
+unsigned int alignof_symb(const symb_t *const symb)
+{
+	switch (symb->kind)
+	{
+	case SYMB_DTYPE:
+		return symb->addr.datatype->align;
+
+	case SYMB_STYPE:
+		return symb->addr.structure->align;
+
+	case SYMB_CONST:
+		return alignof_symb(symb->addr.constant->type);
+
+		/*case SYMB_LOCAL:
+			return alignof_symb(symb->addr.variable->type);
+
+		case SYMB_FUNCT:
+			return alignof_symb(symb->addr.function->type);
+
+		case SYMB_PARAM:
+			return alignof_symb(symb->addr.parameter->type);*/
+
+	default:
+		return 0;
+	}
+}
+
+symbdata_t *create_symbdata(const char *const name, const symb_t *const type)
+{
+	symbdata_t *data = alloc(symbdata_t);
+
+	data->name = name;
+	data->type = type;
+
+	return data;
+}
+
+symbdata_t *create_symbdata_v(unsigned int count, ...)
+{
+	symbdata_t *data;
+
+	if (count > 0)
+	{
+		unsigned int i;
+		va_list args;
+
+		data = dim(symbdata_t, count);
+
+		va_start(args, count);
+
+		for (i = 0; i < count; i++)
+		{
+			data[i].name = va_arg(args, char *);
+			data[i].type = va_arg(args, symb_t *);
+		}
+
+		va_end(args);
+	}
+	else
+	{
+		data = NULL;
+	}
+
+	return data;
+}
+
+unsigned int sizeof_symbdata(const symbdata_t *const data)
+{
+	return sizeof_symb(data->type);
+}
+
+unsigned int sizeof_symbdata_v(unsigned int count, const symbdata_t *const data)
+{
+	unsigned int i, s;
+
+	for (i = 0, s = 0; i < count; i++)
+		s += sizeof_symb(data[i].type);
+
+	return s;
+}
+
+unsigned int alignof_symbdata(const symbdata_t *const data)
+{
+	return alignof_symb(data->type);
+}
+
+unsigned int alignof_symbdata_v(unsigned int count, const symbdata_t *const data)
+{
+	unsigned int i, s;
+
+	for (i = 0, s = 0; i < count; i++)
+		s += alignof_symb(data[i].type);
+
+	return s;
+}
+
 // Specialized Symbols
 
 symb_t *create_symb_dtype(const char *const name, unsigned int width, unsigned int align)
@@ -199,6 +352,18 @@ symb_t *create_symb_dtype(const char *const name, unsigned int width, unsigned i
 
 	symb->addr.datatype->width = width;
 	symb->addr.datatype->align = align;
+
+	return symb;
+}
+
+symb_t *create_symb_stype(const char *const name, unsigned int width, unsigned int align, unsigned int membc, const symbdata_t *const membv)
+{
+	symb_t *symb = create_symb(name, SYMB_STYPE);
+
+	symb->addr.structure->width = width;
+	symb->addr.structure->align = align;
+	symb->addr.structure->membc = membc;
+	symb->addr.structure->membv = membv;
 
 	return symb;
 }

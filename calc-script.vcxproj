@@ -70,6 +70,10 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <OutDir>$(SolutionDir)out\$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>.$(ShortProjectName)\$(Platform)\$(Configuration)\</IntDir>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
@@ -142,9 +146,6 @@
     <None Include=".gitignore" />
     <None Include="LICENSE" />
     <None Include="README.md" />
-  </ItemGroup>
-  <ItemGroup>
-    <Natvis Include="natvis-file.natvis" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -32,6 +32,7 @@
 #   include <csignal>
 
 #   include <cstdlib>
+#   include <cstdarg>
 
 #   ifdef CALC_DEBUG
 #       include <cstdio>
@@ -45,6 +46,7 @@ namespace calc::vm
 #   include <signal.h>
 
 #   include <stdlib.h>
+#   include <stdarg.h>
 
 #   ifdef CALC_DEBUG
 #       include <stdio.h>
@@ -82,6 +84,32 @@ void *calloc_s(size_t count, size_t size);
 #	define dim(type, count) (type *)calloc_s((count), sizeof(type))
 #endif // dim
 
+/// @brief Allocate a block of bytes, all set to
+///		   zero.
+/// @param size Number of bytes to allocate.
+/// @return Pointer to the beginning of the
+///			allocated region of memory.
+void *mallocz_s(size_t size);
+/// @brief Allocate a series of coniguous block of
+///		   bytes, all set to zero.
+/// @param count Number of blocks to allocate.
+/// @param size Number of bytes in each block
+///		   of memory.
+/// @return Pointer to the first allocated block.
+void *callocz_s(size_t count, size_t size);
+
+#ifndef allocz
+/// @brief Allocate a new zero or default instance
+///        of a specified type.
+#	define allocz(type) (type *)mallocz_s(sizeof(type))
+#endif // allocz
+
+#ifndef dimz
+/// @brief Allocate a new array of type with all
+///        members set to zero.
+#	define dimz(type, count) (type *)callocz_s((count), sizeof(type))
+#endif // dimz
+
 /// @brief Allocate a block of memory in the heap,
 ///		   aligned to a specific width.
 /// @param size Number of byte to allocate.
@@ -111,31 +139,36 @@ void *calloca_s(size_t count, size_t size, size_t alignment);
 #	define dima(type1, type2, count) (type1 *)calloca_s((count), sizeof(type1), sizeof(type2))
 #endif // dima
 
-/// @brief Allocate a block of bytes, all set to
+/// @brief Allocate a block of memory in the heap,
+///		   aligned to a specific width, all set to
 ///		   zero.
-/// @param size Number of bytes to allocate.
-/// @return Pointer to the beginning of the
-///			allocated region of memory.
-void *mallocz_s(size_t size);
-/// @brief Allocate a series of coniguous block of
-///		   bytes, all set to zero.
+/// @param size Number of byte to allocate.
+/// @param alignment Width of alignment.
+/// @return Pointer to the beginning of the allocated
+///			block of memory.
+void *mallocaz_s(size_t size, size_t alignment);
+/// @brief Allocate a series of cotiguous blocks
+///		   of memory in the heap aligned to a 
+///		   specific width, all set to zero.
 /// @param count Number of blocks to allocate.
-/// @param size Number of bytes in each block
-///		   of memory.
-/// @return Pointer to the first allocated block.
-void *callocz_s(size_t count, size_t size);
+/// @param size Number of bytes in each block.
+/// @param alignment Width of the alignment.
+/// @return Pointer to the beginning of the
+///			first allocated region.
+void *callocaz_s(size_t count, size_t size, size_t alignment);
 
-#ifndef allocz
-/// @brief Allocate a new zero or default instance
-///        of a specified type.
-#	define allocz(type) (type *)mallocz_s(sizeof(type))
-#endif // allocz
+#ifndef allocaz
+/// @brief Allocate a new zero instance of the specified
+///        type, aligned to another type.
+#	define allocaz(type1, type2) (type1 *)mallocaz_s(sizeof(type1), sizeof(type2))
+#endif // allocaz
 
-#ifndef dimz
-/// @brief Allocate a new array of type with all
-///        members set to zero.
-#	define dimz(type, count) (type *)callocz_s((count), sizeof(type))
-#endif // dimz
+#ifndef dimaz
+/// @brief Allocate a new array of the specified type
+///        with members aligned to another type all
+///        set to zero.
+#	define dimaz(type1, type2, count) (type1 *)callocaz_s((count), sizeof(type1), sizeof(type2))
+#endif // dimaz
 
 #pragma endregion
 
@@ -201,6 +234,8 @@ typedef CALC_BYTE_T byte_t;
 
 /// @brief Record for primitive types infos.
 typedef struct _calc_symbol_datatype  symb_dtype_t;
+/// @brief Record for structure types infos.
+typedef struct _calc_symbol_structure symb_stype_t;
 /// @brief Record for constants infos.
 typedef struct _calc_symbol_constant  symb_const_t;
 /// @brief Record for variables infos.
@@ -217,6 +252,8 @@ typedef union _calc_symbol_addr
 {
     /// @brief Datatype symbol infos.
     symb_dtype_t *datatype;
+    /// @brief Structure symbol infos.
+    symb_stype_t *structure;
     /// @brief Constant symbol infos.
     symb_const_t *constant;
     /// @brief Variable symbol infos.
@@ -234,6 +271,8 @@ typedef enum _calc_symbol_kind
     SYMB_UNDEF,
     /// @brief Datatype symbol kind.
     SYMB_DTYPE,
+    /// @brief Structure symbol kind.
+    SYMB_STYPE,
     /// @brief Constant symbol kind.
     SYMB_CONST,
     /// @brief Variable symbol kind.
@@ -272,6 +311,56 @@ typedef struct _calc_symbol
 /// @param kind Kind of the symbol.
 /// @return A pointer to new symbol.
 symb_t *create_symb(const char *const name, const symbkind_t kind);
+byte_t *malloc_symb(const symb_t *const type);
+
+/// @brief Get size of the symbol.
+/// @param symb Symbol.
+/// @return Size of symb.
+unsigned int sizeof_symb(const symb_t *const symb);
+/// @brief 
+/// @param symb 
+/// @return 
+unsigned int alignof_symb(const symb_t *const symb);
+
+/// @brief Record for data layout.
+typedef struct _calc_symbol_data
+{
+    /// @brief Name of the member.
+    char *name;
+    /// @brief Type of the member.
+    symb_t *type;
+} symbdata_t;
+
+/// @brief 
+/// @param name 
+/// @param type 
+/// @return 
+symbdata_t *create_symbdata(const char *const name, const symb_t *const type);
+/// @brief 
+/// @param count 
+/// @param  
+/// @return 
+symbdata_t *create_symbdata_v(unsigned int count, ...);
+
+/// @brief 
+/// @param data 
+/// @return 
+unsigned int sizeof_symbdata(const symbdata_t *const data);
+/// @brief 
+/// @param count 
+/// @param data 
+/// @return 
+unsigned int sizeof_symbdata_v(unsigned int count, const symbdata_t *const data);
+
+/// @brief 
+/// @param data 
+/// @return 
+unsigned int alignof_symbdata(const symbdata_t *const data);
+/// @brief 
+/// @param count 
+/// @param data 
+/// @return 
+unsigned int alignof_symbdata_v(unsigned int count, const symbdata_t *const data);
 
 // Specialized Symbols
 
@@ -289,6 +378,24 @@ struct _calc_symbol_datatype
 /// @param align 
 /// @return 
 symb_t *create_symb_dtype(const char *const name, unsigned int width, unsigned int align);
+
+struct _calc_symbol_structure
+{
+    /// @brief Size of the type.
+    unsigned int width;
+    /// @brief Alignment of the type.
+    unsigned int align;
+    /// @brief Count of members.
+    unsigned int membc;
+    /// @brief Data layouts of members.
+    symbdata_t  *membv;
+};
+
+/// @brief 
+/// @param name 
+/// @param layout 
+/// @return 
+symb_t *create_symb_stype(const char *const name, unsigned int membc, unsigned int width, unsigned int align, const symbdata_t *const membv);
 
 struct _calc_symbol_constant
 {

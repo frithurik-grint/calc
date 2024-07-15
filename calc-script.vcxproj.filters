@@ -47,7 +47,4 @@
     <None Include="LICENSE" />
     <None Include="README.md" />
   </ItemGroup>
-  <ItemGroup>
-    <Natvis Include="natvis-file.natvis" />
-  </ItemGroup>
 </Project>
