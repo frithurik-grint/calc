@@ -108,6 +108,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -132,11 +133,17 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\calc-build.c" />
+    <ClCompile Include="src\calc-liber.c" />
+    <ClCompile Include="src\calc-parse.c" />
+    <ClCompile Include="src\calc-scrpt.c" />
+    <ClCompile Include="src\calc-shell.c" />
     <ClCompile Include="src\calc-virtm.c" />
     <ClCompile Include="src\calc.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\calc-build.h" />
+    <ClInclude Include="src\calc-liber.h" />
+    <ClInclude Include="src\calc-parse.h" />
     <ClInclude Include="src\calc-scrpt.h" />
     <ClInclude Include="src\calc-shell.h" />
     <ClInclude Include="src\calc-virtm.h" />

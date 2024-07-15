@@ -66,10 +66,12 @@
 #	endif // CALC_UNICODE
 #endif // _UNICODE
 
-#include "calc-virtm.h"
+#ifdef _CALC_NO_PARSE_ENV
+#   define CALC_PARSE_H_ 0
+#endif
 
-#ifdef _CALC_NO_BUILD_ENV
-#   define CALC_BUILD_H_ 0
+#ifdef _CALC_NO_VIRTM_ENV
+#   define CALC_VIRTM_H_ 0
 #endif
 
 #include "calc-build.h"
@@ -78,12 +80,11 @@
 #   define CALC_SCRPT_H_ 0
 #endif
 
-#include "calc-scrpt.h"
-
 #ifdef _CALC_NO_SHELL_ENV
 #   define CALC_SHELL_H_ 0
 #endif
 
+#include "calc-scrpt.h"
 #include "calc-shell.h"
 
 #ifdef __cplusplus

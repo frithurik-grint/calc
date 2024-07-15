@@ -24,6 +24,18 @@
     <ClCompile Include="src\calc-virtm.c">
       <Filter>File di origine</Filter>
     </ClCompile>
+    <ClCompile Include="src\calc-liber.c">
+      <Filter>File di origine</Filter>
+    </ClCompile>
+    <ClCompile Include="src\calc-parse.c">
+      <Filter>File di origine</Filter>
+    </ClCompile>
+    <ClCompile Include="src\calc-scrpt.c">
+      <Filter>File di origine</Filter>
+    </ClCompile>
+    <ClCompile Include="src\calc-shell.c">
+      <Filter>File di origine</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\calc.h">
@@ -39,6 +51,12 @@
       <Filter>File di intestazione</Filter>
     </ClInclude>
     <ClInclude Include="src\calc-virtm.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="src\calc-parse.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="src\calc-liber.h">
       <Filter>File di intestazione</Filter>
     </ClInclude>
   </ItemGroup>

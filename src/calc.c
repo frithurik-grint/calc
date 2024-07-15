@@ -5,11 +5,16 @@ int main()
     symb_t *i32 = create_symb_dtype("i32", sizeof(int), sizeof(int));
     symb_t *i64 = create_symb_dtype("i64", sizeof(long long), sizeof(long long));
 
-    symbdata_t *membv = create_symbdata_v(2, "x", i32, "y", i32);
+    char *names[] = { "a", "b" };
+    symb_t *types[] = { i32, i64 };
 
-    symb_t *point = create_symb_stype("point", 8, 4, 2, membv);
+    symbdata_t *membv = create_symbdata_array(2, names, types);
 
-    byte_t *A = malloc_symb(point);
+    symb_t *point = create_symb_stype_autosiz("point", 2, membv);
+
+    symb_t *A = malloc_symb_local("A", point);
+
+    unsigned int size = sizeof_symb(A);
 
     return 0;
 }

@@ -1,157 +1,6 @@
 #include "calc-virtm.h"
 
-#ifdef __cplusplus
-namespace calc::vm
-{
-#endif
-
-/* =---- Internal Memory Management ----------------------------= */
-
-#pragma region Internal Memory Management
-
-// +---- Internal
-
-#pragma region Internal
-
-static inline void *_safety_abort(
-#ifdef CALC_DEBUG
-	const char *const funcname
-#endif // CALC_DEBUG
-)
-{
-#ifdef CALC_DEBUG
-	printf("error: function %s cannot allocate memory\n", funcname);
-	exit(3);
-#else
-	raise(SIGSEGV);
-	abort();
-#endif // CALC_DEBUG
-
-	return NULL;
-}
-
-static inline void *_safety_check(
-#ifdef CALC_DEBUG
-	const char *const funcname,
-#endif // CALC_DEBUG
-	void *block
-)
-{
-	if (!block)
-		return _safety_abort(
-#ifdef CALC_DEBUG
-			funcname
-#endif // CALC_DEBUG
-		);
-	else
-		return block;
-}
-
-static inline void *_zerofy_block(void *block, size_t size)
-{
-	assert(block != NULL);
-
-	char *p = (char *)block;
-
-	for (; size > 0; size--)
-		p[size - 1] = 0x00;
-
-	return (void *)p;
-}
-
-#pragma endregion
-
-// +---- Internal -- End
-
-void *malloc_s(size_t size)
-{
-	return _safety_check(
-#ifdef CALC_DEBUG
-		__func__,
-#endif // CALC_DEBUG
-		malloc(size)
-	);
-}
-
-void *calloc_s(size_t count, size_t size)
-{
-	return _safety_check(
-#ifdef CALC_DEBUG
-		__func__,
-#endif // CALC_DEBUG
-		calloc(count, size)
-	);
-}
-
-void *mallocz_s(size_t size)
-{
-	return _zerofy_block(_safety_check(
-#ifdef CALC_DEBUG
-		__func__,
-#endif // CALC_DEBUG
-		malloc(size)
-	), size);
-}
-
-void *callocz_s(size_t count, size_t size)
-{
-	return _zerofy_block(_safety_check(
-#ifdef CALC_DEBUG
-		__func__,
-#endif // CALC_DEBUG
-		calloc(count, size)
-	), count * size);
-}
-
-#ifndef _get_aligned_size
-#	define _get_aligned_size(size, alignment) ((size + alignment - 1) & ~(alignment - 1))
-#endif // _get_aligned_size
-
-void *malloca_s(size_t size, size_t alignment)
-{
-	return _safety_check(
-#ifdef CALC_DEBUG
-		__func__,
-#endif // CALC_DEBUG
-		malloc(_get_aligned_size(size, alignment))
-	);
-}
-
-void *calloca_s(size_t count, size_t size, size_t alignment)
-{
-	return _safety_check(
-#ifdef CALC_DEBUG
-		__func__,
-#endif // CALC_DEBUG
-		calloc(count, _get_aligned_size(size, alignment))
-	);
-}
-
-void *mallocaz_s(size_t size, size_t alignment)
-{
-	return _zerofy_block(_safety_check(
-#ifdef CALC_DEBUG
-		__func__,
-#endif // CALC_DEBUG
-		malloc(size = _get_aligned_size(size, alignment))
-	), size);
-}
-
-void *calloca_s(size_t count, size_t size, size_t alignment)
-{
-	return _zerofy_block(_safety_check(
-#ifdef CALC_DEBUG
-		__func__,
-#endif // CALC_DEBUG
-		calloc(count, size = _get_aligned_size(size, alignment))
-	), count * size);
-}
-
-#ifdef _get_aligned_size
-#	undef _get_aligned_size
-#endif // undef _get_aligned_size
-
-#pragma endregion
+#if CALC_VIRTM_H_
 
 /* =---- Environment -------------------------------------------= */
 
@@ -221,6 +70,11 @@ byte_t *malloc_symb(const symb_t *const type)
 	return mallocaz_s(sizeof_symb(type), alignof_symb(type));
 }
 
+byte_t *packlc_symb(const symb_t *const type)
+{
+	return mallocz_s(sizeof_symb(type));
+}
+
 unsigned int sizeof_symb(const symb_t *const symb)
 {
 	switch (symb->kind)
@@ -234,9 +88,10 @@ unsigned int sizeof_symb(const symb_t *const symb)
 	case SYMB_CONST:
 		return sizeof_symb(symb->addr.constant->type);
 
-	/*case SYMB_LOCAL:
+	case SYMB_LOCAL:
 		return sizeof_symb(symb->addr.variable->type);
 
+	/*
 	case SYMB_FUNCT:
 		return sizeof_symb(symb->addr.function->type);
 
@@ -261,9 +116,10 @@ unsigned int alignof_symb(const symb_t *const symb)
 	case SYMB_CONST:
 		return alignof_symb(symb->addr.constant->type);
 
-		/*case SYMB_LOCAL:
-			return alignof_symb(symb->addr.variable->type);
+	case SYMB_LOCAL:
+		return alignof_symb(symb->addr.variable->type);
 
+		/*
 		case SYMB_FUNCT:
 			return alignof_symb(symb->addr.function->type);
 
@@ -285,7 +141,31 @@ symbdata_t *create_symbdata(const char *const name, const symb_t *const type)
 	return data;
 }
 
-symbdata_t *create_symbdata_v(unsigned int count, ...)
+symbdata_t *create_symbdata_array(unsigned int count, const char *const *const names, const symb_t *const *const types)
+{
+	symbdata_t *data;
+
+	if (count > 0)
+	{
+		unsigned int i;
+
+		data = dim(symbdata_t, count);
+
+		for (i = 0; i < count; i++)
+		{
+			data[i].name = names[i];
+			data[i].type = types[i];
+		}
+	}
+	else
+	{
+		data = NULL;
+	}
+
+	return data;
+}
+
+symbdata_t *create_symbdata_va(unsigned int count, ...)
 {
 	symbdata_t *data;
 
@@ -319,7 +199,7 @@ unsigned int sizeof_symbdata(const symbdata_t *const data)
 	return sizeof_symb(data->type);
 }
 
-unsigned int sizeof_symbdata_v(unsigned int count, const symbdata_t *const data)
+unsigned int sizeof_symbdata_array(unsigned int count, const symbdata_t *const data)
 {
 	unsigned int i, s;
 
@@ -334,14 +214,30 @@ unsigned int alignof_symbdata(const symbdata_t *const data)
 	return alignof_symb(data->type);
 }
 
-unsigned int alignof_symbdata_v(unsigned int count, const symbdata_t *const data)
+unsigned int alignof_symbdata_array(unsigned int count, const symbdata_t *const data)
 {
-	unsigned int i, s;
+	if (count > 0)
+	{
+		unsigned int i, m, t;
 
-	for (i = 0, s = 0; i < count; i++)
-		s += alignof_symb(data[i].type);
+		m = alignof_symb(data->type);
 
-	return s;
+		for (i = 1; i < count; i++)
+		{
+			t = alignof_symb(data[i].type);
+
+			if (m < t)
+				m = t;
+			else
+				continue;
+		}
+
+		return m;
+	}
+	else
+	{
+		return 0;
+	}
 }
 
 // Specialized Symbols
@@ -368,12 +264,54 @@ symb_t *create_symb_stype(const char *const name, unsigned int width, unsigned i
 	return symb;
 }
 
-symb_t *create_symb_const(const char *const name, const symb_t *const type)
+symb_t *create_symb_stype_autosiz(const char *const name, unsigned int membc, const symbdata_t *const membv)
+{
+	symb_t *symb = create_symb(name, SYMB_STYPE);
+
+	symb->addr.structure->width = sizeof_symbdata_array(membc, membv);
+	symb->addr.structure->align = alignof_symbdata_array(membc, membv);
+	symb->addr.structure->membc = membc;
+	symb->addr.structure->membv = membv;
+
+	return symb;
+}
+
+symb_t *create_symb_const(const char *const name, const symb_t *const type, const byte_t *const data)
 {
 	symb_t *symb = create_symb(name, SYMB_CONST);
 
 	symb->addr.constant->type = type;
-	symb->addr.constant->data = NULL;
+	symb->addr.constant->data = data;
+
+	return symb;
+}
+
+symb_t *create_symb_local(const char *const name, const symb_t *const type)
+{
+	symb_t *symb = create_symb(name, SYMB_LOCAL);
+
+	symb->addr.variable->type = type;
+	symb->addr.variable->data = NULL;
+
+	return symb;
+}
+
+symb_t *malloc_symb_local(const char *const name, const symb_t *const type)
+{
+	symb_t *symb = create_symb(name, SYMB_LOCAL);
+
+	symb->addr.variable->type = type;
+	symb->addr.variable->data = malloc_symb(type);
+
+	return symb;
+}
+
+symb_t *packlc_symb_local(const char *const name, const symb_t *const type)
+{
+	symb_t *symb = create_symb(name, SYMB_LOCAL);
+
+	symb->addr.variable->type = type;
+	symb->addr.variable->data = packlc_symb(type);
 
 	return symb;
 }
@@ -434,6 +372,4 @@ symb_t *create_symb_const(const char *const name, const symb_t *const type)
 
 /* =------------------------------------------------------------= */
 
-#ifdef __cplusplus
-}
-#endif
+#endif // CALC_VIRTM_H_ ENABLED

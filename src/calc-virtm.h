@@ -3,230 +3,21 @@
 /* calc-virtm.h - Copyright (c) 2024 Frithurik Grint */
 
 #ifndef CALC_VIRTM_H_
-#define CALC_VIRTM_H_
+#define CALC_VIRTM_H_ 1
+
+#include "calc-liber.h"
 
 #ifdef __cplusplus
-#   ifndef CALC_C_HEADER_BEGIN
-/// @brief This macro marks the C header beginning for C++ compilers.
-#       define CALC_C_HEADER_BEGIN extern "C" {
-#   endif // CALC_C_HEADER_BEGIN
-
-#   ifndef CALC_C_HEADER_END
-/// @brief This macro marks the C header ending for C++ compilers.
-#       define CALC_C_HEADER_END }
-#   endif // CALC_C_HEADER_END
-#else
-#   ifndef CALC_C_HEADER_BEGIN
-/// @brief This macro marks the C header beginning for C++ compilers.
-#       define CALC_C_HEADER_BEGIN
-#   endif // CALC_C_HEADER_BEGIN
-
-#   ifndef CALC_C_HEADER_END
-/// @brief This macro marks the C header ending for C++ compilers.
-#       define CALC_C_HEADER_END
-#   endif // CALC_C_HEADER_END
-#endif // __cplusplus
-
-#ifdef __cplusplus
-#   include <cassert>
-#   include <csignal>
-
-#   include <cstdlib>
-#   include <cstdarg>
-
-#   ifdef CALC_DEBUG
-#       include <cstdio>
-#   endif // CALC_DEBUG
-
-namespace calc::vm
+namespace calc
 {
-    using namespace std;
-#else
-#   include <assert.h>
-#   include <signal.h>
-
-#   include <stdlib.h>
-#   include <stdarg.h>
-
-#   ifdef CALC_DEBUG
-#       include <stdio.h>
-#   endif // CALC_DEBUG
+using namespace std;
 #endif
 
 CALC_C_HEADER_BEGIN
 
-/* =---- Internal Memory Management ----------------------------= */
-
-#pragma region Internal Memory Management
-
-/// @brief Allocate a block of memory in the heap.
-/// @param size Number of bytes to allocate.
-/// @return Pointer to the beginning of the allocated
-///			region of memory.
-void *malloc_s(size_t size);
-/// @brief Allocate a series of contiguous blocks
-///		   of memory in the heap.
-/// @param count Number of blocks to allocate.
-/// @param size Number of bytes in each block.
-/// @return Pointer to the beginning of the first
-///			allocated block
-void *calloc_s(size_t count, size_t size);
-
-#ifndef alloc
-/// @brief Allocate a new instance of the specified
-///        type.
-#	define alloc(type) (type *)malloc_s(sizeof(type))
-#endif // alloc
-
-#ifndef dim
-/// @brief Allocate a new array of the specified type
-///        the specified number of members
-#	define dim(type, count) (type *)calloc_s((count), sizeof(type))
-#endif // dim
-
-/// @brief Allocate a block of bytes, all set to
-///		   zero.
-/// @param size Number of bytes to allocate.
-/// @return Pointer to the beginning of the
-///			allocated region of memory.
-void *mallocz_s(size_t size);
-/// @brief Allocate a series of coniguous block of
-///		   bytes, all set to zero.
-/// @param count Number of blocks to allocate.
-/// @param size Number of bytes in each block
-///		   of memory.
-/// @return Pointer to the first allocated block.
-void *callocz_s(size_t count, size_t size);
-
-#ifndef allocz
-/// @brief Allocate a new zero or default instance
-///        of a specified type.
-#	define allocz(type) (type *)mallocz_s(sizeof(type))
-#endif // allocz
-
-#ifndef dimz
-/// @brief Allocate a new array of type with all
-///        members set to zero.
-#	define dimz(type, count) (type *)callocz_s((count), sizeof(type))
-#endif // dimz
-
-/// @brief Allocate a block of memory in the heap,
-///		   aligned to a specific width.
-/// @param size Number of byte to allocate.
-/// @param alignment Width of alignment.
-/// @return Pointer to the beginning of the allocated
-///			block of memory.
-void *malloca_s(size_t size, size_t alignment);
-/// @brief Allocate a series of cotiguous blocks
-///		   of memory in the heap aligned to a 
-///		   specific width.
-/// @param count Number of blocks to allocate.
-/// @param size Number of bytes in each block.
-/// @param alignment Width of the alignment.
-/// @return Pointer to the beginning of the
-///			first allocated region.
-void *calloca_s(size_t count, size_t size, size_t alignment);
-
-#ifndef alloca
-/// @brief Allocate a new instance of the specified
-///        type, aligned to another type.
-#	define alloca(type1, type2) (type1 *)malloca_s(sizeof(type1), sizeof(type2))
-#endif // alloca
-
-#ifndef dima
-/// @brief Allocate a new array of the specified type
-///        with members aligned to another type.
-#	define dima(type1, type2, count) (type1 *)calloca_s((count), sizeof(type1), sizeof(type2))
-#endif // dima
-
-/// @brief Allocate a block of memory in the heap,
-///		   aligned to a specific width, all set to
-///		   zero.
-/// @param size Number of byte to allocate.
-/// @param alignment Width of alignment.
-/// @return Pointer to the beginning of the allocated
-///			block of memory.
-void *mallocaz_s(size_t size, size_t alignment);
-/// @brief Allocate a series of cotiguous blocks
-///		   of memory in the heap aligned to a 
-///		   specific width, all set to zero.
-/// @param count Number of blocks to allocate.
-/// @param size Number of bytes in each block.
-/// @param alignment Width of the alignment.
-/// @return Pointer to the beginning of the
-///			first allocated region.
-void *callocaz_s(size_t count, size_t size, size_t alignment);
-
-#ifndef allocaz
-/// @brief Allocate a new zero instance of the specified
-///        type, aligned to another type.
-#	define allocaz(type1, type2) (type1 *)mallocaz_s(sizeof(type1), sizeof(type2))
-#endif // allocaz
-
-#ifndef dimaz
-/// @brief Allocate a new array of the specified type
-///        with members aligned to another type all
-///        set to zero.
-#	define dimaz(type1, type2, count) (type1 *)callocaz_s((count), sizeof(type1), sizeof(type2))
-#endif // dimaz
-
-#pragma endregion
-
 /* =---- Environment -------------------------------------------= */
 
 #pragma region Environment
-
-// +---- Datatypes
-
-#pragma region Datatypes
-
-// Boolean
-
-#ifndef CALC_BOOL_T
-/// @brief This macro allow boolean data type modification.
-#   define CALC_BOOL_T unsigned char
-#endif // CALC_BOOL_T
-
-/// @brief Boolean data type, can be only set to TRUE
-///        or to FALSE.
-typedef CALC_BOOL_T bool_t;
-
-#ifndef TRUE
-/// @brief This macro provides true value (1) for bool_t
-///        data type.
-#   define TRUE ((bool_t)0x01)
-#endif // TRUE
-
-#ifndef FALSE
-/// @brief This macro provides false value (0) for bool_t
-///        data type.
-#   define FALSE ((bool_t)0x00)
-#endif // FALSE
-
-// Byte
-
-#ifndef CALC_BYTE_T
-/// @brief This macro allow byte data type modification.
-#   define CALC_BYTE_T unsigned char
-#endif // CALC_BYTE_T
-
-/// @brief Byte data type, its value must be into BYTE_MIN
-///        and BYTE_MAX range.
-typedef CALC_BYTE_T byte_t;
-
-#ifndef BYTE_MIN
-/// @brief This macro provides the minimun value for
-///        byte_t data type.
-#   define BYTE_MIN ((byte_t)0x00)
-#endif // BYTE_MIN
-
-#ifndef BYTE_MAX
-/// @brief This macro provides the maximum value for
-///        byte_t data type.
-#   define BYTE_MAX ((byte_t)0xFF)
-#endif // BYTE_MAX
-
-#pragma endregion
 
 // +---- Symbol Table
 
@@ -311,15 +102,24 @@ typedef struct _calc_symbol
 /// @param kind Kind of the symbol.
 /// @return A pointer to new symbol.
 symb_t *create_symb(const char *const name, const symbkind_t kind);
+/// @brief Allocate a new instance of a
+///        symbol type.
+/// @param type Type to allocate.
+/// @return A pointer to the new allocated value.
 byte_t *malloc_symb(const symb_t *const type);
+/// @brief Allocate a packed instance ot
+///        a symbol type. (allocate unaligned)
+/// @param type 
+/// @return 
+byte_t *packlc_symb(const symb_t *const type);
 
 /// @brief Get size of the symbol.
 /// @param symb Symbol.
 /// @return Size of symb.
 unsigned int sizeof_symb(const symb_t *const symb);
-/// @brief 
-/// @param symb 
-/// @return 
+/// @brief Get alignment of the symbol.
+/// @param symb Symbol.
+/// @return Alignment of symb.
 unsigned int alignof_symb(const symb_t *const symb);
 
 /// @brief Record for data layout.
@@ -331,36 +131,49 @@ typedef struct _calc_symbol_data
     symb_t *type;
 } symbdata_t;
 
-/// @brief 
-/// @param name 
-/// @param type 
-/// @return 
+/// @brief Create a new symbol data (prototype).
+/// @param name Name of the symbol.
+/// @param type Type of the symbol.
+/// @return A pointer to the new symbol data.
 symbdata_t *create_symbdata(const char *const name, const symb_t *const type);
-/// @brief 
-/// @param count 
-/// @param  
-/// @return 
-symbdata_t *create_symbdata_v(unsigned int count, ...);
+/// @brief Create a new array of symbol datas
+///        (prototypes).
+/// @param count Number of prototypes in the
+///              array.
+/// @param names Names of protorypes.
+/// @param types Types of prototypes
+/// @return A pointer to the first element of
+///         the prototypes array.
+symbdata_t *create_symbdata_array(unsigned int count, const char *const *const names, const symb_t *const *const types);
+/// @brief Create a new array of symbol datas
+///        (prototypes) using varargs. Useful
+///        for built-in complex types.
+/// @param count Number of 
+/// @param others Pairs of name-type. E.g.
+///               create_symbdata_va(2, "x", i32, "y", i32)
+/// @return A pointer to the first element of
+///         the prototypes array.
+symbdata_t *create_symbdata_va(unsigned int count, ...);
 
-/// @brief 
-/// @param data 
-/// @return 
+/// @brief Get the size of prototype. 
+/// @param data Prototype.
+/// @return Size of prototype.
 unsigned int sizeof_symbdata(const symbdata_t *const data);
-/// @brief 
-/// @param count 
-/// @param data 
-/// @return 
-unsigned int sizeof_symbdata_v(unsigned int count, const symbdata_t *const data);
+/// @brief Get the size of prototype array.
+/// @param count Number of prototypes.
+/// @param data Prototypes.
+/// @return Size of prototypes.
+unsigned int sizeof_symbdata_array(unsigned int count, const symbdata_t *const data);
 
-/// @brief 
-/// @param data 
-/// @return 
+/// @brief Get the alignment of prototype. 
+/// @param data Prototype.
+/// @return Alignment of prototype.
 unsigned int alignof_symbdata(const symbdata_t *const data);
-/// @brief 
-/// @param count 
-/// @param data 
-/// @return 
-unsigned int alignof_symbdata_v(unsigned int count, const symbdata_t *const data);
+/// @brief Get the alignment of prototype array.
+/// @param count Number of prototypes.
+/// @param data Prototypes.
+/// @return Alignment of prototypes.
+unsigned int alignof_symbdata_array(unsigned int count, const symbdata_t *const data);
 
 // Specialized Symbols
 
@@ -372,11 +185,11 @@ struct _calc_symbol_datatype
     unsigned int align;
 };
 
-/// @brief 
-/// @param name 
-/// @param width 
-/// @param align 
-/// @return 
+/// @brief Create a new primitive data type.
+/// @param name Name of the type.
+/// @param width Width (not size, in bytes) of the type.
+/// @param align Alignment (in bytes) of the type.
+/// @return A pointer to the new symbol.
 symb_t *create_symb_dtype(const char *const name, unsigned int width, unsigned int align);
 
 struct _calc_symbol_structure
@@ -391,11 +204,24 @@ struct _calc_symbol_structure
     symbdata_t  *membv;
 };
 
-/// @brief 
-/// @param name 
-/// @param layout 
-/// @return 
-symb_t *create_symb_stype(const char *const name, unsigned int membc, unsigned int width, unsigned int align, const symbdata_t *const membv);
+/// @brief Create a new structure data type.
+/// @param name Name of the type.
+/// @param width Width (not size, in bytes) of the type.
+///              If it's uknown use create_symb_stype_autosiz.
+/// @param align Alignment (in bytes) of the type.
+///              If it's uknown use create_symb_stype_autosiz.
+/// @param membc Number of members. (can be 0)
+/// @param membv Members prototypes. (should be NULL only if
+///              membc is 0)
+/// @return A pointer to the new symbol.
+symb_t *create_symb_stype(const char *const name, unsigned int width, unsigned int align, unsigned int membc, const symbdata_t *const membv);
+/// @brief Create a new structure data type.
+/// @param name Name of the type.
+/// @param membc Number of members. (can be 0)
+/// @param membv Members prototypes. (should be NULL only if
+///              membc is 0)
+/// @return A pointer to the new symbol.
+symb_t *create_symb_stype_autosiz(const char *const name, unsigned int membc, const symbdata_t *const membv);
 
 struct _calc_symbol_constant
 {
@@ -405,32 +231,25 @@ struct _calc_symbol_constant
     byte_t *data;
 };
 
-/// @brief 
-/// @param name 
-/// @param type 
-/// @return 
-symb_t *create_symb_const(const char *const name, const symb_t *const type);
+symb_t *create_symb_const(const char *const name, const symb_t *const type, const byte_t *const data);
 
 struct _calc_symbol_variable
 {
-    void *_;
+    /// @brief Type symbol pointer.
+    symb_t *type;
+    /// @brief Raw data value.
+    byte_t *data;
 };
 
-/// @brief 
-/// @param name 
-/// @param type 
-/// @return 
-symb_t *create_symb_local(const char *const name, ...);
+symb_t *create_symb_local(const char *const name, const symb_t *const type);
+symb_t *malloc_symb_local(const char *const name, const symb_t *const type);
+symb_t *packlc_symb_local(const char *const name, const symb_t *const type);
 
 struct _calc_symbol_function
 {
     void *_;
 };
 
-/// @brief 
-/// @param name 
-/// @param type 
-/// @return 
 symb_t *create_symb_funct(const char *const name, ...);
 
 struct _calc_symbol_parameter
@@ -438,10 +257,6 @@ struct _calc_symbol_parameter
     void *_;
 };
 
-/// @brief 
-/// @param name 
-/// @param type 
-/// @return 
 symb_t *create_symb_param(const char *const name, ...);
 
 // Symbol Table
@@ -523,7 +338,9 @@ CALC_C_HEADER_END
 #endif
 
 #ifdef _CALC_BUILD_AS_ONE
-#   include "calc-virtm.c"
+#   ifndef CALC_VIRTM_C_
+#       include "calc-virtm.c"
+#   endif // CALC_VIRTM_C_
 #endif // _CALC_BUILD_AS_ONE
 
 #endif // CALC_VIRTM_H_
