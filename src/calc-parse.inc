@@ -16,11 +16,11 @@
 #   define deftrv(name, text) deftok(name, NULL)
 #endif // deftrv
 
-/// @brief <eof> trivia token. (end of file)
+/// @brief EOF trivia token. (end of file)
 deftrv(ENDOF,                                       "<eof>"),
-/// @brief <eol> trivia token. (end of line)
+/// @brief EOL trivia token. (end of line)
 deftrv(ENDOL,                                       "<eol>"),
-/// @brief <wsp> trivia token. (white spaces)
+/// @brief WSP trivia token. (white spaces)
 deftrv(SPACE,                                       "<wsp>"),
 
 #ifdef deftrv
@@ -35,7 +35,7 @@ deftrv(SPACE,                                       "<wsp>"),
 #endif // defkey
 
 /// @brief 'const' reserved word token.
-defkey(CONST, "const"),
+defkey(CONST,                                       "const"),
 
 #ifndef CALC_SORTED_KEYWORDS
 /// @brief If its value is 1, keywords are in alphabetical
@@ -58,17 +58,17 @@ defkey(CONST, "const"),
 // Stray Punctuators
 
 /// @brief '(' stray punctuator token. (left round bracket)
-defpct(LROUN, "("),
+defpct(LROUN,                                       "("),
 /// @brief ')' stray punctuator token. (rigth round bracket)
-defpct(RROUN, ")"),
+defpct(RROUN,                                       ")"),
 /// @brief '[' stray punctuator token. (left square bracket)
-defpct(LSQRD, "["),
+defpct(LSQRD,                                       "["),
 /// @brief ']' stray punctuator token. (right square bracket)
-defpct(RSQRD, "]"),
+defpct(RSQRD,                                       "]"),
 /// @brief '(' stray punctuator token. (left curly bracket)
-defpct(LCURL, "{"),
+defpct(LCURL,                                       "{"),
 /// @brief '(' stray punctuator token. (rigth curly bracket)
-defpct(RCURL, "}"),
+defpct(RCURL,                                       "}"),
 
 /// @brief '~' stray punctuator token. (tilde)
 defpct(TILDE, "~"),
@@ -124,7 +124,7 @@ defpct(BACKT, "`"),
 // Composed Tokens - Doubled
 
 /// @brief '??' composed punctuator token.
-defpct(QUEST_EQUAL, "??"),
+defpct(QUEST_QUEST, "??"),
 /// @brief '!!' composed punctuator token.
 defpct(EXCLM_EXCLM, "!!"),
 /// @brief '&&' composed punctuator token.
