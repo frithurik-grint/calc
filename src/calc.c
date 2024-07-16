@@ -2,7 +2,14 @@
 
 int main()
 {
+    hash_t a, b, c, d, e, f;
 
+    a = gethash("Ciao");
+    b = gethash("ciao");
+    c = gethash("Ciao come va?");
+    d = gethash(" ciao");
+    e = gethash("$");
+    f = gethash("zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz");
 }
 
 #ifdef _CALC_BUILD_AS_ONE

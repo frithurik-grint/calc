@@ -31,37 +31,18 @@
 #   endif // CALC_C_HEADER_END
 #endif // __cplusplus
 
-#ifdef __cplusplus
-#   include <cassert>
-#   include <csignal>
-#   include <cstring>
+#include <assert.h>
+#include <signal.h>
+#include <string.h>
 
-#   include <cstdlib>
-#   include <cstdarg>
+#include <stdlib.h>
+#include <stdarg.h>
 
-#   include <cctype>
+#include <ctype.h>
 
-#   ifdef CALC_DEBUG
-#       include <cstdio>
-#   endif // CALC_DEBUG
-
-namespace calc
-{
-using namespace std;
-#else
-#   include <assert.h>
-#   include <signal.h>
-#   include <string.h>
-
-#   include <stdlib.h>
-#   include <stdarg.h>
-
-#   include <ctype.h>
-
-#   ifdef CALC_DEBUG
-#       include <stdio.h>
-#   endif // CALC_DEBUG
-#endif
+#ifdef CALC_DEBUG
+#   include <stdio.h>
+#endif // CALC_DEBUG
 
 CALC_C_HEADER_BEGIN
 
@@ -262,13 +243,88 @@ char *strdcpy(char *const dest, const char *const source, size_t length);
 
 #pragma endregion
 
+/* =---- Symbols Management ------------------------------------= */
+
+#pragma region Symbols Management
+
+/// @brief Hash code data type.
+typedef unsigned int hash_t;
+
+#ifndef HASH_MIN
+/// @brief Minimum hash code value.
+#   define HASH_MIN ((hash_t)0x00)
+#endif // HASH_MIN
+
+#ifndef HASH_MAX
+/// @brief Maximum hash code value.
+#   define HASH_MAX ((hash_t)-2)
+#endif // HASH_MAX
+
+#ifndef HASH_INV
+/// @brief Erroneus hash code value.
+#   define HASH_INV ((hash_t)-1)
+#endif // HASH_INV
+
+/// @brief Compute hash code of a string.
+/// @param str Input string.
+/// @return Computed hash code.
+hash_t gethash(const char *const str);
+
+// Symbol Table
+
+/// @brief Access record of a symbol.
+typedef struct _calc_symbol_key
+{
+    /// @brief Name of the symbol.
+    char                    *name;
+    /// @brief References counter, it can be
+    ///        useful for garbage collection.
+    unsigned int             refs;
+    /// @brief Index of symbol datas in the
+    ///        symbols record.
+    unsigned int             data;
+    /// @brief Pointer to the collided symbol
+    ///        with the same hash.
+    struct _calc_symbol_key *next;
+} symbkey_t;
+
+/// @brief Create a new symbol table key record.
+/// @param name Name of the symbol.
+/// @param data Index in symbol record.
+/// @param prev In case of collision this points
+///        to the other item.
+/// @return A pointer to the new symbol key.
+symbkey_t *create_symbkey(const char *const name, unsigned int data, symbkey_t *const prev);
+
+#ifndef CALC_SYMBTAB_CHUNKSIZ
+/// @brief Number of symbols in a chunk.
+#   define CALC_SYMBTAB_CHUNKSIZ (BUFSIZ >> 4)
+#endif // CALC_SYMBTAB_CHUNKSIZ
+
+/// @brief Symbol table.
+typedef struct _calc_symbol_table
+{
+    /// @brief Pointer to first key.
+    symbkey_t                 *keys;
+    /// @brief Number of used hashes.
+    unsigned int               size;
+    /// @brief Last allocated hash.
+    hash_t                     last;
+    /// @brief Previous symbol table chunk.
+    struct _calc_symbol_table *prev;
+} symbtab_t;
+
+/// @brief Create a symbol table.
+/// @param size Number of symbol key records.
+/// @param prev Previous symbol table chunk.
+/// @return A pointer to the new symbol table
+symbtab_t *create_symbtab(unsigned int size, symbtab_t *const prev);
+
+#pragma endregion
+
 /* =------------------------------------------------------------= */
 
 CALC_C_HEADER_END
-
-#ifdef __cplusplus
-}
-#endif // __cplusplus
 
 #ifdef _CALC_BUILD_AS_ONE
 #   ifndef CALC_LIBER_C_

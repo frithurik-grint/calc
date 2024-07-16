@@ -7,14 +7,7 @@
 
 #include "calc-liber.h"
 
-#ifdef __cplusplus
-#   include <cstdio>
-
-namespace calc
-{
-#else
-#   include <stdio.h>
-#endif // __cplusplus
+#include <stdio.h>
 
 CALC_C_HEADER_BEGIN
 
@@ -48,6 +41,8 @@ typedef enum _calc_token_code
 
 #pragma pop_macro("deftok")
 } tokcode_t;
+
+
 
 #pragma endregion
 
@@ -145,9 +140,5 @@ char *doub_getbuf(doub_t *const buf);
 /* =------------------------------------------------------------= */
 
 CALC_C_HEADER_END
-
-#ifdef __cplusplus
-}
-#endif // __cplusplus
 
 #endif // CALC_PARSE_H_

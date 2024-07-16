@@ -7,12 +7,6 @@
 
 #include "calc-liber.h"
 
-#ifdef __cplusplus
-namespace calc
-{
-using namespace std;
-#endif
-
 CALC_C_HEADER_BEGIN
 
 /* =---- Environment -------------------------------------------= */
@@ -332,9 +326,5 @@ symb_t *create_symb_param(const char *const name, ...);
 /* =------------------------------------------------------------= */
 
 CALC_C_HEADER_END
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif // CALC_VIRTM_H_

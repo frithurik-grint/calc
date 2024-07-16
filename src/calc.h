@@ -90,14 +90,7 @@
 #include "calc-scrpt.h"
 #include "calc-shell.h"
 
-#ifdef __cplusplus
-#   include <cstdio>
-
-namespace calc
-{
-#else
-#   include <stdio.h>
-#endif
+#include <stdio.h>
 
 CALC_C_HEADER_BEGIN
 

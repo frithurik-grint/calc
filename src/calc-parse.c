@@ -1,10 +1,5 @@
 #include "calc-parse.h"
 
-#ifdef __cplusplus
-namespace calc
-{
-#endif
-
 /* =---- Lexical Analyzer --------------------------------------= */
 
 #pragma region Lexical Analyzer
@@ -178,7 +173,3 @@ char *doub_getbuf(doub_t *const buf)
 #pragma endregion
 
 /* =------------------------------------------------------------= */
-
-#ifdef __cplusplus
-}
-#endif

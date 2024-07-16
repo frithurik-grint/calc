@@ -1,10 +1,5 @@
 #include "calc-liber.h"
 
-#ifdef __cplusplus
-namespace calc
-{
-#endif
-
 /* =---- Memory Management -------------------------------------= */
 
 #pragma region Memory Management
@@ -238,8 +233,63 @@ char *strdcpy(char *const dest, const char *const source, size_t length)
 
 #pragma endregion
 
-/* =------------------------------------------------------------= */
+/* =---- Symbols Management ------------------------------------= */
 
-#ifdef __cplusplus
+#pragma region Symbols Management
+
+static inline hash_t _get_hash_code(const char *str)
+{
+	if (!str || (*str <= 0x20))
+		return HASH_INV; // intentionally returns an unmanageable value
+
+	hash_t hash;
+
+	for (hash = HASH_MIN; *str > 0x20; str++)
+		hash += *str - 0x21;
+
+	return hash;
 }
-#endif
+
+hash_t gethash(const char *const str)
+{
+	return _get_hash_code((const char *)str);
+}
+
+// Symbol Table
+
+symbkey_t *create_symbkey(const char *const name, unsigned int data, symbkey_t *const prev)
+{
+	symbkey_t *key = alloc(symbkey_t);
+
+	key->name = name;
+	key->data = data;
+	key->refs = 0;
+
+	if (prev)
+	{
+		if (prev->next)
+			key->next = prev->next;
+		else
+			key->next = NULL;
+
+		prev->next = key;
+	}
+
+	return key;
+}
+
+symbtab_t *create_symbtab(unsigned int size, symbtab_t *const prev)
+{
+	symbtab_t *tab = alloc(symbtab_t);
+
+	tab->keys = dimz(symbkey_t, size);
+	tab->size = size;
+	tab->last = HASH_INV;
+	tab->prev = prev;
+
+	return tab;
+}
+
+#pragma endregion
+
+/* =------------------------------------------------------------= */
