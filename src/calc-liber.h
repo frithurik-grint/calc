@@ -305,7 +305,7 @@ symbkey_t *create_symbkey(const char *const name, unsigned int data, symbkey_t *
 typedef struct _calc_symbol_table
 {
     /// @brief Pointer to first key.
-    symbkey_t                 *keys;
+    symbkey_t                **keys;
     /// @brief Number of used hashes.
     unsigned int               size;
     /// @brief Last allocated hash.
@@ -325,6 +325,7 @@ symbtab_t *create_symbtab(unsigned int size, symbtab_t *const prev);
 /// @param name Name of the symbol.
 /// @return Hash code of the symbol.
 hash_t add_symbol(symbtab_t *const tab, const char *const name);
+
 
 #pragma endregion
 

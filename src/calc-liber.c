@@ -237,7 +237,7 @@ char *strdcpy(char *const dest, const char *const source, size_t length)
 
 #pragma region Symbols Management
 
-static inline hash_t _get_hash_code(const char *str)
+static inline hash_t _get_hashcode(const char *str)
 {
 	if (!str || (*str <= 0x20))
 		return HASH_INV; // intentionally returns an unmanageable value
@@ -252,7 +252,7 @@ static inline hash_t _get_hash_code(const char *str)
 
 hash_t gethash(const char *const str)
 {
-	return _get_hash_code((const char *)str);
+	return _get_hashcode((const char *)str);
 }
 
 // Symbol Table
@@ -290,9 +290,41 @@ symbtab_t *create_symbtab(unsigned int size, symbtab_t *const prev)
 	return tab;
 }
 
+static inline bool_t _symbol_is_def(symbtab_t *const tab, const char *const name, hash_t *const outhash)
+{
+	hash_t hash = _get_hashcode(name);
+
+	if (hash == HASH_INV)
+		return hash;
+	else
+		hash %= tab->size;
+
+	if (outhash)
+		*outhash = hash;
+
+	return (bool_t)(tab->keys[hash] > 0);
+}
+
+static inline hash_t _get_tab_hashcode(symbtab_t *const tab, const char *const name)
+{
+	hash_t hash = _get_hashcode(name);
+
+	if (hash == HASH_INV)
+		return hash;
+	else
+		return hash % tab->size;
+}
+
 hash_t add_symbol(symbtab_t *const tab, const char *const name)
 {
+	hash_t hash = _get_tab_hashcode(tab, name);
 
+	if (!tab->keys[hash])
+	{
+	}
+	else
+	{
+	}
 }
 
 #pragma endregion

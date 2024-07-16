@@ -267,12 +267,6 @@ symb_t *create_symb_param(const char *const name, ...);
 
 #pragma endregion
 
-// +---- Call Stack
-
-#pragma region Call Stack
-
-#pragma endregion
-
 // +---- Evaluation Stack
 
 #pragma region Evaluation Stack
@@ -280,6 +274,14 @@ symb_t *create_symb_param(const char *const name, ...);
 #ifndef CALC_EVALSTACK_MAX
 #   define CALC_EVALSTACK_MAX 0x00FF
 #endif // CALC_EVALSTACK_MAX
+
+
+
+#pragma endregion
+
+// +---- Call Stack
+
+#pragma region Call Stack
 
 #pragma endregion
 
