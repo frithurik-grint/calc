@@ -37,7 +37,7 @@ typedef enum _calc_token_code
 #pragma push_macro("deftok")
 
 #ifndef deftok
-#   define deftok(tok_name, tok_lexeme) TOK_ ## tok_name
+#   define deftok(tok_name, tok_lexeme) TOK_ ## tok_name,
 #endif
 
 #include "calc-parse.inc"

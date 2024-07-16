@@ -3,7 +3,6 @@
 int main()
 {
 
-    return 0;
 }
 
 #ifdef _CALC_BUILD_AS_ONE
