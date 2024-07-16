@@ -26,6 +26,29 @@ CALC_C_HEADER_BEGIN
 
 #pragma region Tokens
 
+/// @brief Enumerate token codes. (prefixed
+///        with TOK_)
+typedef enum _calc_token_code
+{
+    /// @brief Not recognized or erroneus
+    ///        token code.
+    TOK_INVAL,
+
+#pragma push_macro("deftok")
+
+#ifndef deftok
+#   define deftok(tok_name, tok_lexeme) TOK_ ## tok_name
+#endif
+
+#include "calc-parse.inc"
+
+#ifdef deftok
+#   undef deftok
+#endif
+
+#pragma pop_macro("deftok")
+} tokcode_t;
+
 #pragma endregion
 
 // +---- Source Stream
@@ -44,7 +67,7 @@ typedef struct _calc_double_buffer
     /// @brief Forward position.
     unsigned int fwd;
     /// @brief Length of the buffer.
-    size_t       len;
+    unsigned int len;
 } doub_t;
 
 /// @brief Create a new double buffered
@@ -59,7 +82,7 @@ typedef struct _calc_double_buffer
 ///               If length is zero, length
 ///               becomes BUFSIZ.
 /// @return A pointer to the new 
-doub_t *create_doub(char *const buffer, size_t length);
+doub_t *create_doub(char *const buffer, unsigned int length);
 
 /// @brief Get top character.
 /// @param buf Source buffer.
@@ -104,11 +127,16 @@ void doub_advance(doub_t *const buf);
 /// @brief Retreat position of buf.
 /// @param buf Source buffer.
 void doub_retreat(doub_t *const buf);
-
 /// @brief Reset position to the beginning
 ///        and restore initial buffer.
 /// @param buf Source buffer.
 void doub_rewind(doub_t *const buf);
+
+/// @brief Get begin buffer.
+/// @param buf Source buffer.
+/// @return A pointer to the current begin
+///         of the buffer.
+char *doub_getbuf(doub_t *const buf);
 
 #pragma endregion
 

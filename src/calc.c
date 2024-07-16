@@ -2,18 +2,7 @@
 
 int main()
 {
-    doub_t *d = create_doub(NULL, 0);
-
-    doub_puts(d, "a = 3 + 2");
-    doub_retreat(d);
-
-    char c = (char)doub_getc(d);
-
-    char *id = doub_chop(d);
-
-    doub_advance(d);
-
-    c = (char)doub_getc(d);
+    
 
     return 0;
 }

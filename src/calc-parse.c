@@ -21,7 +21,7 @@ namespace calc
 
 // Double Buffer
 
-doub_t *create_doub(char *const buffer, size_t length)
+doub_t *create_doub(char *const buffer, unsigned int length)
 {
     doub_t *buf = alloc(doub_t);
 
@@ -38,7 +38,7 @@ doub_t *create_doub(char *const buffer, size_t length)
 
 int doub_topc(const doub_t *const buf)
 {
-    if ((size_t)(buf->pos + buf->fwd) < buf->len)
+    if ((buf->pos + buf->fwd) < buf->len)
 #ifdef CALC_DEBUG
         return buf->buf[buf->fwd];
 #else
@@ -50,7 +50,7 @@ int doub_topc(const doub_t *const buf)
 
 int doub_getc(doub_t *const buf)
 {
-    if ((size_t)(buf->pos + buf->fwd) < buf->len)
+    if ((buf->pos + buf->fwd) < buf->len)
 #ifdef CALC_DEBUG
         return buf->buf[buf->fwd++];
 #else
@@ -62,7 +62,7 @@ int doub_getc(doub_t *const buf)
 
 int doub_setc(doub_t *const buf, int c)
 {
-    if ((size_t)(buf->pos + buf->fwd) < buf->len)
+    if ((buf->pos + buf->fwd) < buf->len)
 #ifdef CALC_DEBUG
         return buf->buf[buf->fwd] = c;
 #else
@@ -74,7 +74,7 @@ int doub_setc(doub_t *const buf, int c)
 
 int doub_putc(doub_t *const buf, int c)
 {
-    if ((size_t)(buf->pos + buf->fwd) < buf->len)
+    if ((buf->pos + buf->fwd) < buf->len)
 #ifdef CALC_DEBUG
         return buf->buf[buf->fwd++] = c;
 #else
@@ -127,7 +127,7 @@ char *doub_chop(doub_t *const buf)
 
 void doub_advance(doub_t *const buf)
 {
-    if ((size_t)(buf->pos + buf->fwd) < buf->len)
+    if ((buf->pos + buf->fwd) < buf->len)
     {
 #ifdef CALC_DEBUG
         buf->buf += buf->fwd;
@@ -138,9 +138,9 @@ void doub_advance(doub_t *const buf)
     else
     {
 #ifdef CALC_DEBUG
-        buf->buf += (size_t)(buf->pos + buf->fwd) - buf->len;
+        buf->buf += (buf->pos + buf->fwd) - buf->len;
 #endif
-        buf->pos += (size_t)(buf->pos + buf->fwd) - buf->len;
+        buf->pos += (buf->pos + buf->fwd) - buf->len;
         buf->fwd = 0;
     }
 
@@ -162,6 +162,15 @@ void doub_rewind(doub_t *const buf)
     buf->fwd = 0;
 
     return;
+}
+
+char *doub_getbuf(doub_t *const buf)
+{
+#ifdef CALC_DEBUG
+    return buf->buf;
+#else
+    return buf->buf + buf->pos;
+#endif
 }
 
 #pragma endregion

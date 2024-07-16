@@ -64,5 +64,8 @@
     <None Include=".gitignore" />
     <None Include="LICENSE" />
     <None Include="README.md" />
+    <None Include="src\calc-parse.inc">
+      <Filter>File di intestazione</Filter>
+    </None>
   </ItemGroup>
 </Project>

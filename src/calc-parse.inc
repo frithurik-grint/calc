@@ -1,0 +1,204 @@
+#ifndef NULL
+#   define NULL ((void *)0x00)
+#endif // NULL
+
+/* calc-parse.inc - Copyright (c) 2024 Frithurik Grint */
+
+#ifndef deftok
+/// @brief Placeholder declaration of deftok(...).
+#   define deftok(name, lexeme)
+#endif
+
+/* =---- Trivia Tokens -----------------------------------------= */
+
+#ifndef deftrv
+/// @brief Internal macro for keyword tokens defintion.
+#   define deftrv(name, text) deftok(name, NULL)
+#endif // deftrv
+
+/// @brief <eof> trivia token. (end of file)
+deftrv(ENDOF,                                       "<eof>"),
+/// @brief <eol> trivia token. (end of line)
+deftrv(ENDOL,                                       "<eol>"),
+/// @brief <wsp> trivia token. (white spaces)
+deftrv(SPACE,                                       "<wsp>"),
+
+#ifdef deftrv
+#   undef deftrv
+#endif // UNDEF deftrv
+
+/* =---- Reserved Word Tokens ----------------------------------= */
+
+#ifndef defkey
+/// @brief Internal macro for keyword tokens defintion.
+#   define defkey(name, lexeme) deftok(KWORD_ ## name, lexeme)
+#endif // defkey
+
+/// @brief 'const' reserved word token.
+defkey(CONST, "const"),
+
+#ifndef CALC_SORTED_KEYWORDS
+/// @brief If its value is 1, keywords are in alphabetical
+///        order. If keywords are not sorted, set this macro
+///        to zero.
+#   define CALC_SORTED_KEYWORDS 1
+#endif // CALC_SORTED_KEYWORDS
+
+#ifdef defkey
+#   undef defkey
+#endif // UNDEF defkey
+
+/* =---- Punctuation Tokens ------------------------------------= */
+
+#ifndef defpct
+/// @brief Internal macro for keyword tokens defintion.
+#   define defpct(name, text) deftok(PUNCT_ ## name, NULL)
+#endif // defpct
+
+// Stray Punctuators
+
+/// @brief '(' stray punctuator token. (left round bracket)
+defpct(LROUN, "("),
+/// @brief ')' stray punctuator token. (rigth round bracket)
+defpct(RROUN, ")"),
+/// @brief '[' stray punctuator token. (left square bracket)
+defpct(LSQRD, "["),
+/// @brief ']' stray punctuator token. (right square bracket)
+defpct(RSQRD, "]"),
+/// @brief '(' stray punctuator token. (left curly bracket)
+defpct(LCURL, "{"),
+/// @brief '(' stray punctuator token. (rigth curly bracket)
+defpct(RCURL, "}"),
+
+/// @brief '~' stray punctuator token. (tilde)
+defpct(TILDE, "~"),
+
+/// @brief '?' stray punctuator token. (question mark)
+defpct(QUEST, "?"),
+/// @brief '!' stray punctuator token. (exclamation mark)
+defpct(EXCLM, "!"),
+/// @brief '&' stray punctuator token. (ampersand)
+defpct(AMPER, "&"),
+/// @brief '|' stray punctuator token. (pipe)
+defpct(PIPEE, "|"),
+/// @brief '^' stray punctuator token. (caret)
+defpct(CARET, "^"),
+
+/// @brief '<' stray punctuator token. (less than)
+defpct(LESST, "<"),
+/// @brief '>' stray punctuator token. (greater than)
+defpct(GREAT, ">"),
+/// @brief '=' stray punctuator token. (equal)
+defpct(EQUAL, "="),
+
+/// @brief '+' stray punctuator token. (plus)
+defpct(PLUSS, "+"),
+/// @brief '-' stray punctuator token. (minus)
+defpct(MINUS, "-"),
+/// @brief '*' stray punctuator token. (asterisk)
+defpct(STARR, "*"),
+/// @brief '/' stray punctuator token. (slash)
+defpct(SLASH, "/"),
+/// @brief '%' stray punctuator token. (percent)
+defpct(PERCN, "%"),
+
+/// @brief '#' stray punctuator token. (hash)
+defpct(SHARP, "#"),
+/// @brief '@' stray punctuator token. (at)
+defpct(ATSIG, "@"),
+
+/// @brief ',' stray punctuator token. (comma)
+defpct(COMMA, ","),
+/// @brief '.' stray punctuator token. (dot)
+defpct(POINT, "."),
+/// @brief ':' stray punctuator token. (colon)
+defpct(COLON, ":"),
+/// @brief ';' stray punctuator token. (semicolon)
+defpct(SEMIC, ";"),
+
+/// @brief '\' stray punctuator token. (backslash)
+defpct(BACKS, "\\"),
+/// @brief '`' stray punctuator token. (backtick)
+defpct(BACKT, "`"),
+
+// Composed Tokens - Doubled
+
+/// @brief '??' composed punctuator token.
+defpct(QUEST_EQUAL, "??"),
+/// @brief '!!' composed punctuator token.
+defpct(EXCLM_EXCLM, "!!"),
+/// @brief '&&' composed punctuator token.
+defpct(AMPER_AMPER, "&&"),
+/// @brief '||' composed punctuator token.
+defpct(PIPEE_PIPEE, "||"),
+
+/// @brief '<<' composed punctuator token.
+defpct(LESST_LESST, "<<"),
+/// @brief '>>' composed punctuator token.
+defpct(GREAT_GREAT, ">>"),
+/// @brief '==' composed punctuator token.
+defpct(EQUAL_EQUAL, "=="),
+
+/// @brief '++' composed punctuator token.
+defpct(PLUSS_PLUSS, "++"),
+/// @brief '--' composed punctuator token.
+defpct(MINUS_MINUS, "--"),
+
+/// @brief '..' composed punctuator token.
+defpct(POINT_POINT, ".."),
+/// @brief '::' composed punctuator token.
+defpct(COLON_COLON, "::"),
+
+// Composed Tokens - Equal
+
+/// @brief '?=' composed punctuator token.
+defpct(QUEST_EQUAL, "?="),
+/// @brief '!=' composed punctuator token.
+defpct(EXCLM_EQUAL, "!="),
+/// @brief '&=' composed punctuator token.
+defpct(AMPER_EQUAL, "&="),
+/// @brief '|=' composed punctuator token.
+defpct(PIPEE_EQUAL, "|="),
+/// @brief '^=' composed punctuator token.
+defpct(CARET_EQUAL, "^="),
+
+/// @brief '<=' composed punctuator token.
+defpct(LESST_EQUAL, "<="),
+/// @brief '>=' composed punctuator token.
+defpct(GREAT_EQUAL, ">="),
+
+/// @brief '<<=' composed punctuator token.
+defpct(LESST_LESST_EQUAL, "<<="),
+/// @brief '>>=' composed punctuator token.
+defpct(GREAT_GREAT_EQUAL, ">>="),
+
+/// @brief '+=' composed punctuator token.
+defpct(PLUSS_EQUAL, "+="),
+/// @brief '-=' composed punctuator token.
+defpct(MINUS_EQUAL, "-="),
+/// @brief '*=' composed punctuator token.
+defpct(STARR_EQUAL, "*="),
+/// @brief '/=' composed punctuator token.
+defpct(SLASH_EQUAL, "/="),
+/// @brief '%=' composed punctuator token.
+defpct(PERCN_EQUAL, "%="),
+
+// Composed Tokens
+
+/// @brief '->' composed punctuator token. (arrow)
+defpct(ARROW, "->"),
+/// @brief '=>' composed punctuator token. (then arrow)
+defpct(THENN, "=>"),
+/// @brief '<>' composed punctuator token. (equivalence arrow)
+defpct(EQVLN, "<>"),
+
+/// @brief '...' composed punctuator token. (ellipsis)
+defpct(ELLIP, "...")
+
+#ifdef defpct
+#   undef defpct
+#endif // UNDEF defpct
+
+/* =---- Constant Literal Tokens -------------------------------= */
+
+/* =------------------------------------------------------------= */
