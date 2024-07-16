@@ -34,11 +34,7 @@
 #   define _CRT_SECURE_NO_WARNINGS 1
 #endif
 
-#ifdef __cplusplus
-#   include <cstddef>
-#else
-#   include <stddef.h>
-#endif // __cplusplus
+#include <stddef.h>
 
 #ifdef _CRT_BEGIN_C_HEADER
 #	ifndef CALC_C_HEADER_BEGIN
@@ -101,10 +97,6 @@ CALC_C_HEADER_BEGIN
 /* =------------------------------------------------------------= */
 
 CALC_C_HEADER_END
-
-#ifdef __cplusplus
-}
-#endif
 
 #pragma warning(pop)
 
