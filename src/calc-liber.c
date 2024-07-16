@@ -290,6 +290,11 @@ symbtab_t *create_symbtab(unsigned int size, symbtab_t *const prev)
 	return tab;
 }
 
+hash_t add_symbol(symbtab_t *const tab, const char *const name)
+{
+
+}
+
 #pragma endregion
 
 /* =------------------------------------------------------------= */

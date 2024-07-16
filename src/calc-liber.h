@@ -320,6 +320,12 @@ typedef struct _calc_symbol_table
 /// @return A pointer to the new symbol table
 symbtab_t *create_symbtab(unsigned int size, symbtab_t *const prev);
 
+/// @brief Create a new symbol key if
+///        doesn't exists.
+/// @param name Name of the symbol.
+/// @return Hash code of the symbol.
+hash_t add_symbol(symbtab_t *const tab, const char *const name);
+
 #pragma endregion
 
 /* =------------------------------------------------------------= */
