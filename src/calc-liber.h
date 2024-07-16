@@ -39,6 +39,8 @@
 #   include <cstdlib>
 #   include <cstdarg>
 
+#   include <cctype>
+
 #   ifdef CALC_DEBUG
 #       include <cstdio>
 #   endif // CALC_DEBUG
@@ -53,6 +55,8 @@ using namespace std;
 
 #   include <stdlib.h>
 #   include <stdarg.h>
+
+#   include <ctype.h>
 
 #   ifdef CALC_DEBUG
 #       include <stdio.h>
@@ -230,6 +234,30 @@ typedef CALC_BYTE_T byte_t;
 
 // String
 
+/// @brief Allocate a new empty string.
+/// @param length Size of the string.
+/// @return A pointer to the new string.
+char *strloc(size_t length);
+
+/// @brief Equals two strings.
+/// @param str1 First string. (is better to use a costant)
+/// @param str2 Second string.
+/// @return TRUE if the strings have the same content and the same
+///         length, or if are the same. (also if are both NULL)
+bool_t streq(const char *const str1, const char *const str2);
+/// @brief Equals two strings ignoring letters case.
+/// @param str1 First string. (is better to use a costant)
+/// @param str2 Second string.
+/// @return TRUE if the strings have the same content and the same
+///         length, or if are the same. (also if are both NULL)
+bool_t strieq(const char *const str1, const char *const str2);
+
+/// @brief Create a duplicate of a string or copy it in
+///        dest.
+/// @param dest Destination buffer (if NULL duplicate).
+/// @param source Source string.
+/// @param length Number of character to copy.
+/// @return A pointer to a new string or dest.
 char *strdcpy(char *const dest, const char *const source, size_t length);
 
 #pragma endregion

@@ -1,5 +1,10 @@
 #include "calc-liber.h"
 
+#ifdef __cplusplus
+namespace calc
+{
+#endif
+
 /* =---- Memory Management -------------------------------------= */
 
 #pragma region Memory Management
@@ -154,6 +159,71 @@ void *callocaz_s(size_t count, size_t size, size_t alignment)
 
 // String
 
+char *strloc(size_t length)
+{
+	if (length > 0)
+	{
+		char *str;
+
+		str = dim(char, length + 1);
+		str[length] = '\0';
+
+		return str;
+	}
+	else
+	{
+		return dimz(char, 1);
+	}
+}
+
+bool_t streq(const char *const str1, const char *const str2)
+{
+	if (str1 == str2)
+		return TRUE;
+
+	if (!str1 || !str2)
+		return FALSE;
+
+	size_t len = strlen(str1);
+
+	if (len != strlen(str2))
+		return FALSE;
+
+	for (; len > 0; len--)
+	{
+		if (str1[len] != str2[len])
+			return FALSE;
+		else
+			continue;
+	}
+
+	return TRUE;
+}
+
+bool_t strieq(const char *const str1, const char *const str2)
+{
+	if (str1 == str2)
+		return TRUE;
+
+	if (!str1 || !str2)
+		return FALSE;
+
+	size_t len = strlen(str1);
+
+	if (len != strlen(str2))
+		return FALSE;
+
+	for (; len > 0; len--)
+	{
+		if ((str1[len] != str2[len]) && (str1[len] != (tolower(str2[len]))))
+			return FALSE;
+		else
+			continue;
+	}
+
+	return TRUE;
+}
+
 char *strdcpy(char *const dest, const char *const source, size_t length)
 {
 	char *buf;
@@ -169,3 +239,7 @@ char *strdcpy(char *const dest, const char *const source, size_t length)
 #pragma endregion
 
 /* =------------------------------------------------------------= */
+
+#ifdef __cplusplus
+}
+#endif

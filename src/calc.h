@@ -27,6 +27,9 @@
 #ifndef CALC_H_
 #define CALC_H_
 
+#pragma warning(push)
+#pragma warning(disable: 4090 4996)
+
 #ifndef _CRT_SECURE_NO_WARNINGS
 #   define _CRT_SECURE_NO_WARNINGS 1
 #endif
@@ -62,7 +65,7 @@
 
 #ifdef _UNICODE
 #	ifndef CALC_UNICODE
-#		define CALC_UNICODE
+#		define CALC_UNICODE 1
 #	endif // CALC_UNICODE
 #endif // _UNICODE
 
@@ -109,5 +112,7 @@ CALC_C_HEADER_END
 #ifdef __cplusplus
 }
 #endif
+
+#pragma warning(pop)
 
 #endif

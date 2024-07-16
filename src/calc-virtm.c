@@ -1,5 +1,10 @@
 #include "calc-virtm.h"
 
+#ifdef __cplusplus
+namespace calc
+{
+#endif
+
 /* =---- Environment -------------------------------------------= */
 
 #pragma region Environment

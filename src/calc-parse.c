@@ -1,5 +1,10 @@
 #include "calc-parse.h"
 
+#ifdef __cplusplus
+namespace calc
+{
+#endif
+
 /* =---- Lexical Analyzer --------------------------------------= */
 
 #pragma region Lexical Analyzer
@@ -16,159 +21,147 @@
 
 // Double Buffer
 
-dbuf_t *create_dbuf(char *const buf, unsigned int length)
+doub_t *create_doub(char *const buffer, size_t length)
 {
-    dbuf_t *dbuf = alloc(dbuf_t);
+    doub_t *buf = alloc(doub_t);
 
-    buf[length] = '\0';
+    if (!length)
+        length = BUFSIZ;
 
-    dbuf->buf = buf;
-    dbuf->fwd = 0;
-    dbuf->pos = 0;
+    buf->buf = (!buffer ? strloc(length) : buffer);
+    buf->pos = 0;
+    buf->fwd = 0;
+    buf->len = length;
 
-    return dbuf;
+    return buf;
 }
 
-int topbufc(const dbuf_t *const dbuf)
+int doub_topc(const doub_t *const buf)
 {
-    int c;
-
-    if (dbuf->buf[dbuf->fwd])
-        c = dbuf->buf[dbuf->fwd];
+    if ((size_t)(buf->pos + buf->fwd) < buf->len)
+#ifdef CALC_DEBUG
+        return buf->buf[buf->fwd];
+#else
+        return buf->buf[buf->pos + buf->fwd];
+#endif
     else
-        c = EOF;
-
-    return c;
+        return EOF;
 }
 
-int getbufc(dbuf_t *const dbuf)
+int doub_getc(doub_t *const buf)
 {
-    int c;
-
-    if (dbuf->buf[dbuf->fwd])
-        c = dbuf->buf[dbuf->fwd++];
+    if ((size_t)(buf->pos + buf->fwd) < buf->len)
+#ifdef CALC_DEBUG
+        return buf->buf[buf->fwd++];
+#else
+        return buf->buf[buf->pos + buf->fwd++];
+#endif
     else
-        c = EOF;
-
-    return c;
+        return EOF;
 }
 
-int setbufc(dbuf_t *const dbuf, int c)
+int doub_setc(doub_t *const buf, int c)
 {
-    if (dbuf->buf[dbuf->fwd])
-        dbuf->buf[dbuf->fwd] = c;
+    if ((size_t)(buf->pos + buf->fwd) < buf->len)
+#ifdef CALC_DEBUG
+        return buf->buf[buf->fwd] = c;
+#else
+        return buf->buf[buf->pos + buf->fwd] = c;
+#endif
     else
-        c = EOF;
-
-    return c;
+        return EOF;
 }
 
-int putbufc(dbuf_t *const dbuf, int c)
+int doub_putc(doub_t *const buf, int c)
 {
-    if (dbuf->buf[dbuf->fwd])
-        dbuf->buf[dbuf->fwd++] = c;
+    if ((size_t)(buf->pos + buf->fwd) < buf->len)
+#ifdef CALC_DEBUG
+        return buf->buf[buf->fwd++] = c;
+#else
+        return buf->buf[buf->pos + buf->fwd++] = c;
+#endif
     else
-        c = EOF;
-
-    return c;
+        return EOF;
 }
 
-// Lexer
-
-lexr_t *create_lexr(const char *const fname, dbuf_t *const dbuff)
+char *doub_gets(char *const dest, doub_t *const buf)
 {
-    lexr_t *lexr = alloc(lexr_t);
+    int i = 0, c;
 
-    lexr->fname = fname;
-    lexr->dbuff = dbuff;
-    lexr->lnpos = 0;
-    lexr->clpos = 0;
-
-    return lexr;
-}
-
-static inline int _count_char(lexr_t *const lexr, int c)
-{
-    switch (c)
+    do
     {
-    case '\n':
-        lexr->lnpos++;
-        lexr->clpos = 0;
-        break;
+        c = doub_getc(buf);
 
-    default:
-        lexr->clpos++;
-        break;
-    }
-
-    return c;
-}
-
-static inline int _skip_spaces(lexr_t *const lexr)
-{
-    dbuf_t *dbuf = lexr->dbuff;
-
-    while (isspace(*dbuf->buf))
-    {
-        if (*dbuf->buf > 0)
-        {
-            dbuf->buf++;
-            dbuf->pos++;
-        }
-        else
-        {
+        if (c == EOF)
             break;
-        }
+        else
+            dest[i++] = c;
+    } while ((c != '\n') && (c != '\0'));
 
-        _count_char(lexr, *dbuf->buf);
+    dest[i] = '\0';
+
+    return dest;
+}
+
+char *doub_puts(doub_t *const buf, char *const str)
+{
+    int i = 0, c;
+
+    do
+        c = doub_putc(buf, str[i++]);
+    while ((c != EOF) && str[i]);
+
+    doub_putc(buf, '\0');
+
+    return str;
+}
+
+char *doub_chop(doub_t *const buf)
+{
+#ifdef CALC_DEBUG
+    return strdcpy(NULL, buf->buf, buf->fwd);
+#else
+    return strdcpy(NULL, buf->buf + buf->pos, buf->fwd);
+#endif
+}
+
+void doub_advance(doub_t *const buf)
+{
+    if ((size_t)(buf->pos + buf->fwd) < buf->len)
+    {
+#ifdef CALC_DEBUG
+        buf->buf += buf->fwd;
+#endif
+        buf->pos += buf->fwd;
+        buf->fwd = 0;
     }
-
-    return *dbuf->buf;
-}
-
-int toplexc(lexr_t *const lexr)
-{
-    if (isspace(*lexr->dbuff->buf))
-        _skip_spaces(lexr);
-
-    return topbufc(lexr->dbuff);
-}
-
-int getlexc(lexr_t *const lexr)
-{
-    if (isspace(*lexr->dbuff->buf))
-        _skip_spaces(lexr);
-
-    return _count_char(lexr, getbufc(lexr->dbuff));
-}
-
-void advance(lexr_t *const lexr)
-{
-    dbuf_t *dbuf = lexr->dbuff;
-
-    dbuf->buf += dbuf->fwd;
-    dbuf->pos += dbuf->fwd;
-    dbuf->fwd = 0;
+    else
+    {
+#ifdef CALC_DEBUG
+        buf->buf += (size_t)(buf->pos + buf->fwd) - buf->len;
+#endif
+        buf->pos += (size_t)(buf->pos + buf->fwd) - buf->len;
+        buf->fwd = 0;
+    }
 
     return;
 }
 
-char *accept(lexr_t *const lexr)
+void doub_retreat(doub_t *const buf)
 {
-    char   *lexm;
-    dbuf_t *dbuf;
-
-    dbuf = lexr->dbuff;
-    lexm = strdcpy(NULL, dbuf->buf, (size_t)dbuf->fwd);
-
-    advance(lexr);
-
-    return lexm;
+    buf->fwd = 0;
+    return;
 }
 
-char *retire(lexr_t *const lexr)
+void doub_rewind(doub_t *const buf)
 {
-    return lexr->dbuff->fwd = 0, lexr->dbuff->buf;
+#ifdef CALC_DEBUG
+    buf->buf -= buf->pos;
+#endif
+    buf->pos = 0;
+    buf->fwd = 0;
+
+    return;
 }
 
 #pragma endregion
@@ -176,3 +169,7 @@ char *retire(lexr_t *const lexr)
 #pragma endregion
 
 /* =------------------------------------------------------------= */
+
+#ifdef __cplusplus
+}
+#endif
