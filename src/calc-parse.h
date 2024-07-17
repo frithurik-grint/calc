@@ -149,12 +149,14 @@ typedef enum _calc_token_code
 /// @brief Select keyword or identifier code.
 /// @param lexeme Lexeme of the token.
 /// @return Keyword code, or identifier code.
-tokcode_t gettok_kword_or_id(const char *const lexeme);
+tokcode_t get_keyword_or_id(const char *const lexeme);
 /// @brief Scan next token in the source.
 /// @param src Source buffer.
 /// @param outlex Ouput lexeme.
 /// @return Code of the scanned token.
 tokcode_t gettok(doub_t *const src, char **const outlex);
+
+const char *const tokcode_to_str(tokcode_t code);
 
 /// @brief Record for toke infos.
 typedef struct _calc_token
@@ -167,14 +169,26 @@ typedef struct _calc_token
     tokcode_t code;
 } tok_t;
 
-/// @brief Create a new token.
-/// @param code Token code.
-/// @param lexeme Corresponding lexeme for
-///        token parsing.
-/// @return A pointer to the new token.
-tok_t *create_token(tokcode_t const code, const char *const lexeme);
+#pragma endregion
+
+// +---- Lexical Analyzer
+
+#pragma region Lexical Analyzer
+
+typedef struct _calc_lexer
+{
+    doub_t *doub;
+    tokcode_t    look;
+    tokcode_t    last;
+    unsigned int line;
+    unsigned int clmn;
+} lexer_t;
+
+tokcode_t lookahead(lexer_t *const lex);
+tokcode_t lex_token(lexer_t *const lex, char **const lexeme);
 
 #pragma endregion
+
 
 #pragma endregion
 

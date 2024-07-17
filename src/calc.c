@@ -2,21 +2,29 @@
 
 int main()
 {
-    char *lexm;
+    char *lexm, line[BUFSIZ];
     doub_t *src = create_doub(NULL, BUFSIZ);
-
-    doub_puts(src, "12 + 3 = 15");
-    doub_retreat(src);
-
-    tokcode_t c;
 
     do
     {
-        if ((c = gettok(src, &lexm)) > TOK_ENDOS)
-            doub_advance(src);
-    } while (c != TOK_ENDOS);
+        printf("> ");
+        fgets(line, BUFSIZ, stdin);
 
-    printf("%d\n", c);
+        doub_puts(src, line);
+        doub_retreat(src);
+
+        tokcode_t c;
+
+        do
+        {
+            if ((c = gettok(src, &lexm)) > TOK_ENDOS)
+                doub_advance(src);
+
+            printf(tokcode_to_str(c), lexm);
+        } while (c != TOK_ENDOS);
+
+        printf("\n");
+    } while (TRUE);
 }
 
 #ifdef _CALC_BUILD_AS_ONE

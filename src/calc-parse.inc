@@ -43,7 +43,7 @@ deftrv(ENDOS,                                       "<nul>")
 deftrv(SPACE,                                       "<wsp>")
 
 /// @brief Identifier trivia token.
-deftrv(IDENT,                                       "id")
+deftrv(IDENT,                                       "<id: '%s'>")
 
 #ifdef deftrv
 #   undef deftrv
@@ -234,17 +234,23 @@ defpct(ELLIP,                                       "...")
 
 // Numeric Literals
 
-/// @brief 'int_b' numeric constant literal. (integers)
-deflit(INTGR_BIN,                                   "int_b")
-/// @brief 'int_c' numeric constant literal. (integers)
-deflit(INTGR_OCT,                                   "int_c")
-/// @brief 'int_d' numeric constant literal. (integers)
-deflit(INTGR_DEC,                                   "int_d")
-/// @brief 'int_x' numeric constant literal. (integers)
-deflit(INTGR_HEX,                                   "int_x")
+/// @brief 'bin' numeric constant literal. (binary integers)
+deflit(INTGR_BIN,                                   "<bin: '%s'>")
+/// @brief 'oct' numeric constant literal. (octal integers)
+deflit(INTGR_OCT,                                   "<oct: '%s'>")
+/// @brief 'dec' numeric constant literal. (decimal integers)
+deflit(INTGR_DEC,                                   "<dec: '%s'>")
+/// @brief 'hex' numeric constant literal. (hexadecimal integers)
+deflit(INTGR_HEX,                                   "<hex: '%s'>")
 
-/// @brief 'flt' numeric constant literal. (floating-point)
-deflit(FLOAT,                                       "flt")
+/// @brief 'fbin' numeric constant literal. (binary floats)
+deflit(FLOAT_BIN,                                   "<fbin: '%s'>")
+/// @brief 'foct' numeric constant literal. (octal floats)
+deflit(FLOAT_OCT,                                   "<foct: '%s'>")
+/// @brief 'fdec' numeric constant literal. (decimal floats)
+deflit(FLOAT_DEC,                                   "<fdec: '%s'>")
+/// @brief 'fhex' numeric constant literal. (hexadecimal floats)
+deflit(FLOAT_HEX,                                   "<fhex: '%s'>")
 
 // Textual Literals
 
