@@ -61,6 +61,7 @@
 
 #ifdef _UNICODE
 #	ifndef CALC_UNICODE
+/// @biref Internal unicode charset flag.
 #		define CALC_UNICODE 1
 #	endif // CALC_UNICODE
 #endif // _UNICODE

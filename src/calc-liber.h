@@ -34,15 +34,60 @@
 #include <assert.h>
 #include <signal.h>
 #include <string.h>
-
 #include <stdlib.h>
 #include <stdarg.h>
 
 #include <ctype.h>
+#include <stdio.h>
 
-#ifdef CALC_DEBUG
-#   include <stdio.h>
-#endif // CALC_DEBUG
+#ifdef _WIN32            // unistd.h ports on windows
+#   include <io.h>
+#   include <process.h>
+#   include <direct.h>
+
+/// @brief Existance test access.
+#   define F_OK          0
+/// @brief Write mode access.
+#   define W_OK          2
+/// @brief Read mode access.
+#   define R_OK          4
+/// @brief Execution mode access.
+#   define X_OK          6
+
+/// @brief Ddetermine accessibility of a file.
+/// @param path File or directory path.
+/// @param mode Read/write attribute.
+/// @return 0 if the file has the given mode.
+///         The function returns -1 if the named
+///         filedoesn't exist or doesn't have
+///         the given mode.
+#   define access        _access
+/// @brief Creates a second file descriptor for an open file.
+#   define dup           _dup
+/// @brief Reassigns a file descriptor.
+#   define dup2          _dup2
+
+#   define execve        _execve
+#   define ftruncate     _chsize
+#   define unlink        _unlink
+#   define fileno        _fileno
+#   define getcwd        _getcwd
+#   define chdir         _chdir
+#   define isatty        _isatty
+#   define lseek         _lseek
+
+#   ifdef _WIN64
+#       define ssize_t   __int64
+#   else
+#       define ssize_t   long
+#   endif // _WIN64
+
+#   define STDIN_FILENO  0
+#   define STDOUT_FILENO 1
+#   define STDERR_FILENO 2
+#else
+#   include <unistd.h>
+#endif // _WIN32
 
 CALC_C_HEADER_BEGIN
 
@@ -174,7 +219,7 @@ void *callocaz_s(size_t count, size_t size, size_t alignment);
 #pragma region Datatypes Management
 
 #ifndef numcmp
-/// @brief Compare two generic numbers.
+/// @brief Compares two generic numbers.
 #   define numcmp(num1, num2)   ((num1) > (num2)) ? +1 : \
                                 ((num1) < (num2)) ? -1 : 0
 #endif // numcmp
@@ -252,6 +297,35 @@ bool_t strieq(const char *const str1, const char *const str2);
 /// @param length Number of character to copy.
 /// @return A pointer to a new string or dest.
 char *strdcpy(char *const dest, const char *const source, size_t length);
+
+#pragma endregion
+
+/* =---- Exceptions Management ---------------------------------= */
+
+#pragma region Exceptions Management
+
+typedef enum _calc_exception_code
+{
+#pragma push_macro("defexc")
+
+#ifndef defexc
+#   define defexc(name, handler, excode, format, argc) EX_ ## name = excode,
+#endif // defexc
+
+#include "calc-liber.inc"
+
+#ifdef defexc
+#   undef defexc
+#endif // UNDEF defexc
+
+#pragma pop_macro("defexc")
+} excode_t;
+
+void push_exception(excode_t excode,
+#ifdef CALC_DEBUG
+                    const char *const funcname, const char *filename, int line,
+#endif
+                    ...);
 
 #pragma endregion
 
