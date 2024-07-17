@@ -164,7 +164,7 @@ defpct(MINUS_MINUS,                                 "--")
 /// @brief '..' composed punctuator token.
 defpct(POINT_POINT,                                 "..")
 /// @brief '::' composed punctuator token.
-defpct(COLON_COLON,                                 "::")
+defpct(COLON_COLON, "::")
 
 // Composed Tokens - Equal
 
