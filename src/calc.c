@@ -2,14 +2,21 @@
 
 int main()
 {
-    hash_t a, b, c, d, e, f;
+    char *lexm;
+    doub_t *src = create_doub(NULL, BUFSIZ);
 
-    a = gethash("Ciao");
-    b = gethash("ciao");
-    c = gethash("Ciao come va?");
-    d = gethash(" ciao");
-    e = gethash("$");
-    f = gethash("zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz");
+    doub_puts(src, "12 + 3 = 15");
+    doub_retreat(src);
+
+    tokcode_t c;
+
+    do
+    {
+        if ((c = gettok(src, &lexm)) > TOK_ENDOS)
+            doub_advance(src);
+    } while (c != TOK_ENDOS);
+
+    printf("%d\n", c);
 }
 
 #ifdef _CALC_BUILD_AS_ONE

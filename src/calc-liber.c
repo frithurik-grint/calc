@@ -98,17 +98,13 @@ void *callocz_s(size_t count, size_t size)
 	), count * size);
 }
 
-#ifndef _get_aligned_size
-#	define _get_aligned_size(size, alignment) ((size + alignment - 1) & ~(alignment - 1))
-#endif // _get_aligned_size
-
 void *malloca_s(size_t size, size_t alignment)
 {
 	return _safety_check(
 #ifdef CALC_DEBUG
 		__func__,
 #endif // CALC_DEBUG
-		malloc(_get_aligned_size(size, alignment))
+		malloc(alignto(size, alignment))
 	);
 }
 
@@ -118,7 +114,7 @@ void *calloca_s(size_t count, size_t size, size_t alignment)
 #ifdef CALC_DEBUG
 		__func__,
 #endif // CALC_DEBUG
-		calloc(count, _get_aligned_size(size, alignment))
+		calloc(count, alignto(size, alignment))
 	);
 }
 
@@ -128,7 +124,7 @@ void *mallocaz_s(size_t size, size_t alignment)
 #ifdef CALC_DEBUG
 		__func__,
 #endif // CALC_DEBUG
-		malloc(size = _get_aligned_size(size, alignment))
+		malloc(size = alignto(size, alignment))
 	), size);
 }
 
@@ -138,13 +134,9 @@ void *callocaz_s(size_t count, size_t size, size_t alignment)
 #ifdef CALC_DEBUG
 		__func__,
 #endif // CALC_DEBUG
-		calloc(count, size = _get_aligned_size(size, alignment))
+		calloc(count, size = alignto(size, alignment))
 	), count * size);
 }
-
-#ifdef _get_aligned_size
-#	undef _get_aligned_size
-#endif // undef _get_aligned_size
 
 #pragma endregion
 

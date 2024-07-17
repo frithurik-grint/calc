@@ -37,8 +37,13 @@
 deftrv(ENDOF,                                       "<eof>")
 /// @brief EOL trivia token. (end of line)
 deftrv(ENDOL,                                       "<eol>")
+/// @brief NUL trivia token. (end of string)
+deftrv(ENDOS,                                       "<nul>")
 /// @brief WSP trivia token. (white spaces)
 deftrv(SPACE,                                       "<wsp>")
+
+/// @brief Identifier trivia token.
+deftrv(IDENT,                                       "id")
 
 #ifdef deftrv
 #   undef deftrv
@@ -53,6 +58,8 @@ deftrv(SPACE,                                       "<wsp>")
 
 /// @brief 'const' reserved word token.
 defkey(CONST,                                       "const")
+/// @brief 'let' reserved word token. (constant declaration)
+defkey(CDECL,                                       "let")
 
 #ifndef CALC_SORTED_KEYWORDS
 /// @brief If its value is 1, keywords are in alphabetical
@@ -72,7 +79,7 @@ defkey(CONST,                                       "const")
 #   define defpct(name, text) deftok(PUNCT_ ## name, NULL) defstr(PUNCT_ ## name, text)
 #endif // defpct
 
-// Stray Punctuators
+// Brackets
 
 /// @brief '(' stray punctuator token. (left round bracket)
 defpct(LROUN,                                       "(")
@@ -86,6 +93,8 @@ defpct(RSQRD,                                       "]")
 defpct(LCURL,                                       "{")
 /// @brief '(' stray punctuator token. (rigth curly bracket)
 defpct(RCURL,                                       "}")
+
+// Stray Punctuators
 
 /// @brief '~' stray punctuator token. (tilde)
 defpct(TILDE,                                       "~")
@@ -164,7 +173,7 @@ defpct(MINUS_MINUS,                                 "--")
 /// @brief '..' composed punctuator token.
 defpct(POINT_POINT,                                 "..")
 /// @brief '::' composed punctuator token.
-defpct(COLON_COLON, "::")
+defpct(COLON_COLON,                                 "::")
 
 // Composed Tokens - Equal
 
@@ -225,8 +234,15 @@ defpct(ELLIP,                                       "...")
 
 // Numeric Literals
 
-/// @brief 'int' numeric constant literal. (integers)
-deflit(INTGR,                                       "int")
+/// @brief 'int_b' numeric constant literal. (integers)
+deflit(INTGR_BIN,                                   "int_b")
+/// @brief 'int_c' numeric constant literal. (integers)
+deflit(INTGR_OCT,                                   "int_c")
+/// @brief 'int_d' numeric constant literal. (integers)
+deflit(INTGR_DEC,                                   "int_d")
+/// @brief 'int_x' numeric constant literal. (integers)
+deflit(INTGR_HEX,                                   "int_x")
+
 /// @brief 'flt' numeric constant literal. (floating-point)
 deflit(FLOAT,                                       "flt")
 

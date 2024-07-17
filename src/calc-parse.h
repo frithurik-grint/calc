@@ -9,42 +9,21 @@
 
 #include <stdio.h>
 
+#ifndef EOL
+/// @brief End of line character.
+#   define EOL '\n'
+#endif // EOL
+
+#ifndef NUL
+/// @brief NUL character.
+#   define NUL '\0'
+#endif // NUL
+
 CALC_C_HEADER_BEGIN
 
 /* =---- Lexical Analyzer --------------------------------------= */
 
 #pragma region Lexical Analyzer
-
-// +---- Tokens
-
-#pragma region Tokens
-
-/// @brief Enumerate token codes. (prefixed
-///        with TOK_)
-typedef enum _calc_token_code
-{
-    /// @brief Not recognized or erroneus
-    ///        token code.
-    TOK_INVAL,
-
-#pragma push_macro("deftok")
-
-#ifndef deftok
-#   define deftok(tok_name, tok_lexeme) TOK_ ## tok_name,
-#endif
-
-#include "calc-parse.inc"
-
-#ifdef deftok
-#   undef deftok
-#endif
-
-#pragma pop_macro("deftok")
-} tokcode_t;
-
-
-
-#pragma endregion
 
 // +---- Source Stream
 
@@ -56,7 +35,7 @@ typedef enum _calc_token_code
 typedef struct _calc_double_buffer
 {
     /// @brief Buffer pointer.
-    char        *buf;
+    char *buf;
     /// @brief Current position.
     unsigned int pos;
     /// @brief Forward position.
@@ -132,6 +111,68 @@ void doub_rewind(doub_t *const buf);
 /// @return A pointer to the current begin
 ///         of the buffer.
 char *doub_getbuf(doub_t *const buf);
+
+#pragma endregion
+
+// +---- Tokens
+
+#pragma region Tokens
+
+#ifndef DECSEP
+/// @brief Decimal separator constant.
+#   define DECSEP '.'
+#endif // DECSEP
+
+/// @brief Enumerate token codes. (prefixed
+///        with TOK_)
+typedef enum _calc_token_code
+{
+    /// @brief Not recognized or erroneus
+    ///        token code.
+    TOK_INVAL,
+
+#pragma push_macro("deftok")
+
+#ifndef deftok
+#   define deftok(tok_name, tok_lexeme) TOK_ ## tok_name,
+#endif
+
+#include "calc-parse.inc"
+
+#ifdef deftok
+#   undef deftok
+#endif
+
+#pragma pop_macro("deftok")
+} tokcode_t;
+
+/// @brief Select keyword or identifier code.
+/// @param lexeme Lexeme of the token.
+/// @return Keyword code, or identifier code.
+tokcode_t gettok_kword_or_id(const char *const lexeme);
+/// @brief Scan next token in the source.
+/// @param src Source buffer.
+/// @param outlex Ouput lexeme.
+/// @return Code of the scanned token.
+tokcode_t gettok(doub_t *const src, char **const outlex);
+
+/// @brief Record for toke infos.
+typedef struct _calc_token
+{
+    /// @brief Lexeme value of the token,
+    ///        is not NULL when token is
+    ///        an identifier or a literal.
+    char     *lexm;
+    /// @brief Code of the token.
+    tokcode_t code;
+} tok_t;
+
+/// @brief Create a new token.
+/// @param code Token code.
+/// @param lexeme Corresponding lexeme for
+///        token parsing.
+/// @return A pointer to the new token.
+tok_t *create_token(tokcode_t const code, const char *const lexeme);
 
 #pragma endregion
 

@@ -101,6 +101,12 @@ void *callocz_s(size_t count, size_t size);
 #	define dimz(type, count) (type *)callocz_s((count), sizeof(type))
 #endif // dimz
 
+#ifndef alignto
+/// @brief Align two sizes. Used in *alloca_s and *allocaz_s
+///        functions.
+#   define alignto(size, alignment) ((size + alignment - 1) & ~(alignment - 1))
+#endif // alignto
+
 /// @brief Allocate a block of memory in the heap,
 ///		   aligned to a specific width.
 /// @param size Number of byte to allocate.
@@ -166,6 +172,12 @@ void *callocaz_s(size_t count, size_t size, size_t alignment);
 /* =---- Datatypes Management ----------------------------------= */
 
 #pragma region Datatypes Management
+
+#ifndef numcmp
+/// @brief Compare two generic numbers.
+#   define numcmp(num1, num2)   ((num1) > (num2)) ? +1 : \
+                                ((num1) < (num2)) ? -1 : 0
+#endif // numcmp
 
 // Boolean
 
