@@ -2,7 +2,7 @@
 // fibonacci number.
 //
 fib1(n) : i32 -> i32
-  => (n > 2) ? fib(n - 1) + fib(n - 2) : 1;
+  = (n > 2) ? fib(n - 1) + fib(n - 2) : 1;
 
 // or, without recursion
 //
