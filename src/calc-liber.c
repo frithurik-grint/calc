@@ -25,24 +25,24 @@ const int _getpagesiz()
 #pragma region Internal
 
 static inline int _fputln(FILE *const stream)
-#ifdef _WIN32
+#ifdef _CALC_USE_CRLF
 {
-	return fputs(endline, stream);
+	return fputs("\r\n", stream);
 }
 #else
 {
-	return fputc(endline, stream), 1;
+	return fputc('\n', stream), 1;
 }
 #endif // _WIN32
 
 static inline int _putln()
-#ifdef _WIN32
+#ifdef _CALC_USE_CRLF
 {
-	return puts(endline);
+	return puts("\r\n");
 }
 #else
 {
-	return putchar(endline), 1;
+	return putchar('\n'), 1;
 }
 #endif // _WIN32
 
@@ -109,7 +109,7 @@ int fprintfn(FILE *const stream, const char *const format, ...)
 
 int vprintfn(const char *const format, va_list arglist)
 {
-	return _vprintf(format, arglist);
+	return _vprintfn(format, arglist);
 }
 
 int printfn(const char *const format, ...)

@@ -237,8 +237,6 @@ CALC_C_HEADER_END
 #   define pagesiz       _getpagesiz()
 /// @brief Gets data word size.
 #   define wordsiz       sizeof(int)
-/// @brief Endline character sequence.
-#   define endline       "\r\n"
 #else
 #   include <unistd.h>
 
@@ -246,8 +244,6 @@ CALC_C_HEADER_END
 #   define pagesiz       sysconf(_SC_PAGESIZE)
 /// @brief Gets data word size.
 #   define wordsiz       sizeof(int)
-/// @brief Endline character sequence.
-#   define endline       '\n'
 #endif // _WIN32
 
 CALC_C_HEADER_BEGIN

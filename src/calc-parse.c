@@ -108,18 +108,18 @@ char *doub_puts(doub_t *const buf, char *const str)
 char *doub_chop(doub_t *const buf)
 {
 #ifdef CALC_DEBUG
-    return strdcpy(NULL, buf->buf, buf->fwd);
+    return strndcpy(NULL, buf->buf, buf->fwd);
 #else
-    return strdcpy(NULL, buf->buf + buf->pos, buf->fwd);
+    return strndcpy(NULL, buf->buf + buf->pos, buf->fwd);
 #endif
 }
 
 char *doub_chopto(doub_t *const buf, char *const dest)
 {
 #ifdef CALC_DEBUG
-    return strdcpy(dest, buf->buf, buf->fwd);
+    return strndcpy(dest, buf->buf, buf->fwd);
 #else
-    return strdcpy(dest, buf->buf + buf->pos, buf->fwd);
+    return strndcpy(dest, buf->buf + buf->pos, buf->fwd);
 #endif
 }
 
@@ -682,7 +682,8 @@ const char *const tokcode_to_str(const tokcode_t code)
 #pragma push_macro("defstr")
 
 #ifndef defstr
-#   define defstr(name, lexeme) case TOK_ ## name: return lexeme,
+#   define defstr(name, lexeme) case TOK_ ## name: \
+                                    return lexeme;
 #endif
 
 #include "calc-parse.inc"
@@ -703,12 +704,13 @@ const char *const tokname_to_str(const tokcode_t code)
     switch (code)
     {
     case TOK_INVAL:
-        return "INVALID"
+        return "INVALID";
 
 #pragma push_macro("defstr")
 
 #ifndef defstr
-#   define defstr(name, lexeme) case TOK_ ## name: return # name,
+#   define defstr(name, lexeme) case TOK_ ## name: \
+                                    return # name;
 #endif
 
 #include "calc-parse.inc"
@@ -744,9 +746,9 @@ void tokenize()
             c = lnext(&lex, &lexeme);
 
             if (lexeme)
-                printfn("(%02d) %-11s -> '%s'", (int)c, tokname_to_str(c), lexeme);
+                printfn("(%02d) %-24s -> '%s'", (int)c, tokname_to_str(c), lexeme);
             else
-                printfn("(%02d) %-11s -> '%s'", (int)c, tokname_to_str(c), tokcode_to_str(c));
+                printfn("(%02d) %-24s -> '%s'", (int)c, tokname_to_str(c), tokcode_to_str(c));
         } while (c > TOK_NULCH);
 
         putln();
