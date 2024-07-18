@@ -486,9 +486,9 @@ hash_t gethash(const char *const str)
 
 // Symbol Table
 
-symbkey_t *create_symbkey(const char *const name, unsigned int data, symbkey_t *const prev)
+hashkey_t *create_hashkey(const char *const name, unsigned int data, hashkey_t *const prev)
 {
-	symbkey_t *key = alloc(symbkey_t);
+	hashkey_t *key = alloc(hashkey_t);
 
 	key->name = name;
 	key->data = data;
@@ -511,11 +511,11 @@ symbkey_t *create_symbkey(const char *const name, unsigned int data, symbkey_t *
 	return key;
 }
 
-symbtab_t *create_symbtab(unsigned int size, symbtab_t *const prev)
+hashtab_t *create_hashtab(unsigned int size, hashtab_t *const prev)
 {
-	symbtab_t *tab = alloc(symbtab_t);
+	hashtab_t *tab = alloc(hashtab_t);
 
-	tab->keys = dimz(symbkey_t, size);
+	tab->keys = dimz(hashkey_t, size);
 	tab->size = size;
 	tab->used = 0;
 	tab->prev = prev;
@@ -523,13 +523,13 @@ symbtab_t *create_symbtab(unsigned int size, symbtab_t *const prev)
 	return tab;
 }
 
-bool_t symbtab_exists(symbtab_t *const tab, const char *const name)
+bool_t hashtab_exists(hashtab_t *const tab, const char *const name)
 {
 	hash_t hash = _get_hashcode_mod(name, tab->size);
 
 	if (tab->keys[hash])
 	{
-		symbkey_t *s = tab->keys[hash];
+		hashkey_t *s = tab->keys[hash];
 
 		do
 		{
@@ -543,37 +543,37 @@ bool_t symbtab_exists(symbtab_t *const tab, const char *const name)
 	return FALSE;
 }
 
-symbkey_t *symbtab_add(symbtab_t *const tab, const char *const name, unsigned int attr)
+hashkey_t *hashtab_add(hashtab_t *const tab, const char *const name, unsigned int attr)
 {
 	hash_t hash = _get_hashcode_mod(name, tab->size);
 
 	if (tab->keys[hash])
 	{
-		symbkey_t *s = tab->keys[hash], *p;
+		hashkey_t *s = tab->keys[hash], *p;
 
 		do
 		{
 			if (streq(name, s->name))
-				return s;
+				return s->refs++, s;
 			else
 				p = s, s = p->next;
 		} while (s);
 
-		return create_symbkey(name, attr, p);
+		return create_hashkey(name, attr, p);
 	}
 	else
 	{
-		return tab->used++, tab->keys[hash] = create_symbkey(name, attr, NULL);
+		return tab->used++, tab->keys[hash] = create_hashkey(name, attr, NULL);
 	}
 }
 
-symbkey_t *symbtab_get(symbtab_t *const tab, const char *const name)
+hashkey_t *hashtab_get(hashtab_t *const tab, const char *const name)
 {
 	hash_t hash = _get_hashcode_mod(name, tab->size);
 
 	if (tab->keys[hash])
 	{
-		symbkey_t *s = tab->keys[hash];
+		hashkey_t *s = tab->keys[hash];
 
 		do
 		{
@@ -587,13 +587,13 @@ symbkey_t *symbtab_get(symbtab_t *const tab, const char *const name)
 	return NULL;
 }
 
-symbkey_t *symbtab_set(symbtab_t *const tab, const char *const name, unsigned int attr)
+hashkey_t *hashtab_set(hashtab_t *const tab, const char *const name, unsigned int attr)
 {
 	hash_t hash = _get_hashcode_mod(name, tab->size);
 
 	if (tab->keys[hash])
 	{
-		symbkey_t *s = tab->keys[hash];
+		hashkey_t *s = tab->keys[hash];
 
 		do
 		{
@@ -607,7 +607,7 @@ symbkey_t *symbtab_set(symbtab_t *const tab, const char *const name, unsigned in
 	return NULL;
 }
 
-symbtab_t *delete_symbtab(symbtab_t *const tab)
+hashtab_t *delete_hashtab(hashtab_t *const tab)
 {
 	unsigned int i;
 
@@ -615,7 +615,7 @@ symbtab_t *delete_symbtab(symbtab_t *const tab)
 	{
 		if (tab->keys[i])
 		{
-			symbkey_t *key = tab->keys[i], *tmp;
+			hashkey_t *key = tab->keys[i], *tmp;
 
 			do
 			{
@@ -633,12 +633,12 @@ symbtab_t *delete_symbtab(symbtab_t *const tab)
 
 	free(tab->keys);
 
-	return (symbtab_t *)tab->prev;
+	return (hashtab_t *)tab->prev;
 }
 
 #ifdef CALC_DEBUG
 
-void symbtab_print(symbtab_t *const tab)
+void hashtab_print(hashtab_t *const tab)
 {
 	unsigned int i, c, d;
 
@@ -646,7 +646,7 @@ void symbtab_print(symbtab_t *const tab)
 	{
 		if (tab->keys[i])
 		{
-			symbkey_t *key = tab->keys[i];
+			hashkey_t *key = tab->keys[i];
 
 			d = 0;
 

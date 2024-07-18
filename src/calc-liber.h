@@ -638,7 +638,7 @@ typedef struct _calc_symbol_key
     /// @brief Pointer to the collided symbol
     ///        with the same hash.
     struct _calc_symbol_key *next;
-} symbkey_t;
+} hashkey_t;
 
 /// @brief Create a new symbol table key record.
 /// @param name Name of the symbol.
@@ -646,7 +646,7 @@ typedef struct _calc_symbol_key
 /// @param prev In case of collision this points
 ///        to the other item.
 /// @return A pointer to the new symbol key.
-symbkey_t *create_symbkey(const char *const name, unsigned int data, symbkey_t *const prev);
+hashkey_t *create_hashkey(const char *const name, unsigned int data, hashkey_t *const prev);
 
 #ifndef CALC_SYMBTAB_CHUNKSIZ
 /// @brief Number of symbols in a chunk.
@@ -654,58 +654,58 @@ symbkey_t *create_symbkey(const char *const name, unsigned int data, symbkey_t *
 #endif // CALC_SYMBTAB_CHUNKSIZ
 
 /// @brief Symbol table.
-typedef struct _calc_symbol_table
+typedef struct _calc_hash_table
 {
     /// @brief Pointer to first key.
-    symbkey_t                **keys;
+    hashkey_t                **keys;
     /// @brief Number of max hashes.
     unsigned int               size;
     /// @brief Number of used hashes.
     unsigned int               used;
-    /// @brief Previous symbol table chunk.
-    struct _calc_symbol_table *prev;
-} symbtab_t;
+    /// @brief Previous hash table chunk.
+    struct _calc_hash_table *prev;
+} hashtab_t;
 
 /// @brief Create a symbol table.
 /// @param size Number of symbol key records.
 /// @param prev Previous symbol table chunk.
 /// @return A pointer to the new symbol table
-symbtab_t *create_symbtab(unsigned int size, symbtab_t *const prev);
+hashtab_t *create_hashtab(unsigned int size, hashtab_t *const prev);
 
 /// @brief Checks if a symbol is defined.
-/// @param tab Symbol table reference.
+/// @param tab Hash table reference.
 /// @param name Name of the symbol.
 /// @return TRUE if exists, else FALSE.
-bool_t symbtab_exists(symbtab_t *const tab, const char *const name);
+bool_t hashtab_exists(hashtab_t *const tab, const char *const name);
 
 /// @brief Create a new symbol key if
 ///        doesn't exists.
-/// @param tab Symbol table reference.
+/// @param tab Hash table reference.
 /// @param name Name of the symbol.
 /// @param attr Value to set to data attribute.
 /// @return Pointer to the symbol.
-symbkey_t *symbtab_add(symbtab_t *const tab, const char *const name, unsigned int attr);
+hashkey_t *hashtab_add(hashtab_t *const tab, const char *const name, unsigned int attr);
 /// @brief Gets pointer to a symbol (if exists).
-/// @param tab Symbol table reference.
+/// @param tab Hash table reference.
 /// @param name Name of the symbol.
 /// @return Pointer to the symbol.
-symbkey_t *symbtab_get(symbtab_t *const tab, const char *const name);
+hashkey_t *hashtab_get(hashtab_t *const tab, const char *const name);
 /// @brief Change data attribute value of a symbol (if exists).
-/// @param tab Symbol table reference.
+/// @param tab Hash table reference.
 /// @param name Name of the symbol.
 /// @param attr Value to set to data attribute.
 /// @return Pointer to the symbol.
-symbkey_t *symbtab_set(symbtab_t *const tab, const char *const name, unsigned int attr);
+hashkey_t *hashtab_set(hashtab_t *const tab, const char *const name, unsigned int attr);
 
 /// @brief Free symbol table, deleting every entry.
-/// @param tab Symbol table reference.
-symbtab_t *delete_symbtab(symbtab_t *const tab);
+/// @param tab Hash table reference.
+hashtab_t *delete_hashtab(hashtab_t *const tab);
 
 #ifdef CALC_DEBUG
 
 /// @brief Prints symbol table entries on stdout.
-/// @param tab Symbol table reference.
-void symbtab_print(symbtab_t *const tab);
+/// @param tab Hash table reference.
+void hashtab_print(hashtab_t *const tab);
 
 #endif // CALC_DEBUG
 
