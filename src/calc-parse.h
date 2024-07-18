@@ -198,11 +198,17 @@ typedef struct _calc_lexer
 {
     /// @brief Double buffered source.
     doub_t      *doub;
+    /// @brief Hash table to store identifiers.
+    hashtab_t   *htab;
+    /// @brief Pointer to the last inserted symbol.
+    hashkey_t   *hkey;
     /// @brief Lookahead token.
     tokcode_t    look;
     /// @brief Last lexed token.
     tokcode_t    last;
 } lexer_t;
+
+lexer_t *create_lexer(unsigned int bufsiz, unsigned int tabsiz);
 
 /// @brief Gets the next token and puts it into
 ///        lex->look without increasing input
@@ -217,6 +223,14 @@ tokcode_t llook(lexer_t *const lex);
 ///               (only if token need it).
 /// @return The next token in the stream.
 tokcode_t lnext(lexer_t *const lex, char **const lexeme);
+/// @brief Looks the next tokens and advance
+///        only when it matches with match.
+/// @param lex Lexer reference.
+/// @param match Match token.
+/// @param lexeme The corresponding lexeme
+///               (only if token need it).
+/// @return TRUE if matches, else FALSE.
+bool_t lmatch(lexer_t *const lex, tokcode_t match, char **const lexeme);
 
 #pragma endregion
 

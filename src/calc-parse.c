@@ -283,6 +283,8 @@ static tokcode_t _gettok(doub_t *const src, char **const lexeme)
     while (isspace(l = dtopc(src)))
         src->buf++, src->pos++;
 
+    static char tmp[BUFSIZ] = { 1 };
+
     switch (l)
     {
         // Trivia
@@ -472,7 +474,27 @@ static tokcode_t _gettok(doub_t *const src, char **const lexeme)
         return src->fwd++, TOK_PUNCT_SHARP;
 
     case '@':
-        return src->fwd++, TOK_PUNCT_ATSIG;
+        src->fwd++;
+
+        if (isalnum(l = dtopc(src)) || (l == '_') || (l == '$') || (l == '.'))
+        {
+            dadvance(src);
+
+            do
+                src->fwd++;
+            while (isalnum(l = dtopc(src)) || (l == '_') || (l == '$') || (l == '.'));
+
+            dchopto(src, tmp);
+
+            if (lexeme)
+                *lexeme = tmp;
+
+            return TOK_IDENT;
+        }
+        else
+        {
+            return TOK_PUNCT_ATSIG;
+        }
 
     case ',':
         return src->fwd++, TOK_PUNCT_COMMA;
@@ -511,9 +533,69 @@ static tokcode_t _gettok(doub_t *const src, char **const lexeme)
     case '`':
         return src->fwd++, TOK_PUNCT_BACKT;
 
-        // Reserved Words
+        // Reserved Words And Identifiers
 
-        // TODO...
+    case 'a':   case 'b':   case 'c':   case 'd':   case 'e':   case 'f':
+    case 'g':   case 'h':   case 'i':   case 'j':   case 'k':   case 'l':
+    case 'm':   case 'n':   case 'o':   case 'p':   case 'q':   case 'r':
+    case 's':   case 't':   case 'u':   case 'v':   case 'w':   case 'x':
+    case 'y':   case 'z':
+        src->fwd++;
+
+        if (islower(l = dtopc(src)))
+        {
+            do
+                src->fwd++;
+            while (islower(l = dtopc(src)));
+
+            if (!isalnum(l) && (l != '_') && (l != '$'))
+            {
+                tokcode_t c;
+
+                dchopto(src, tmp);
+
+                if (lexeme && ((c = get_keyword_or_id(tmp)) == TOK_IDENT))
+                    *lexeme = tmp;
+
+                return c;
+            }
+            else
+            {
+                do
+                    src->fwd++;
+                while (isalnum(l = dtopc(src)) || (l == '_') || (l == '$'));
+
+                dchopto(src, tmp);
+
+                if (lexeme)
+                    *lexeme = tmp;
+
+                return TOK_IDENT;
+            }
+        }
+        else
+        {
+            src->fwd--;
+        }
+
+        if (isalnum(l = dtopc(src)) || (l == '_') || (l == '$'))
+        {
+    case 'A':   case 'B':   case 'C':   case 'D':   case 'E':   case 'F':
+    case 'G':   case 'H':   case 'I':   case 'J':   case 'K':   case 'L':
+    case 'M':   case 'N':   case 'O':   case 'P':   case 'Q':   case 'R':
+    case 'S':   case 'T':   case 'U':   case 'V':   case 'W':   case 'X':
+    case 'Y':   case 'Z':   case '_':   case '$':
+            do
+                src->fwd++;
+            while (isalnum(l = dtopc(src)) || (l == '_') || (l == '$'));
+
+            dchopto(src, tmp);
+
+            if (lexeme)
+                *lexeme = tmp;
+
+            return TOK_IDENT;
+        }
 
         // Numerics
 
@@ -522,7 +604,7 @@ static tokcode_t _gettok(doub_t *const src, char **const lexeme)
             src->fwd++;
         while ((l = dtopc(src)) == '0');
 
-        if (((l = dtopc(src)) == 'B') || (l == 'b'))
+        if ((l == 'B') || (l == 'b'))
         {
             src->fwd++;
 
@@ -580,7 +662,8 @@ static tokcode_t _gettok(doub_t *const src, char **const lexeme)
         }
         else if ((l == 'D') || (l == 'd') || isdigit(l))
         {
-            src->fwd++;
+            if (l >= 'D')
+                src->fwd++;
 
             if ((((l = dtopc(src)) >= '0') && (l <= '9')))
             {
@@ -589,9 +672,9 @@ static tokcode_t _gettok(doub_t *const src, char **const lexeme)
     case '1': case '2': case '3':
     case '4': case '5': case '6':
     case '7': case '8': case '9':
-        do
-            src->fwd++;
-        while ((((l = dtopc(src)) >= '0') && (l <= '9')));
+                do
+                    src->fwd++;
+                while ((((l = dtopc(src)) >= '0') && (l <= '9')));
             }
             else
             {
@@ -729,30 +812,34 @@ const char *const tokname_to_str(const tokcode_t code)
 void tokenize()
 {
     char line[BUFSIZ], *lexeme;
-    lexer_t lex;
-
-    lex.doub = create_doub(NULL, BUFSIZ);
+    bool_t end = FALSE;
+    lexer_t *lex = create_lexer(BUFSIZ, 32);
 
     do
     {
         printf("TOK > ");
         fgets(line, BUFSIZ, stdin);
-        doub_puts(lex.doub, line);
+        dputs(lex->doub, line);
 
         tokcode_t c;
 
         do
         {
-            c = lnext(&lex, &lexeme);
+            c = lnext(lex, &lexeme);
 
             if (lexeme)
                 printfn("(%02d) %-24s -> '%s'", (int)c, tokname_to_str(c), lexeme);
             else
                 printfn("(%02d) %-24s -> '%s'", (int)c, tokname_to_str(c), tokcode_to_str(c));
-        } while (c > TOK_NULCH);
+
+            if (c == TOK_KWORD_END)
+                end = TRUE;
+        } while (!end && (c > TOK_NULCH));
 
         putln();
-    } while (lexeme ? *lexeme != 'q' : TRUE);
+    } while (!end);
+
+    hashtab_print(lex->htab);
 
     return;
 }
@@ -762,6 +849,19 @@ void tokenize()
 // +---- Lexer
 
 #pragma region Lexer
+
+lexer_t *create_lexer(unsigned int bufsiz, unsigned int tabsiz)
+{
+    lexer_t *lex = alloc(lexer_t);
+
+    lex->doub = create_doub(NULL, bufsiz);
+    lex->htab = create_hashtab(tabsiz, NULL);
+    lex->hkey = NULL;
+    lex->look = 0;
+    lex->last = 0;
+
+    return lex;
+}
 
 tokcode_t llook(lexer_t *const lex) // lookahead
 {
@@ -777,7 +877,39 @@ tokcode_t llook(lexer_t *const lex) // lookahead
 
 tokcode_t lnext(lexer_t *const lex, char **const lexeme) // lex
 {
-    return lex->last = gettok(lex->doub, lexeme), dadvance(lex->doub), lex->last;
+    if (lexeme)
+        *lexeme = NULL;
+
+    tokcode_t code = _gettok(lex->doub, lexeme);
+
+    if (lexeme && (code == TOK_IDENT))
+        lex->hkey = hashtab_add(lex->htab, strndcpy(NULL, *lexeme, lex->doub->fwd), (lex->htab->used > 0 ? lex->hkey->data + 1 : 0));
+
+    dadvance(lex->doub);
+
+    return lex->last = code;
+}
+
+bool_t lmatch(lexer_t *const lex, tokcode_t match, char **const lexeme) // match
+{
+    if (lexeme)
+        *lexeme = NULL;
+
+    tokcode_t code = _gettok(lex->doub, lexeme);
+
+    if (code == match)
+    {
+        if (lexeme && (code == TOK_IDENT))
+            lex->hkey = hashtab_add(lex->htab, strndcpy(NULL, lexeme, lex->doub->fwd), (lex->htab->used > 0 ? lex->hkey->data + 1 : 0));
+
+        dadvance(lex->doub);
+
+        return lex->last = code, TRUE;
+    }
+    else
+    {
+        return FALSE;
+    }
 }
 
 #pragma endregion

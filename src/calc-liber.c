@@ -652,7 +652,7 @@ void hashtab_print(hashtab_t *const tab)
 
 			do
 			{
-				printf("0x%04X-%02X -> 0x%04X ('%s')\n", i, d, key->data, key->name);
+				printf("0x%04X-%02X-%0d -> 0x%04X ('%s')\n", i, d, key->refs, key->data, key->name);
 
 				key = key->next;
 				d++;

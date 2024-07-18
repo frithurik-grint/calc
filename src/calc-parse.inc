@@ -58,6 +58,8 @@ deftrv(IDENT,                                       "id")
 
 /// @brief 'const' reserved word token.
 defkey(KWORD_CONST,                                 "const")
+/// @brief 'end' reserved word token.
+defkey(KWORD_END,                                   "end")
 /// @brief 'let' reserved word token. (constant declaration)
 defkey(KWORD_LET,                                   "let")
 
