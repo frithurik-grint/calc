@@ -405,12 +405,12 @@ char *strdcpy(char *const dest, const char *const source)
 
 int error(const char *const message)
 {
-	return fprint(message, stderr);
+	return fprint(stderr, message);
 }
 
 int errorln(const char *const message)
 {
-	return fprintln(message, stderr);
+	return fprintln(stderr, message);
 }
 
 int verrorf(const char *const format, va_list arglist)
@@ -490,7 +490,7 @@ hashkey_t *create_hashkey(const char *const name, unsigned int data, hashkey_t *
 {
 	hashkey_t *key = alloc(hashkey_t);
 
-	key->name = name;
+	key->name = (char *)name;
 	key->data = data;
 	key->refs = 0;
 
@@ -515,7 +515,7 @@ hashtab_t *create_hashtab(unsigned int size, hashtab_t *const prev)
 {
 	hashtab_t *tab = alloc(hashtab_t);
 
-	tab->keys = dimz(hashkey_t, size);
+	tab->keys = dimz(hashkey_t*, size);
 	tab->size = size;
 	tab->used = 0;
 	tab->prev = prev;

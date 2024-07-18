@@ -253,12 +253,12 @@ tokcode_t get_keyword_or_id(const char *const lexeme)
 
 // TODO: better exception management...
 
-static inline int expected(const char *const what, const char *const got)
+static inline int expected(const char *const what, char *const got)
 {
     return errorfn("syntax error: expected %s (got '%s')", what, got);
 }
 
-static inline int unexpected(const char *const what, const char *const expected)
+static inline int unexpected(const char *const what, char *const expected)
 {
     return errorfn("syntax error: unexpected %s (expected '%s')", what, expected);
 }
@@ -651,7 +651,7 @@ static tokcode_t _gettok(doub_t *const src, char **const lexeme)
     default:
         src->fwd++;
 
-        notvalid(&l);
+        notvalid((const char *const)&l);
         doub_advance(src);
 
         return TOK_INVAL;

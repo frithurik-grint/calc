@@ -133,7 +133,7 @@ symbdata_t *create_symbdata(const char *const name, const symb_t *const type)
 {
 	symbdata_t *data = alloc(symbdata_t);
 
-	data->name = name;
+	data->name = (char*)name;
 	data->type = type;
 
 	return data;
