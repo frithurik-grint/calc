@@ -6,8 +6,9 @@
 #define CALC_LIBER_H_
 
 #ifndef _CRT_SECURE_NO_WARNINGS
+/// @brief Avoid deprecation warnings.
 #   define _CRT_SECURE_NO_WARNINGS 1
-#endif
+#endif // _CRT_SECURE_NO_WARNINGS
 
 #ifdef __cplusplus
 #   ifndef CALC_C_HEADER_BEGIN
@@ -40,20 +41,23 @@
 #include <ctype.h>
 #include <stdio.h>
 
+#pragma region System Dependent Libraries
+
 #ifdef _WIN32            // unistd.h ports on windows
 #   include <io.h>
 #   include <process.h>
 #   include <direct.h>
 
 /// @brief Existance test access.
-#   define F_OK          0
+#   define F_OK 0
 /// @brief Write mode access.
-#   define W_OK          2
+#   define W_OK 2
 /// @brief Read mode access.
-#   define R_OK          4
+#   define R_OK 4
 /// @brief Execution mode access.
-#   define X_OK          6
+#   define X_OK 6
 
+#ifndef _UNICODE
 /// @brief Ddetermine accessibility of a file.
 /// @param path File or directory path.
 /// @param mode Read/write attribute.
@@ -61,33 +65,188 @@
 ///         The function returns -1 if the named
 ///         filedoesn't exist or doesn't have
 ///         the given mode.
-#   define access        _access
+#       define access       _access
 /// @brief Creates a second file descriptor for an open file.
-#   define dup           _dup
+/// @param fd File descriptor referring to open file.
+/// @return A new file descriptor.
+#       define dup          _dup
 /// @brief Reassigns a file descriptor.
-#   define dup2          _dup2
-
-#   define execve        _execve
-#   define ftruncate     _chsize
-#   define unlink        _unlink
-#   define fileno        _fileno
-#   define getcwd        _getcwd
-#   define chdir         _chdir
-#   define isatty        _isatty
-#   define lseek         _lseek
+/// @param fd1 File descriptor referring to open file.
+/// @param fd2 Any file descriptor.
+/// @return 0 to indicate success. If an error occurs,
+///         each function returns -1 and sets errno to
+///         EBADF if the file descriptor is invalid,
+///         or to EMFILE if no more file descriptors
+///         are available.
+#       define dup2         _dup2
+/// @brief Loads and executes new child processes.
+/// @param cmdname Path of the file to execute.
+/// @param argv Array of pointers to parameters.
+/// @return If successful, these functions don't return
+///         to the calling process. A return value of -1
+///         indicates an error, in which case the errno
+///         global variable is set.
+#       define execve       _execve
+/// @brief Changes the size of a file.
+/// @param fd File descriptor referring to an open file.
+/// @param size New length of the file in bytes.
+/// @return 0 if the file size is successfully changed.
+///         A return value of -1 indicates an error.
+#       define ftruncate    _chsize
+/// @brief Delete a file.
+/// @param filename Name of file to remove.
+/// @return 0 if successful. Otherwise, the function
+///         returns -1 and sets errno to EACCES
+#       define unlink       _unlink
+/// @brief Gets the file descriptor associated with a stream.
+/// @param stream Pointer to the FILE structure.
+/// @return _fileno returns the file descriptor. There's no
+///         error return. The result is undefined if stream
+///         doesn't specify an open file. 
+#       define fileno       _fileno
+/// @brief Gets the current working directory.
+/// @param buffer Storage location for the path.
+/// @param maxlen Maximum length of the path in characters.
+/// @return Returns a pointer to buffer. A NULL return value
+///         indicates an error.
+#       define getcwd       _getcwd
+/// @brief Determines whether a file descriptor is
+///        associated with a character device.
+/// @param fd File descriptor that refers to the device to
+///           be tested.
+/// @return _isatty returns a nonzero value if the descriptor
+///         is associated with a character device. Otherwise,
+///         _isatty returns 0.
+#       define chdir        _chdir
+/// @brief Determines whether a file descriptor is
+///        associated with a character device.
+/// @param fd File descriptor that refers to the device to
+///           be tested.
+/// @return _isatty returns a nonzero value if the descriptor
+///         is associated with a character device. Otherwise,
+///         _isatty returns 0.
+#       define isatty       _isatty
+/// @brief Moves a file pointer to the specified location.
+/// @param fd File descriptor referring to an open file.
+/// @param offset Number of bytes from origin.
+/// @param origin Initial position.
+/// @return _lseek returns the offset, in bytes, of the
+///         new position from the beginning of the file.
+#       define lseek        _lseek
+#else
+/// @brief Ddetermine accessibility of a file.
+/// @param path File or directory path.
+/// @param mode Read/write attribute.
+/// @return 0 if the file has the given mode.
+///         The function returns -1 if the named
+///         filedoesn't exist or doesn't have
+///         the given mode.
+#       define access       _waccess
+/// @brief Creates a second file descriptor for an open file.
+/// @param fd File descriptor referring to open file.
+/// @return A new file descriptor.
+#       define dup          _dup
+/// @brief Reassigns a file descriptor.
+/// @param fd1 File descriptor referring to open file.
+/// @param fd2 Any file descriptor.
+/// @return 0 to indicate success. If an error occurs,
+///         each function returns -1 and sets errno to
+///         EBADF if the file descriptor is invalid,
+///         or to EMFILE if no more file descriptors
+///         are available.
+#       define dup2         _dup2
+/// @brief Loads and executes new child processes.
+/// @param cmdname Path of the file to execute.
+/// @param argv Array of pointers to parameters.
+/// @return If successful, these functions don't return
+///         to the calling process. A return value of -1
+///         indicates an error, in which case the errno
+///         global variable is set.
+#       define execve       _wexecve
+/// @brief Changes the size of a file.
+/// @param fd File descriptor referring to an open file.
+/// @param size New length of the file in bytes.
+/// @return 0 if the file size is successfully changed.
+///         A return value of -1 indicates an error.
+#       define ftruncate    _chsize
+/// @brief Delete a file.
+/// @param filename Name of file to remove.
+/// @return 0 if successful. Otherwise, the function
+///         returns -1 and sets errno to EACCES
+#       define unlink       _wunlink
+/// @brief Gets the file descriptor associated with a stream.
+/// @param stream Pointer to the FILE structure.
+/// @return _fileno returns the file descriptor. There's no
+///         error return. The result is undefined if stream
+///         doesn't specify an open file. 
+#       define fileno       _fileno
+/// @brief Gets the current working directory.
+/// @param buffer Storage location for the path.
+/// @param maxlen Maximum length of the path in characters.
+/// @return Returns a pointer to buffer. A NULL return value
+///         indicates an error.
+#       define getcwd       _wgetcwd
+/// @brief Changes the current working directory.
+/// @param dirname Path of new working directory.
+/// @return These functions return a value of 0 if successful.
+///         A return value of -1 indicates failure.
+#       define chdir        _wchdir
+/// @brief Determines whether a file descriptor is
+///        associated with a character device.
+/// @param fd File descriptor that refers to the device to
+///           be tested.
+/// @return _isatty returns a nonzero value if the descriptor
+///         is associated with a character device. Otherwise,
+///         _isatty returns 0.
+#       define isatty       _isatty
+/// @brief Moves a file pointer to the specified location.
+/// @param fd File descriptor referring to an open file.
+/// @param offset Number of bytes from origin.
+/// @param origin Initial position.
+/// @return _lseek returns the offset, in bytes, of the
+///         new position from the beginning of the file.
+#       define lseek        _lseek
+#   endif // _UNICODE
 
 #   ifdef _WIN64
-#       define ssize_t   __int64
+/// @brief Used for a count of bytes or an error indication.
+#       define ssize_t  __int64
 #   else
-#       define ssize_t   long
+/// @brief Used for a count of bytes or an error indication.
+#       define ssize_t  long
 #   endif // _WIN64
 
+/// @brief stdin fileno.
 #   define STDIN_FILENO  0
+/// @brief stdout fileno.
 #   define STDOUT_FILENO 1
+/// @brief stderr fileno.
 #   define STDERR_FILENO 2
+
+#   include <windows.h>
+
+CALC_C_HEADER_BEGIN
+
+/// @brief Gets memory page size.
+/// @return Memory page size.
+const int _getpagesiz();
+
+CALC_C_HEADER_END
+
+/// @brief Gets memory page size.
+#   define pagesiz       _getpagesiz()
+/// @brief Gets data word size.
+#   define wordsiz       sizeof(int)
 #else
 #   include <unistd.h>
+
+/// @brief Gets memory page size.
+#   define pagesiz       sysconf(_SC_PAGESIZE)
+/// @brief Gets data word size.
+#   define wordsiz       sizeof(int)
 #endif // _WIN32
+
+#pragma endregion
 
 CALC_C_HEADER_BEGIN
 
@@ -212,6 +371,14 @@ void *callocaz_s(size_t count, size_t size, size_t alignment);
 #	define dimaz(type1, type2, count) (type1 *)callocaz_s((count), sizeof(type1), sizeof(type2))
 #endif // dimaz
 
+// Strings
+
+/// @brief Allocate a new array of bytes (string).
+/// @param length Number of characters in the string.
+/// @return A pointer to the first character of the 
+///         string.
+char *stralloc(size_t length);
+
 #pragma endregion
 
 /* =---- Datatypes Management ----------------------------------= */
@@ -270,13 +437,6 @@ typedef CALC_BYTE_T byte_t;
 #   define BYTE_MAX ((byte_t)0xFF)
 #endif // BYTE_MAX
 
-// String
-
-/// @brief Allocate a new empty string.
-/// @param length Size of the string.
-/// @return A pointer to the new string.
-char *strloc(size_t length);
-
 /// @brief Equals two strings.
 /// @param str1 First string. (is better to use a costant)
 /// @param str2 Second string.
@@ -303,29 +463,6 @@ char *strdcpy(char *const dest, const char *const source, size_t length);
 /* =---- Exceptions Management ---------------------------------= */
 
 #pragma region Exceptions Management
-
-typedef enum _calc_exception_code
-{
-#pragma push_macro("defexc")
-
-#ifndef defexc
-#   define defexc(name, handler, excode, format, argc) EX_ ## name = excode,
-#endif // defexc
-
-#include "calc-liber.inc"
-
-#ifdef defexc
-#   undef defexc
-#endif // UNDEF defexc
-
-#pragma pop_macro("defexc")
-} excode_t;
-
-void push_exception(excode_t excode,
-#ifdef CALC_DEBUG
-                    const char *const funcname, const char *filename, int line,
-#endif
-                    ...);
 
 #pragma endregion
 
@@ -362,7 +499,7 @@ hash_t gethash(const char *const str);
 typedef struct _calc_symbol_key
 {
     /// @brief Name of the symbol.
-    char                    *name;
+    char *name;
     /// @brief References counter, it can be
     ///        useful for garbage collection.
     unsigned int             refs;
@@ -384,7 +521,7 @@ symbkey_t *create_symbkey(const char *const name, unsigned int data, symbkey_t *
 
 #ifndef CALC_SYMBTAB_CHUNKSIZ
 /// @brief Number of symbols in a chunk.
-#   define CALC_SYMBTAB_CHUNKSIZ (BUFSIZ >> 4)
+#   define CALC_SYMBTAB_CHUNKSIZ (BUFSIZ >> 2)
 #endif // CALC_SYMBTAB_CHUNKSIZ
 
 /// @brief Symbol table.
@@ -392,10 +529,10 @@ typedef struct _calc_symbol_table
 {
     /// @brief Pointer to first key.
     symbkey_t                **keys;
-    /// @brief Number of used hashes.
+    /// @brief Number of max hashes.
     unsigned int               size;
-    /// @brief Last allocated hash.
-    hash_t                     last;
+    /// @brief Number of used hashes.
+    unsigned int               used;
     /// @brief Previous symbol table chunk.
     struct _calc_symbol_table *prev;
 } symbtab_t;
@@ -406,12 +543,42 @@ typedef struct _calc_symbol_table
 /// @return A pointer to the new symbol table
 symbtab_t *create_symbtab(unsigned int size, symbtab_t *const prev);
 
+/// @brief Checks if a symbol is defined.
+/// @param tab Symbol table reference.
+/// @param name Name of the symbol.
+/// @return TRUE if exists, else FALSE.
+bool_t symbtab_exists(symbtab_t *const tab, const char *const name);
+
 /// @brief Create a new symbol key if
 ///        doesn't exists.
+/// @param tab Symbol table reference.
 /// @param name Name of the symbol.
-/// @return Hash code of the symbol.
-hash_t add_symbol(symbtab_t *const tab, const char *const name);
+/// @param attr Value to set to data attribute.
+/// @return Pointer to the symbol.
+symbkey_t *symbtab_add(symbtab_t *const tab, const char *const name, unsigned int attr);
+/// @brief Gets pointer to a symbol (if exists).
+/// @param tab Symbol table reference.
+/// @param name Name of the symbol.
+/// @return Pointer to the symbol.
+symbkey_t *symbtab_get(symbtab_t *const tab, const char *const name);
+/// @brief Change data attribute value of a symbol (if exists).
+/// @param tab Symbol table reference.
+/// @param name Name of the symbol.
+/// @param attr Value to set to data attribute.
+/// @return Pointer to the symbol.
+symbkey_t *symbtab_set(symbtab_t *const tab, const char *const name, unsigned int attr);
 
+/// @brief Free symbol table, deleting every entry.
+/// @param tab Symbol table reference.
+symbtab_t *delete_symbtab(symbtab_t *const tab);
+
+#ifdef CALC_DEBUG
+
+/// @brief Prints symbol table entries on stdout.
+/// @param tab Symbol table reference.
+void symbtab_print(symbtab_t *const tab);
+
+#endif // CALC_DEBUG
 
 #pragma endregion
 

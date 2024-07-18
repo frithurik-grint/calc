@@ -1,50 +1,21 @@
-#include "calc.h"
+#include "calc-liber.h"
 
-int main()
+int main(void)
 {
-    char *lexm, line[BUFSIZ];
-    doub_t *src = create_doub(NULL, BUFSIZ);
+	symbtab_t *stab = create_symbtab(CALC_SYMBTAB_CHUNKSIZ, NULL);
 
-    do
-    {
-        printf("> ");
-        fgets(line, BUFSIZ, stdin);
+	symbtab_add(stab, "ciao", 0);
+	symbtab_add(stab, "Ciao", 1);
+	symbtab_add(stab, "cIao", 2);
+	symbtab_add(stab, "ciAo", 3);
+	symbtab_add(stab, "ciaO", 4);
+	symbtab_add(stab, "fede", 5);
+	symbtab_add(stab, "DIOP", 6);
+	symbtab_add(stab, "ciao", 7);
+	symbtab_add(stab, "nope", 8);
+	symbtab_add(stab, "xnny", 9);
 
-        doub_puts(src, line);
-        doub_retreat(src);
+	symbtab_print(stab);
 
-        tokcode_t c;
-
-        do
-        {
-            if ((c = gettok(src, &lexm)) > TOK_ENDOS)
-                doub_advance(src);
-
-            printf(tokcode_to_str(c), lexm);
-        } while (c != TOK_ENDOS);
-
-        printf("\n");
-    } while (TRUE);
+	return 0;
 }
-
-#ifdef _CALC_BUILD_AS_ONE
-#   include "calc-liber.c"
-
-#   if CALC_PARSE_H_ == 1
-#       include "calc-parse.c"
-#   endif // CALC_PARSE_H_
-
-#   if CALC_VIRTM_H_ == 1
-#       include "calc-virtm.c"
-#   endif // CALC_VIRTM_H_
-
-#   include "calc-build.c"
-
-#   if CALC_SCRPT_H_ == 1
-#       include "calc-scrpt.c"
-#   endif // CALC_SCRPT_H_
-
-#   if CALC_SHELL_H_ == 1
-#       include "calc-shell.c"
-#   endif // CALC_SHELL_H_
-#endif // _CALC_BUILD_AS_ONE

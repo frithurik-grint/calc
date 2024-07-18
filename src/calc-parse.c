@@ -17,7 +17,7 @@ doub_t *create_doub(char *const buffer, unsigned int length)
     if (!length)
         length = BUFSIZ;
 
-    buf->buf = (!buffer ? strloc(length) : buffer);
+    buf->buf = (!buffer ? stralloc(length) : buffer);
     buf->pos = 0;
     buf->fwd = 0;
     buf->len = length;
@@ -627,35 +627,38 @@ tokcode_t gettok(doub_t *const src, char **const outlex)
     }
 }
 
-const char *const tokcode_to_str(tokcode_t code)
+#pragma endregion
+
+#pragma endregion
+
+// +---- Lexical Analyzer
+
+#pragma region Lexical Analyzer
+
+tokcode_t lookahead(lexer_t *const lex)
 {
-    switch (code)
-    {
-    case TOK_INVAL:
-        return "";
+    tokcode_t code = gettok(lex->doub, NULL);
 
-#pragma push_macro("defstr")
+    if (code != TOK_INVAL)
+        doub_retreat(lex->doub);
+    else
+        doub_advance(lex->doub);
 
-#ifndef defstr
-#   define defstr(tok_name, tok_lexeme) case TOK_ ## tok_name: \
-                                            return tok_lexeme;
-#endif // defstr
+    return lex->look = code;
+}
 
-#include "calc-parse.inc"
-
-#ifdef defstr
-#   undef defstr
-#endif // defstr
-
-#pragma pop_macro("defstr")
-
-    default:
-        return "uknown";
-    }
+tokcode_t lex_token(lexer_t *const lex, char **const lexeme)
+{
+    return lex->last = gettok(lex->doub, lexeme), doub_advance(lex->doub), lex->last;
 }
 
 #pragma endregion
 
+
 #pragma endregion
 
 /* =------------------------------------------------------------= */
+
+#ifndef CALC_PARSE_C_
+#   define CALC_PARSE_C_
+#endif // CALC_PARSE_C_

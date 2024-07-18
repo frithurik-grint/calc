@@ -177,11 +177,9 @@ typedef struct _calc_token
 
 typedef struct _calc_lexer
 {
-    doub_t *doub;
+    doub_t      *doub;
     tokcode_t    look;
     tokcode_t    last;
-    unsigned int line;
-    unsigned int clmn;
 } lexer_t;
 
 tokcode_t lookahead(lexer_t *const lex);
@@ -195,5 +193,11 @@ tokcode_t lex_token(lexer_t *const lex, char **const lexeme);
 /* =------------------------------------------------------------= */
 
 CALC_C_HEADER_END
+
+#ifdef _CALC_BUILD_AS_ONE
+#   ifndef CALC_PARSE_C_
+#       include "calc-parse.c"
+#   endif // CALC_PARSE_C_
+#endif // _CALC_BUILD_AS_ONE
 
 #endif // CALC_PARSE_H_

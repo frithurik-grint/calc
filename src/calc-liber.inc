@@ -18,7 +18,7 @@
 /// @brief Invalid token exception.
 defexc(SYNTX_INVAL, "InvalidTokenException",        0x0100, CALC_EX_PREFX_SYNTX "'%s' is not a valid token",    1)
 /// @brief Expected token exception.
-defexc(SYNTX_EXPCT, "ExpectedTokenException"        0x0110, CALC_EX_PREFX_SYNTX "expected %s (got '%s')",       2)
+defexc(SYNTX_EXPCT, "ExpectedTokenException",       0x0110, CALC_EX_PREFX_SYNTX "expected %s (got '%s')",       2)
 /// @brief Unexpected token exception.
 defexc(SYNTX_UNEXP, "UnexpectedTokenException",     0x0120, CALC_EX_PREFX_SYNTX "unexpected '%s'",              1)
 
