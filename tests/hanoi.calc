@@ -1,0 +1,18 @@
+// This file is an example of a function that computes the hanoi
+// tower algorithm.
+//
+pragma load base;
+pragma load base.io;
+
+use extern printfn(format : cstr, ...) -> i32;
+
+hanoi(n : i32, from : char, to : char, aux : char) -> void {
+  if (n == 1)
+    end, printfn("Move disk 1 from rod %c to rod %c", from, to);
+
+  hanoi(n - 1, from, aux, to);
+  printfn("Move disk %d from rod %c to rod %c", n, from, to);
+  hanoi(n - 1, aux, to, from);
+
+  end;
+}
