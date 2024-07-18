@@ -1,4 +1,4 @@
-#include "../src/calc-liber.h"
+#include "calc-liber.h"
 
 #pragma region System Dependent Libraries
 
