@@ -32,6 +32,20 @@
 #   endif // CALC_C_HEADER_END
 #endif // __cplusplus
 
+#ifdef _DEBUG
+#	ifndef CALC_DEBUG
+/// @brief Internal debug flag.
+#		define CALC_DEBUG 1
+#	endif // CALC_DEBUG
+#endif // _DEBUG
+
+#ifdef _UNICODE
+#	ifndef CALC_UNICODE
+/// @biref Internal unicode charset flag.
+#		define CALC_UNICODE 1
+#	endif // CALC_UNICODE
+#endif // _UNICODE
+
 #include <assert.h>
 #include <signal.h>
 #include <string.h>
@@ -267,39 +281,43 @@ int putln();
 /// @param message Message to print.
 /// @return Number of characters written.
 int fprint(FILE *const stream, const char *const message);
-/// @brief 
-/// @param message 
+/// @brief Print a message in stdout.
+/// @param message Message to print.
 /// @return Number of characters written.
 int print(const char *const message);
-/// @brief 
-/// @param stream 
-/// @param message 
+/// @brief Print a message in a stream.
+/// @param stream Output stream.
+/// @param message Message to print.
 /// @return Number of characters written.
 int fprintln(FILE *const stream, const char *const message);
-/// @brief 
-/// @param message 
-/// @return 
+/// @brief Print a message in stdout.
+/// @param message Message to print.
+/// @return Number of characters written.
 int println(const char *const message);
-/// @brief 
-/// @param stream 
-/// @param format 
-/// @param arglist 
+/// @brief Print a message in stdout.
+/// @param stream Output stream.
+/// @param format Fromat string to print.
+/// @param arglist Arguments to use to format
+///               the message.
 /// @return Number of characters written.
 int vfprintfn(FILE *const stream, const char *const format, va_list arglist);
-/// @brief 
-/// @param stream 
-/// @param format 
-/// @param others
+/// @brief Print a formatted message in a stream.
+/// @param stream Output stream.
+/// @param format Fromat string to print.
+/// @param others Arguments to use to format
+///               the message.
 /// @return Number of characters written.
 int fprintfn(FILE *const stream, const char *const format, ...);
-/// @brief 
-/// @param format 
-/// @param others
+/// @brief Print a formatted message in stdout.
+/// @param format Fromat string to print.
+/// @param arglist Arguments to use to format
+///               the message.
 /// @return Number of characters written.
 int vprintfn(const char *const format, va_list arglist);
-/// @brief 
-/// @param format 
-/// @param others
+/// @brief Print a formatted message in stdout.
+/// @param format Fromat string to print.
+/// @param others Arguments to use to format
+///               the message.
 /// @return Number of characters written.
 int printfn(const char *const format, ...);
 

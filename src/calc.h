@@ -52,20 +52,6 @@
 #	endif // CALC_C_HEADER_END
 #endif // _CRT_END_C_HEADER
 
-#ifdef _DEBUG
-#	ifndef CALC_DEBUG
-/// @brief Internal debug flag.
-#		define CALC_DEBUG 1
-#	endif // CALC_DEBUG
-#endif // _DEBUG
-
-#ifdef _UNICODE
-#	ifndef CALC_UNICODE
-/// @biref Internal unicode charset flag.
-#		define CALC_UNICODE 1
-#	endif // CALC_UNICODE
-#endif // _UNICODE
-
 #ifdef _CALC_NO_PARSE_ENV
 #   define CALC_PARSE_H_ 0
 #endif
