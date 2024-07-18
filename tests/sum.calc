@@ -1,0 +1,11 @@
+// This file is an example of a function that computes the sum
+// of some numbers.
+//
+let sum(...args) : f64 -> f64 {
+  r : i32 = 0;
+
+  ()arg :: args   // foreach arg in args
+    => r += arg;
+
+  return r;
+}
