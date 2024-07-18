@@ -38,12 +38,12 @@ deftrv(ENDOF,                                       "<eof>")
 /// @brief EOL trivia token. (end of line)
 deftrv(ENDOL,                                       "<eol>")
 /// @brief NUL trivia token. (end of string)
-deftrv(ENDOS,                                       "<nul>")
+deftrv(NULCH,                                       "<nul>")
 /// @brief WSP trivia token. (white spaces)
 deftrv(SPACE,                                       "<wsp>")
 
 /// @brief Identifier trivia token.
-deftrv(IDENT,                                       "<id: '%s'>")
+deftrv(IDENT,                                       "id")
 
 #ifdef deftrv
 #   undef deftrv
@@ -53,13 +53,13 @@ deftrv(IDENT,                                       "<id: '%s'>")
 
 #ifndef defkey
 /// @brief Internal macro for keyword tokens defintion.
-#   define defkey(name, lexeme) deftok(KWORD_ ## name, lexeme) defstr(KWORD_ ## name, lexeme)
+#   define defkey(name, lexeme) deftok(name, lexeme) defstr(name, lexeme)
 #endif // defkey
 
 /// @brief 'const' reserved word token.
-defkey(CONST,                                       "const")
+defkey(KWORD_CONST,                                 "const")
 /// @brief 'let' reserved word token. (constant declaration)
-defkey(CDECL,                                       "let")
+defkey(KWORD_LET,                                   "let")
 
 #ifndef CALC_SORTED_KEYWORDS
 /// @brief If its value is 1, keywords are in alphabetical
@@ -235,28 +235,28 @@ defpct(ELLIP,                                       "...")
 // Numeric Literals
 
 /// @brief 'bin' numeric constant literal. (binary integers)
-deflit(INTGR_BIN,                                   "<bin: '%s'>")
+deflit(INTGR_BIN,                                   "bin")
 /// @brief 'oct' numeric constant literal. (octal integers)
-deflit(INTGR_OCT,                                   "<oct: '%s'>")
+deflit(INTGR_OCT,                                   "oct")
 /// @brief 'dec' numeric constant literal. (decimal integers)
-deflit(INTGR_DEC,                                   "<dec: '%s'>")
+deflit(INTGR_DEC,                                   "dec")
 /// @brief 'hex' numeric constant literal. (hexadecimal integers)
-deflit(INTGR_HEX,                                   "<hex: '%s'>")
+deflit(INTGR_HEX,                                   "hex")
 
 /// @brief 'fbin' numeric constant literal. (binary floats)
-deflit(FLOAT_BIN,                                   "<fbin: '%s'>")
+deflit(FLOAT_BIN,                                   "fbin")
 /// @brief 'foct' numeric constant literal. (octal floats)
-deflit(FLOAT_OCT,                                   "<foct: '%s'>")
+deflit(FLOAT_OCT,                                   "foct")
 /// @brief 'fdec' numeric constant literal. (decimal floats)
-deflit(FLOAT_DEC,                                   "<fdec: '%s'>")
+deflit(FLOAT_DEC,                                   "fdec")
 /// @brief 'fhex' numeric constant literal. (hexadecimal floats)
-deflit(FLOAT_HEX,                                   "<fhex: '%s'>")
+deflit(FLOAT_HEX,                                   "fhex")
 
 // Textual Literals
 
 /// @brief 'cchar' textual constant literal. (character)
 deflit(CCHAR,                                       "cchar")
-/// @brief 'wchar' textual constant literal. (unicode character)
+/// @brief 'uchar' textual constant literal. (unicode character)
 deflit(UCHAR,                                       "uchar")
 
 /// @brief 'cstr' textual constant literal. (string)

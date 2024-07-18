@@ -237,6 +237,8 @@ CALC_C_HEADER_END
 #   define pagesiz       _getpagesiz()
 /// @brief Gets data word size.
 #   define wordsiz       sizeof(int)
+/// @brief Endline character sequence.
+#   define endline       "\r\n"
 #else
 #   include <unistd.h>
 
@@ -244,7 +246,72 @@ CALC_C_HEADER_END
 #   define pagesiz       sysconf(_SC_PAGESIZE)
 /// @brief Gets data word size.
 #   define wordsiz       sizeof(int)
+/// @brief Endline character sequence.
+#   define endline       '\n'
 #endif // _WIN32
+
+CALC_C_HEADER_BEGIN
+
+// +---- Output Functions
+
+#pragma region Output Functions
+
+/// @brief Puts the system endline char
+///        sequence on stream.
+/// @param stream Output stream.
+/// @return Number of characters printed.
+int fputln(FILE *const stream);
+/// @brief Puts the system endline char
+///        sequence on stdout.
+/// @return Number of characters printed.
+int putln();
+
+/// @brief Print a message in a stream.
+/// @param stream Output stream.
+/// @param message Message to print.
+/// @return Number of characters written.
+int fprint(FILE *const stream, const char *const message);
+/// @brief 
+/// @param message 
+/// @return Number of characters written.
+int print(const char *const message);
+/// @brief 
+/// @param stream 
+/// @param message 
+/// @return Number of characters written.
+int fprintln(FILE *const stream, const char *const message);
+/// @brief 
+/// @param message 
+/// @return 
+int println(const char *const message);
+/// @brief 
+/// @param stream 
+/// @param format 
+/// @param arglist 
+/// @return Number of characters written.
+int vfprintfn(FILE *const stream, const char *const format, va_list arglist);
+/// @brief 
+/// @param stream 
+/// @param format 
+/// @param others
+/// @return Number of characters written.
+int fprintfn(FILE *const stream, const char *const format, ...);
+/// @brief 
+/// @param format 
+/// @param others
+/// @return Number of characters written.
+int vprintfn(const char *const format, va_list arglist);
+/// @brief 
+/// @param format 
+/// @param others
+/// @return Number of characters written.
+int printfn(const char *const format, ...);
+
+#pragma endregion
+
+// +---- Output Functions -- End
+
+CALC_C_HEADER_END
 
 #pragma endregion
 
@@ -450,19 +517,85 @@ bool_t streq(const char *const str1, const char *const str2);
 ///         length, or if are the same. (also if are both NULL)
 bool_t strieq(const char *const str1, const char *const str2);
 
+/// @brief Converts a string to lower case.
+/// @param dest Destination buffer (if NULL duplicate).
+/// @param source Source string.
+/// @param length Number of characters.
+/// @return A pointer to dest or the new string.
+char *strntolower(char *const dest, const char *const source, size_t length);
+/// @brief Converts a string to lower case.
+/// @param dest Destination buffer (if NULL duplicate).
+/// @param source Source string.
+/// @return A pointer to dest or the new string.
+char *strtolower(char *const dest, const char *const source);
+/// @brief Converts a string to lower case.
+/// @param dest Destination buffer (if NULL duplicate).
+/// @param source Source string.
+/// @param length Number of characters.
+/// @return A pointer to dest or the new string.
+char *strntoupper(char *const dest, const char *const source, size_t length);
+/// @brief Converts a string to lower case.
+/// @param dest Destination buffer (if NULL duplicate).
+/// @param source Source string.
+/// @return A pointer to dest or the new string.
+char *strtoupper(char *const dest, const char *const source);
+
 /// @brief Create a duplicate of a string or copy it in
 ///        dest.
 /// @param dest Destination buffer (if NULL duplicate).
 /// @param source Source string.
 /// @param length Number of character to copy.
 /// @return A pointer to a new string or dest.
-char *strdcpy(char *const dest, const char *const source, size_t length);
+char *strndcpy(char *const dest, const char *const source, size_t length);
+/// @brief Create a duplicate of a string or copy it in
+///        dest.
+/// @param dest Destination buffer (if NULL duplicate).
+/// @param source Source string.
+/// @return A pointer to a new string or dest.
+char *strdcpy(char *const dest, const char *const source);
 
 #pragma endregion
 
 /* =---- Exceptions Management ---------------------------------= */
 
 #pragma region Exceptions Management
+
+// TODO: better exception management
+
+/// @brief Prints an error message.
+/// @param message Message to print.
+/// @return Number of characters written.
+int error(const char *const message);
+/// @brief Prints an error message on a line.
+/// @param message Message to print. If it's
+///                NULL it prints only an empty
+///                line.
+/// @return Number of characters written.
+int errorln(const char *const message);
+/// @brief Prints an error message.
+/// @param format Format of the message to print.
+/// @param arglist Arguments to use for format
+///                the message.
+/// @return Number of characters written.
+int verrorf(const char *const format, va_list arglist);
+/// @brief Prints an error message on a line.
+/// @param format Format of the message to print.
+/// @param arglist Arguments to use for format
+///                the message.
+/// @return Number of characters written.
+int verrorfn(const char *const format, va_list arglist);
+/// @brief 
+/// @param format Format of the message to print.
+/// @param others Arguments to use for format
+///                the message.
+/// @return Number of characters written.
+int errorf(const char *const format, ...);
+/// @brief 
+/// @param format Format of the message to print.
+/// @param others Arguments to use for format
+///                the message.
+/// @return Number of characters written.
+int errorfn(const char *const format, ...);
 
 #pragma endregion
 

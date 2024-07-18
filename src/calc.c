@@ -1,21 +1,27 @@
-#include "calc-liber.h"
+#include "calc.h"
 
-int main(void)
+int main()
 {
-	symbtab_t *stab = create_symbtab(CALC_SYMBTAB_CHUNKSIZ, NULL);
+    char *lexm, line[BUFSIZ];
+    lexer_t lex;
 
-	symbtab_add(stab, "ciao", 0);
-	symbtab_add(stab, "Ciao", 1);
-	symbtab_add(stab, "cIao", 2);
-	symbtab_add(stab, "ciAo", 3);
-	symbtab_add(stab, "ciaO", 4);
-	symbtab_add(stab, "fede", 5);
-	symbtab_add(stab, "DIOP", 6);
-	symbtab_add(stab, "ciao", 7);
-	symbtab_add(stab, "nope", 8);
-	symbtab_add(stab, "xnny", 9);
+    lex.doub = create_doub(NULL, BUFSIZ);
 
-	symbtab_print(stab);
+    do
+    {
+        printf("> ");
+        fgets(line, BUFSIZ, stdin);
 
-	return 0;
+        doub_puts(lex.doub, line);
+        doub_retreat(lex.doub);
+
+        tokcode_t c;
+
+        do
+        {
+            c = lex_token(&lex, &lexm);
+        } while (c != TOK_NULCH);
+
+        printf("\n");
+    } while (TRUE);
 }

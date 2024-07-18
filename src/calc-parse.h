@@ -9,6 +9,11 @@
 
 #include <stdio.h>
 
+#ifndef EOF
+/// @brief End of file character.
+#   define EOF (-1)
+#endif // EOF
+
 #ifndef EOL
 /// @brief End of line character.
 #   define EOL '\n'
@@ -89,11 +94,19 @@ char *doub_gets(char *const dest, doub_t *const buf);
 /// @param str String to set.
 /// @return str.
 char *doub_puts(doub_t *const buf, char *const str);
-/// @brief Chop buffer content from begin
+/// @brief Chops buffer content from begin
 ///        to forward.
 /// @param buf Source buffer.
 /// @return A pointer to the chopped string.
 char *doub_chop(doub_t *const buf);
+/// @brief Chops buffer content from begin
+///        to forward and copy its value in
+///        dest.
+/// @param buf Source buffer.
+/// @param dest Destination buffer.
+/// @return A pointer to the chopped string (dest)
+///         or null if fails.
+char *doub_chopto(doub_t *const buf, char *const dest);
 
 /// @brief Advance position of buf.
 /// @param buf Source buffer.
@@ -156,37 +169,56 @@ tokcode_t get_keyword_or_id(const char *const lexeme);
 /// @return Code of the scanned token.
 tokcode_t gettok(doub_t *const src, char **const outlex);
 
-const char *const tokcode_to_str(tokcode_t code);
+#ifdef CALC_DEBUG
 
-/// @brief Record for toke infos.
-typedef struct _calc_token
-{
-    /// @brief Lexeme value of the token,
-    ///        is not NULL when token is
-    ///        an identifier or a literal.
-    char     *lexm;
-    /// @brief Code of the token.
-    tokcode_t code;
-} tok_t;
+/// @brief Gets the corresponding string format
+///        for a token.
+/// @param code Token code.
+/// @return A string containing the format string
+///         to re-build the lexeme.
+const char *const tokcode_to_str(const tokcode_t code);
+/// @brief Gets the name of the token (e.g. KWORD_CONST).
+/// @param code Token code.
+/// @return A string containing the name of the token.
+const char *const tokname_to_str(const tokcode_t code);
+
+/// @brief Tokenize user inputs.
+void tokenize();
+
+#endif // CALC_DEBUG
 
 #pragma endregion
 
-// +---- Lexical Analyzer
+// +---- Lexer
 
-#pragma region Lexical Analyzer
+#pragma region Lexer
 
+/// @brief Record of lexical analyzer infos.
 typedef struct _calc_lexer
 {
+    /// @brief Double buffered source.
     doub_t      *doub;
+    /// @brief Lookahead token.
     tokcode_t    look;
+    /// @brief Last lexed token.
     tokcode_t    last;
 } lexer_t;
 
-tokcode_t lookahead(lexer_t *const lex);
-tokcode_t lex_token(lexer_t *const lex, char **const lexeme);
+/// @brief Gets the next token and puts it into
+///        lex->look without increasing input
+///        position.
+/// @param lex Lexer reference.
+/// @return The next token in the stream.
+tokcode_t llook(lexer_t *const lex);
+/// @brief Gets the next token and puts into
+///        lex->last.
+/// @param lex Lexer reference.
+/// @param lexeme The corresponding lexeme
+///               (only if token need it).
+/// @return The next token in the stream.
+tokcode_t lnext(lexer_t *const lex, char **const lexeme);
 
 #pragma endregion
-
 
 #pragma endregion
 

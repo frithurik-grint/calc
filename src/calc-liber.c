@@ -16,6 +16,118 @@ const int _getpagesiz()
 
 #endif // _WIN32
 
+// +---- Output Functions
+
+#pragma region Output Functions
+
+// +---- Internal
+
+#pragma region Internal
+
+static inline int _fputln(FILE *const stream)
+#ifdef _WIN32
+{
+	return fputs(endline, stream);
+}
+#else
+{
+	return fputc(endline, stream), 1;
+}
+#endif // _WIN32
+
+static inline int _putln()
+#ifdef _WIN32
+{
+	return puts(endline);
+}
+#else
+{
+	return putchar(endline), 1;
+}
+#endif // _WIN32
+
+static inline int _vfprintfn(FILE *const stream, const char *const format, va_list arglist)
+{
+	return vfprintf(stream, format, arglist) + _fputln(stream);
+}
+
+static inline int _vprintfn(const char *const format, va_list arglist)
+{
+	return vprintf(format, arglist) + _putln();
+}
+
+#pragma endregion
+
+// +---- Internal -- End
+
+int fputln(FILE *const stream)
+{
+	return _fputln(stream);
+}
+
+int putln()
+{
+	return _putln();
+}
+
+int fprint(FILE *const stream, const char *const message)
+{
+	return fputs(message, stream);
+}
+
+int print(const char *const message)
+{
+	return puts(message);
+}
+
+int fprintln(FILE *const stream, const char *const message)
+{
+	return fputs(message, stream) + _fputln(stream);
+}
+
+int println(const char *const message)
+{
+	return puts(message) + _putln();
+}
+
+int vfprintfn(FILE *const stream, const char *const format, va_list arglist)
+{
+	return _vfprintfn(stream, format, arglist);
+}
+
+int fprintfn(FILE *const stream, const char *const format, ...)
+{
+	int result;
+	va_list arglist;
+
+	va_start(arglist, format);
+	result = _vfprintfn(stream, format, arglist);
+	va_end(arglist);
+
+	return result;
+}
+
+int vprintfn(const char *const format, va_list arglist)
+{
+	return _vprintf(format, arglist);
+}
+
+int printfn(const char *const format, ...)
+{
+	int result;
+	va_list arglist;
+
+	va_start(arglist, format);
+	result = _vprintfn(format, arglist);
+	va_end(arglist);
+
+	return result;
+}
+
+#pragma endregion
+
+// +---- Output Functions -- End
+
 #pragma endregion
 
 /* =---- Memory Management -------------------------------------= */
@@ -224,7 +336,51 @@ bool_t strieq(const char *const str1, const char *const str2)
 	return TRUE;
 }
 
-char *strdcpy(char *const dest, const char *const source, size_t length)
+char *strntolower(char *const dest, const char *const source, size_t length)
+{
+	char *buf;
+
+	if (!dest)
+		buf = stralloc(length);
+	else
+		buf = dest, buf[length + 1] = '\0';
+
+	size_t i;
+
+	for (i = length; i > 0; i--)
+		buf[i] = tolower(source[i]);
+
+	return buf;
+}
+
+char *strtolower(char *const dest, const char *const source)
+{
+	return strntolower(dest, source, strlen(source));
+}
+
+char *strntoupper(char *const dest, const char *const source, size_t length)
+{
+	char *buf;
+
+	if (!dest)
+		buf = stralloc(length);
+	else
+		buf = dest, buf[length + 1] = '\0';
+
+	size_t i;
+
+	for (i = length; i > 0; i--)
+		buf[i] = tolower(source[i]);
+
+	return buf;
+}
+
+char *strtoupper(char *const dest, const char *const source)
+{
+	return strntoupper(dest, source, strlen(source));
+}
+
+char *strndcpy(char *const dest, const char *const source, size_t length)
 {
 	char *buf;
 
@@ -235,6 +391,63 @@ char *strdcpy(char *const dest, const char *const source, size_t length)
 
 	return strncpy(buf, source, length);
 }
+
+char *strdcpy(char *const dest, const char *const source)
+{
+	return strndcpy(dest, source, strlen(source));
+}
+
+#pragma endregion
+
+/* =---- Exceptions Management ---------------------------------= */
+
+#pragma region Exceptions Management
+
+int error(const char *const message)
+{
+	return fprint(message, stderr);
+}
+
+int errorln(const char *const message)
+{
+	return fprintln(message, stderr);
+}
+
+int verrorf(const char *const format, va_list arglist)
+{
+	return vfprintf(stderr, format, arglist);
+}
+
+int verrorfn(const char *const format, va_list arglist)
+{
+	return _vfprintfn(stderr, format, arglist);
+}
+
+int errorf(const char *const format, ...)
+{
+	int result;
+	va_list arglist;
+
+	va_start(arglist, format);
+	result = verrorf(format, arglist);
+	va_end(arglist);
+
+	return result;
+}
+
+int errorfn(const char *const format, ...)
+{
+	int result;
+	va_list arglist;
+
+	va_start(arglist, format);
+	result = verrorfn(format, arglist);
+	va_end(arglist);
+
+	return result;
+}
+
+#pragma endregion
 
 /* =---- Symbols Management ------------------------------------= */
 
@@ -265,8 +478,6 @@ static inline hash_t _get_hashcode_mod(const char *str, unsigned int siz)
 #pragma endregion
 
 // +---- Internal End
-
-#pragma endregion
 
 hash_t gethash(const char *const str)
 {

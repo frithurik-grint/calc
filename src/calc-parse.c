@@ -102,7 +102,7 @@ char *doub_puts(doub_t *const buf, char *const str)
 
     doub_putc(buf, '\0');
 
-    return str;
+    return buf->fwd = 0, str;
 }
 
 char *doub_chop(doub_t *const buf)
@@ -111,6 +111,15 @@ char *doub_chop(doub_t *const buf)
     return strdcpy(NULL, buf->buf, buf->fwd);
 #else
     return strdcpy(NULL, buf->buf + buf->pos, buf->fwd);
+#endif
+}
+
+char *doub_chopto(doub_t *const buf, char *const dest)
+{
+#ifdef CALC_DEBUG
+    return strdcpy(dest, buf->buf, buf->fwd);
+#else
+    return strdcpy(dest, buf->buf + buf->pos, buf->fwd);
 #endif
 }
 
@@ -168,13 +177,20 @@ char *doub_getbuf(doub_t *const buf)
 
 #pragma region Tokens
 
+// token structure
+struct tok_t
+{
+    const char *lexm;
+    tokcode_t code;
+};
+
 tokcode_t get_keyword_or_id(const char *const lexeme)
 {
-    static const tok_t const keystab[] = {
+    static const struct tok_t keystab[] = {
 #pragma push_macro("defkey")
 
 #ifndef defkey
-#   define defkey(tok_name, tok_lexeme) { .code = TOK_KWORD_ ## tok_name, .lexm = tok_lexeme },
+#   define defkey(tok_name, tok_lexeme) { .code = TOK_ ## tok_name, .lexm = tok_lexeme },
 #endif
 
 #include "calc-parse.inc"
@@ -186,9 +202,9 @@ tokcode_t get_keyword_or_id(const char *const lexeme)
 #pragma pop_macro("defkey")
     };
 
-    static const int const count = sizeof(keystab) / sizeof(*keystab);
+    static const int count = (sizeof(keystab) / sizeof(*keystab));
 
-#if CALC_SORTED_KEYWORDS    // if keywords are soreted, it does a binary search
+#if CALC_SORTED_KEYWORDS // if keywords are soreted, it does a binary search
     int hig = 0, mid, low = count - 1;
 
     do
@@ -216,7 +232,7 @@ tokcode_t get_keyword_or_id(const char *const lexeme)
     } while (hig <= low);
 
     return TOK_IDENT;
-#else                       // if keywords aren't sorted, it does a linear search
+#else // if keywords aren't sorted, it does a linear search
     int i;
 
     for (i = 0; i < count; i++)
@@ -231,22 +247,38 @@ tokcode_t get_keyword_or_id(const char *const lexeme)
 #endif
 }
 
+// +---- Internal
+
+#pragma region Internal (Lexical Errors)
+
+// TODO: better exception management...
+
 static inline int expected(const char *const what, const char *const got)
 {
-    return printf("syntax error: expected %s, got '%s'\n", what, got);
+    return errorfn("syntax error: expected %s (got '%s')", what, got);
 }
 
-static inline int notvalid(const char *const got)
+static inline int unexpected(const char *const what, const char *const expected)
 {
-    return printf("syntax error: '%s' is not a valid token\n", got);
+    return errorfn("syntax error: unexpected %s (expected '%s')", what, expected);
 }
 
-tokcode_t gettok(doub_t *const src, char **const outlex)
+static inline int notvalid(const char *const what)
 {
-    int l;
+    return errorfn("syntax error: '%s' is not a valid token", what);
+}
 
-    if (outlex)
-        *outlex = NULL;
+#pragma endregion
+
+// +---- Internal -- End
+
+// +---- Scanner
+
+#pragma region Internal (Lexical Scanner)
+
+static tokcode_t _gettok(doub_t *const src, char **const lexeme)
+{
+    int l; // lookahead character
 
     while (isspace(l = doub_topc(src)))
         src->buf++, src->pos++;
@@ -259,7 +291,7 @@ tokcode_t gettok(doub_t *const src, char **const outlex)
         return TOK_ENDOF;
 
     case NUL:
-        return TOK_ENDOS;
+        return TOK_NULCH;
 
         // Brackets
 
@@ -318,7 +350,7 @@ tokcode_t gettok(doub_t *const src, char **const outlex)
 
     case '|':
         src->fwd++;
-        
+
         if ((l = doub_topc(src)) == '|')
             return src->fwd++, TOK_PUNCT_PIPEE_PIPEE;
         else if (l == '=')
@@ -328,7 +360,7 @@ tokcode_t gettok(doub_t *const src, char **const outlex)
 
     case '^':
         src->fwd++;
-        
+
         if (doub_topc(src) == '=')
             return src->fwd++, TOK_PUNCT_CARET_EQUAL;
         else
@@ -382,7 +414,7 @@ tokcode_t gettok(doub_t *const src, char **const outlex)
 
     case '=':
         src->fwd++;
-        
+
         if ((l = doub_topc(src)) == '=')
             return src->fwd++, TOK_PUNCT_EQUAL_EQUAL;
         else if (l == '>')
@@ -392,7 +424,7 @@ tokcode_t gettok(doub_t *const src, char **const outlex)
 
     case '+':
         src->fwd++;
-        
+
         if ((l = doub_topc(src)) == '+')
             return src->fwd++, TOK_PUNCT_PLUSS_PLUSS;
         else if (l == '=')
@@ -414,7 +446,7 @@ tokcode_t gettok(doub_t *const src, char **const outlex)
 
     case '*':
         src->fwd++;
-        
+
         if (doub_topc(src) == '=')
             return src->fwd++, TOK_PUNCT_STARR_EQUAL;
         else
@@ -422,7 +454,7 @@ tokcode_t gettok(doub_t *const src, char **const outlex)
 
     case '/':
         src->fwd++;
-        
+
         if (doub_topc(src) == '=')
             return src->fwd++, TOK_PUNCT_SLASH_EQUAL;
         else
@@ -430,7 +462,7 @@ tokcode_t gettok(doub_t *const src, char **const outlex)
 
     case '%':
         src->fwd++;
-        
+
         if (doub_topc(src) == '=')
             return src->fwd++, TOK_PUNCT_PERCN_EQUAL;
         else
@@ -506,15 +538,15 @@ tokcode_t gettok(doub_t *const src, char **const outlex)
             {
                 expected("binary digit", &l);
                 doub_advance(src);
-                
+
                 return TOK_INVAL;
             }
 
             if (l == DECSEP)
                 return 0;
-            
-            if (outlex)
-                *outlex = doub_chop(src);
+
+            if (lexeme)
+                *lexeme = doub_chop(src);
 
             return TOK_LITER_INTGR_BIN;
         }
@@ -540,10 +572,10 @@ tokcode_t gettok(doub_t *const src, char **const outlex)
 
             if (l == DECSEP)
                 return 0;
-            
-            if (outlex)
-                *outlex = doub_chop(src);
-            
+
+            if (lexeme)
+                *lexeme = doub_chop(src);
+
             return TOK_LITER_INTGR_OCT;
         }
         else if ((l == 'D') || (l == 'd') || isdigit(l))
@@ -554,12 +586,12 @@ tokcode_t gettok(doub_t *const src, char **const outlex)
             {
                 doub_advance(src);
 
-    case '1':   case '2':   case '3':
-    case '4':   case '5':   case '6':
-    case '7':   case '8':   case '9':
-                do
-                    src->fwd++;
-                while ((((l = doub_topc(src)) >= '0') && (l <= '9')));
+    case '1': case '2': case '3':
+    case '4': case '5': case '6':
+    case '7': case '8': case '9':
+        do
+            src->fwd++;
+        while ((((l = doub_topc(src)) >= '0') && (l <= '9')));
             }
             else
             {
@@ -572,8 +604,8 @@ tokcode_t gettok(doub_t *const src, char **const outlex)
             /*if (lookahead == DECSEP)
                 return 0;*/
 
-            if (outlex)
-                *outlex = doub_chop(src);
+            if (lexeme)
+                *lexeme = doub_chop(src);
 
             return TOK_LITER_INTGR_DEC;
         }
@@ -581,15 +613,13 @@ tokcode_t gettok(doub_t *const src, char **const outlex)
         {
             src->fwd++;
 
-            if (((((l = doub_topc(src)) >= '0') && (l <= '9')) || ((l >= 'A') && (l <= 'F'))
-                                                               || ((l >= 'a') && (l <= 'f'))))
+            if (((((l = doub_topc(src)) >= '0') && (l <= '9')) || ((l >= 'A') && (l <= 'F')) || ((l >= 'a') && (l <= 'f'))))
             {
                 doub_advance(src);
 
                 do
                     src->fwd++;
-                while (((((l = doub_topc(src)) >= '0') && (l <= '9')) || ((l >= 'A') && (l <= 'F'))
-                                                                      || ((l >= 'a') && (l <= 'f'))));
+                while (((((l = doub_topc(src)) >= '0') && (l <= '9')) || ((l >= 'A') && (l <= 'F')) || ((l >= 'a') && (l <= 'f'))));
             }
             else
             {
@@ -602,15 +632,16 @@ tokcode_t gettok(doub_t *const src, char **const outlex)
             if (l == DECSEP)
                 return 0;
 
-            if (outlex)
-                *outlex = doub_chop(src);
-            
-            return TOK_LITER_INTGR_HEX;;
+            if (lexeme)
+                *lexeme = doub_chop(src);
+
+            return TOK_LITER_INTGR_HEX;
+            ;
         }
         else
         {
-            if (outlex)
-                *outlex = "0";
+            if (lexeme)
+                *lexeme = "0";
 
             return TOK_LITER_INTGR_DEC;
         }
@@ -629,15 +660,110 @@ tokcode_t gettok(doub_t *const src, char **const outlex)
 
 #pragma endregion
 
-#pragma endregion
+// +---- Scanner -- End
 
-// +---- Lexical Analyzer
-
-#pragma region Lexical Analyzer
-
-tokcode_t lookahead(lexer_t *const lex)
+tokcode_t gettok(doub_t *const src, char **lexeme)
 {
-    tokcode_t code = gettok(lex->doub, NULL);
+    if (lexeme)
+        *lexeme = NULL;
+
+    return _gettok(src, lexeme);
+}
+
+#ifdef CALC_DEBUG
+
+const char *const tokcode_to_str(const tokcode_t code)
+{
+    switch (code)
+    {
+    case TOK_INVAL:
+        return "<inv>";
+
+#pragma push_macro("defstr")
+
+#ifndef defstr
+#   define defstr(name, lexeme) case TOK_ ## name: return lexeme,
+#endif
+
+#include "calc-parse.inc"
+
+#ifdef defstr
+#   undef defstr
+#endif
+
+#pragma pop_macro("defstr")
+
+    default:
+        return "<???>";
+    }
+}
+
+const char *const tokname_to_str(const tokcode_t code)
+{
+    switch (code)
+    {
+    case TOK_INVAL:
+        return "INVALID"
+
+#pragma push_macro("defstr")
+
+#ifndef defstr
+#   define defstr(name, lexeme) case TOK_ ## name: return # name,
+#endif
+
+#include "calc-parse.inc"
+
+#ifdef defstr
+#   undef defstr
+#endif
+
+#pragma pop_macro("defstr")
+
+    default:
+        return "UKNWOWN";
+    }
+}
+
+void tokenize()
+{
+    char line[BUFSIZ], *lexeme;
+    lexer_t lex;
+
+    lex.doub = create_doub(NULL, BUFSIZ);
+
+    do
+    {
+        printf("TOK > ");
+        fgets(line, BUFSIZ, stdin);
+        doub_puts(lex.doub, line);
+
+        tokcode_t c;
+
+        do
+        {
+            c = lnext(&lex, &lexeme);
+
+            if (lexeme)
+                printfn("(%02d) %-11s -> '%s'", (int)c, tokname_to_str(c), lexeme);
+            else
+                printfn("(%02d) %-11s -> '%s'", (int)c, tokname_to_str(c), tokcode_to_str(c));
+        } while (c > TOK_NULCH);
+
+        putln();
+    } while (lexeme ? *lexeme != 'q' : TRUE);
+
+    return;
+}
+
+#endif // CALC_DEBUG
+
+// +---- Lexer
+
+#pragma region Lexer
+
+tokcode_t llook(lexer_t *const lex) // lookahead
+{
+    tokcode_t code = _gettok(lex->doub, NULL);
 
     if (code != TOK_INVAL)
         doub_retreat(lex->doub);
@@ -647,13 +773,12 @@ tokcode_t lookahead(lexer_t *const lex)
     return lex->look = code;
 }
 
-tokcode_t lex_token(lexer_t *const lex, char **const lexeme)
+tokcode_t lnext(lexer_t *const lex, char **const lexeme) // lex
 {
     return lex->last = gettok(lex->doub, lexeme), doub_advance(lex->doub), lex->last;
 }
 
 #pragma endregion
-
 
 #pragma endregion
 
