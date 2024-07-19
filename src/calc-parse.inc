@@ -56,12 +56,28 @@ deftrv(IDENT,                                       "id")
 #   define defkey(name, lexeme) deftok(name, lexeme) defstr(name, lexeme)
 #endif // defkey
 
-/// @brief 'const' reserved word token.
+/// @brief 'const' keyword token.
 defkey(KWORD_CONST,                                 "const")
-/// @brief 'end' reserved word token.
+/// @brief 'else' keyword token.
+defkey(KWORD_ELSE,                                  "else")
+/// @brief 'end' keyword token.
 defkey(KWORD_END,                                   "end")
-/// @brief 'let' reserved word token. (constant declaration)
+/// @brief 'for' keyword token.
+defkey(KWORD_FOR,                                   "for")
+/// @brief 'if' keyword token.
+defkey(KWORD_IF,                                    "if")
+/// @brief 'int' keyword token.
+defkey(KWORD_INT,                                   "int")
+/// @brief 'let' keyword token. (constant declaration)
 defkey(KWORD_LET,                                   "let")
+/// @brief 'real' keyword token.
+defkey(KWORD_REAL,                                  "real")
+/// @brief 'return' keyword token.
+defkey(KWORD_RETURN,                                "return")
+/// @brief 'void' keyword token.
+defkey(KWORD_VOID,                                  "void")
+/// @brief 'while' keyword token.
+defkey(KWORD_WHILE,                                 "while")
 
 #ifndef CALC_SORTED_KEYWORDS
 /// @brief If its value is 1, keywords are in alphabetical
@@ -83,18 +99,27 @@ defkey(KWORD_LET,                                   "let")
 
 // Brackets
 
-/// @brief '(' stray punctuator token. (left round bracket)
+/// @brief '(' stray bracket token. (left round bracket)
 defpct(LROUN,                                       "(")
-/// @brief ')' stray punctuator token. (rigth round bracket)
+/// @brief ')' stray bracket token. (rigth round bracket)
 defpct(RROUN,                                       ")")
-/// @brief '[' stray punctuator token. (left square bracket)
+/// @brief '[' stray bracket token. (left square bracket)
 defpct(LSQRD,                                       "[")
-/// @brief ']' stray punctuator token. (right square bracket)
+/// @brief ']' stray bracket token. (right square bracket)
 defpct(RSQRD,                                       "]")
-/// @brief '(' stray punctuator token. (left curly bracket)
+/// @brief '(' stray bracket token. (left curly bracket)
 defpct(LCURL,                                       "{")
-/// @brief '(' stray punctuator token. (rigth curly bracket)
+/// @brief '(' stray bracket token. (rigth curly bracket)
 defpct(RCURL,                                       "}")
+
+// Composed Brackets
+
+/// @brief '()' composed bracket token. (round brackets)
+defpct(ROUND,                                       "()")
+/// @brief '[]' composed bracket token. (square brackets)
+defpct(SQRED,                                       "[]")
+/// @brief '{}' composed bracket token. (curly brackets)
+defpct(CURLY,                                       "{}")
 
 // Stray Punctuators
 

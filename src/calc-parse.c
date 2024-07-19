@@ -1,5 +1,9 @@
 #include "calc-parse.h"
 
+#pragma warning(push)
+#pragma warning(disable: 6385)
+#pragma warning(disable: 6386)
+
 /* =---- Lexical Analyzer --------------------------------------= */
 
 #pragma region Lexical Analyzer
@@ -182,6 +186,8 @@ char *dgetbuf(doub_t *const buf)
 
 #pragma endregion
 
+// +---- Source Stream -- End
+
 // +---- Tokens
 
 #pragma region Tokens
@@ -209,33 +215,35 @@ tokcode_t get_keyword_or_id(const char *const lexeme)
 #endif
 
 #pragma pop_macro("defkey")
+
+        NULL
     };
 
     static const int count = (sizeof(keystab) / sizeof(*keystab));
 
 #if CALC_SORTED_KEYWORDS // if keywords are soreted, it does a binary search
-    int hig = 0, mid, low = count - 1;
+    int hig = 0, mid, low = count - 1, k = 0;
 
     do
     {
         mid = (hig + low) >> 1;
 
-        switch (numcmp(*lexeme, *keystab[mid].lexm))
+        switch (numcmp(*(lexeme + k), *(keystab[mid].lexm + k)))
         {
         case +1:
-            hig = mid + 1;
+            hig = mid + 1, k = 0;
             break;
 
         case -1:
-            low = mid - 1;
+            low = mid - 1, k = 0;
             break;
 
         default:
             if (streq(lexeme, keystab[mid].lexm))
                 return keystab[mid].code;
             else
-                hig = mid + 1;
-
+                ++k;
+            
             break;
         }
     } while (hig <= low);
@@ -287,7 +295,7 @@ static inline int notvalid(const char *const what)
 
 static tokcode_t _gettok(doub_t *const src, char **const lexeme)
 {
-    int l; // lookahead character
+    int l, n = 0, o = 0; // lookahead character
 
     while (isspace(l = dtopc(src)))
         src->buf++, src->pos++;
@@ -307,19 +315,43 @@ static tokcode_t _gettok(doub_t *const src, char **const lexeme)
         // Brackets
 
     case '(':
-        return src->fwd++, TOK_PUNCT_LROUN;
+        src->fwd++;
+
+        while (isspace(l = dtopc(src)))
+            src->fwd++;
+
+        if (l == ')')
+            return src->fwd++, TOK_PUNCT_ROUND;
+        else
+            return TOK_PUNCT_LROUN;
 
     case ')':
         return src->fwd++, TOK_PUNCT_RROUN;
 
     case '[':
-        return src->fwd++, TOK_PUNCT_LSQRD;
+        src->fwd++;
+
+        while (isspace(l = dtopc(src)))
+            src->fwd++;
+
+        if (l == ']')
+            return src->fwd++, TOK_PUNCT_SQRED;
+        else
+            return TOK_PUNCT_LSQRD;
 
     case ']':
         return src->fwd++, TOK_PUNCT_RSQRD;
 
     case '{':
-        return src->fwd++, TOK_PUNCT_LCURL;
+        src->fwd++;
+
+        while (isspace(l = dtopc(src)))
+            src->fwd++;
+
+        if (l == '}')
+            return src->fwd++, TOK_PUNCT_CURLY;
+        else
+            return TOK_PUNCT_LCURL;
 
     case '}':
         return src->fwd++, TOK_PUNCT_RCURL;
@@ -603,14 +635,10 @@ static tokcode_t _gettok(doub_t *const src, char **const lexeme)
 
         // Numerics
 
-        unsigned int n, o;
-
     case '0':
         do
             src->fwd++;
         while ((l = dtopc(src)) == '0');
-
-        n = 0;
 
         if ((l == 'B') || (l == 'b'))
         {
@@ -710,7 +738,7 @@ static tokcode_t _gettok(doub_t *const src, char **const lexeme)
                         src->fwd++, t[n++] = l;
                     while (((l = dtopc(src)) >= '0') && (l <= '9'));
 
-                    while (t[n - 1] == '0')
+                    while ((t[n - 1] == '0') && (t[n - 2] != DECSEP))
                         --n;
 
                 expo_part:
@@ -793,8 +821,6 @@ static tokcode_t _gettok(doub_t *const src, char **const lexeme)
         }
         else if (l == DECSEP)
         {
-            dadvance(src);
-
             goto real;
         }
         else
@@ -918,6 +944,10 @@ void tokenize()
 
 #endif // CALC_DEBUG
 
+#pragma endregion
+
+// +---- Tokens -- End
+
 // +---- Lexer
 
 #pragma region Lexer
@@ -972,7 +1002,7 @@ bool_t lmatch(lexer_t *const lex, tokcode_t match, char **const lexeme) // match
     if (code == match)
     {
         if (lexeme && (code == TOK_IDENT))
-            lex->hkey = hashtab_add(lex->htab, strndcpy(NULL, lexeme, lex->doub->fwd), (lex->htab->used > 0 ? lex->hkey->data + 1 : 0));
+            lex->hkey = hashtab_add(lex->htab, strndcpy(NULL, *lexeme, lex->doub->fwd), (lex->htab->used > 0 ? lex->hkey->data + 1 : 0));
 
         dadvance(lex->doub);
 
@@ -986,6 +1016,22 @@ bool_t lmatch(lexer_t *const lex, tokcode_t match, char **const lexeme) // match
 
 #pragma endregion
 
+// +---- Lexer -- End
+
+#pragma endregion
+
+/* =---- Semantic Analyzer -------------------------------------= */
+
+#pragma region Semantic Analyzer
+
+// +---- Abstract Syntax Tree
+
+#pragma region Abstract Syntax Tree
+
+#pragma endregion
+
+// +---- Abstract Syntax Tree -- End
+
 #pragma endregion
 
 /* =------------------------------------------------------------= */
@@ -993,3 +1039,5 @@ bool_t lmatch(lexer_t *const lex, tokcode_t match, char **const lexeme) // match
 #ifndef CALC_PARSE_C_
 #   define CALC_PARSE_C_
 #endif // CALC_PARSE_C_
+
+#pragma warning(pop)

@@ -127,6 +127,8 @@ char *dgetbuf(doub_t *const buf);
 
 #pragma endregion
 
+// +---- Source Stream -- End
+
 // +---- Tokens
 
 #pragma region Tokens
@@ -189,6 +191,8 @@ void tokenize();
 
 #pragma endregion
 
+// +---- Tokens -- End
+
 // +---- Lexer
 
 #pragma region Lexer
@@ -238,7 +242,28 @@ bool_t lmatch(lexer_t *const lex, tokcode_t match, char **const lexeme);
 
 #pragma endregion
 
+// +---- Lexer -- End
+
 #pragma endregion
+
+/* =---- Semantic Analyzer -------------------------------------= */
+
+#pragma region Semantic Analyzer
+
+// +---- Abstract Syntax Tree
+
+#pragma region Abstract Syntax Tree
+
+typedef struct _calc_ast_symbol
+{
+    void *_;
+} ast_symb_t;
+
+#pragma endregion
+
+// +---- Abstract Syntax Tree -- End
+
+#pragma region
 
 /* =------------------------------------------------------------= */
 
