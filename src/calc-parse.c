@@ -123,6 +123,15 @@ char *dchopto(doub_t *const buf, char *const dest)
 #endif
 }
 
+char *dchopof(doub_t *const buf, size_t of)
+{
+#ifdef CALC_DEBUG
+    return strndcpy(NULL, buf->buf, of);
+#else
+    return strndcpy(NULL, buf->buf + buf->pos, of);
+#endif
+}
+
 void dadvance(doub_t *const buf)
 {
     if ((buf->pos + buf->fwd) < buf->len)
@@ -283,7 +292,7 @@ static tokcode_t _gettok(doub_t *const src, char **const lexeme)
     while (isspace(l = dtopc(src)))
         src->buf++, src->pos++;
 
-    static char tmp[BUFSIZ] = { 1 };
+    static char t[BUFSIZ] = { 0 };
 
     switch (l)
     {
@@ -484,10 +493,10 @@ static tokcode_t _gettok(doub_t *const src, char **const lexeme)
                 src->fwd++;
             while (isalnum(l = dtopc(src)) || (l == '_') || (l == '$') || (l == '.'));
 
-            dchopto(src, tmp);
+            dchopto(src, t);
 
             if (lexeme)
-                *lexeme = tmp;
+                *lexeme = t;
 
             return TOK_IDENT;
         }
@@ -502,7 +511,7 @@ static tokcode_t _gettok(doub_t *const src, char **const lexeme)
     case '.':
         src->fwd++;
 
-        if (dtopc(src) == '.')
+        if ((l = dtopc(src)) == '.')
         {
             src->fwd++;
 
@@ -510,6 +519,10 @@ static tokcode_t _gettok(doub_t *const src, char **const lexeme)
                 return src->fwd++, TOK_PUNCT_ELLIP;
             else
                 return TOK_PUNCT_POINT_POINT;
+        }
+        else if (isdigit(l))
+        {
+            goto real_part;
         }
         else
         {
@@ -552,25 +565,16 @@ static tokcode_t _gettok(doub_t *const src, char **const lexeme)
             {
                 tokcode_t c;
 
-                dchopto(src, tmp);
+                dchopto(src, t);
 
-                if (lexeme && ((c = get_keyword_or_id(tmp)) == TOK_IDENT))
-                    *lexeme = tmp;
+                if (lexeme && ((c = get_keyword_or_id(t)) == TOK_IDENT))
+                    *lexeme = t;
 
                 return c;
             }
             else
             {
-                do
-                    src->fwd++;
-                while (isalnum(l = dtopc(src)) || (l == '_') || (l == '$'));
-
-                dchopto(src, tmp);
-
-                if (lexeme)
-                    *lexeme = tmp;
-
-                return TOK_IDENT;
+                goto id;
             }
         }
         else
@@ -584,25 +588,29 @@ static tokcode_t _gettok(doub_t *const src, char **const lexeme)
     case 'G':   case 'H':   case 'I':   case 'J':   case 'K':   case 'L':
     case 'M':   case 'N':   case 'O':   case 'P':   case 'Q':   case 'R':
     case 'S':   case 'T':   case 'U':   case 'V':   case 'W':   case 'X':
-    case 'Y':   case 'Z':   case '_':   case '$':
+    case 'Y':   case 'Z':   case '_':   case '$':   id:
             do
                 src->fwd++;
             while (isalnum(l = dtopc(src)) || (l == '_') || (l == '$'));
 
-            dchopto(src, tmp);
+            dchopto(src, t);
 
             if (lexeme)
-                *lexeme = tmp;
+                *lexeme = t;
 
             return TOK_IDENT;
         }
 
         // Numerics
 
+        unsigned int n, o;
+
     case '0':
         do
             src->fwd++;
         while ((l = dtopc(src)) == '0');
+
+        n = 0;
 
         if ((l == 'B') || (l == 'b'))
         {
@@ -610,25 +618,26 @@ static tokcode_t _gettok(doub_t *const src, char **const lexeme)
 
             if ((((l = dtopc(src)) == '0') || (l == '1')))
             {
-                dadvance(src);
-
                 do
+                {
                     src->fwd++;
-                while ((((l = dtopc(src)) == '0') || (l == '1')));
+
+                    if (!n && (l == '0'))
+                        continue;
+                    else
+                        t[n++] = l;
+                } while ((((l = dtopc(src)) == '0') || (l == '1')));
+
+                if (!n)
+                    t[n++] = '0';
             }
             else
             {
-                expected("binary digit", &l);
-                dadvance(src);
-
-                return TOK_INVAL;
+                return expected("binary digit", unesc(t, l)), TOK_INVAL;
             }
 
-            if (l == DECSEP)
-                return 0;
-
             if (lexeme)
-                *lexeme = dchop(src);
+                t[n] = NUL, *lexeme = t;
 
             return TOK_LITER_INTGR_BIN;
         }
@@ -638,25 +647,26 @@ static tokcode_t _gettok(doub_t *const src, char **const lexeme)
 
             if ((((l = dtopc(src)) >= '0') && (l <= '7')))
             {
-                dadvance(src);
-
                 do
+                {
                     src->fwd++;
-                while ((((l = dtopc(src)) >= '0') && (l <= '7')));
+
+                    if (!n && (l == '0'))
+                        continue;
+                    else
+                        t[n++] = l;
+                } while ((((l = dtopc(src)) >= '0') && (l <= '7')));
+
+                if (!n)
+                    t[n++] = '0';
             }
             else
             {
-                expected("octal digit", &l);
-                dadvance(src);
-
-                return TOK_INVAL;
+                return expected("octal digit", unesc(t, l)), TOK_INVAL;
             }
 
-            if (l == DECSEP)
-                return 0;
-
             if (lexeme)
-                *lexeme = dchop(src);
+                t[n] = NUL, *lexeme = t;
 
             return TOK_LITER_INTGR_OCT;
         }
@@ -667,30 +677,90 @@ static tokcode_t _gettok(doub_t *const src, char **const lexeme)
 
             if ((((l = dtopc(src)) >= '0') && (l <= '9')))
             {
-                dadvance(src);
-
     case '1': case '2': case '3':
     case '4': case '5': case '6':
     case '7': case '8': case '9':
                 do
+                {
                     src->fwd++;
-                while ((((l = dtopc(src)) >= '0') && (l <= '9')));
+
+                    if (!n && (l == '0'))
+                        continue;
+                    else
+                        t[n++] = l;
+                } while ((((l = dtopc(src)) >= '0') && (l <= '9')));
+
+                if (!n)
+                    t[n++] = '0';
             }
             else
             {
-                expected("decimal digit", &l);
-                dadvance(src);
-
-                return TOK_INVAL;
+                return expected("decimal digit", unesc(t, l)), TOK_INVAL;
             }
 
-            /*if (lookahead == DECSEP)
-                return 0;*/
+            if (l == DECSEP)
+            {
+            real:
+                src->fwd++, t[n++] = l;
 
-            if (lexeme)
-                *lexeme = dchop(src);
+                if (isdigit(l = dtopc(src)))
+                {
+                real_part:
+                    do
+                        src->fwd++, t[n++] = l;
+                    while (((l = dtopc(src)) >= '0') && (l <= '9'));
 
-            return TOK_LITER_INTGR_DEC;
+                    while (t[n - 1] == '0')
+                        --n;
+
+                expo_part:
+                    if ((l == 'E') || (l == 'e'))
+                    {
+                        src->fwd++, t[n++] = l;
+                        
+                        if (((l = dtopc(src)) == '+') || (l == '-'))
+                            src->fwd++, t[n++] = l;
+                        
+                        if (isdigit(l = dtopc(src)))
+                        {
+                            o = n;
+
+                            do
+                            {
+                                src->fwd++;
+
+                                if ((n == o) && (l == '0'))
+                                    continue;
+                                else
+                                    t[n++] = l;
+                            } while (isdigit(l = dtopc(src)));
+
+                            if (n == o)
+                                t[n++] = '0';
+                        }
+                        else
+                        {
+                            return unexpected(unesc(t, l), "numeric exponent"), TOK_INVAL;
+                        }
+                    }
+
+                    if (lexeme)
+                        t[n] = NUL, *lexeme = t;
+
+                    return TOK_LITER_FLOAT;
+                }
+                else
+                {
+                    return unexpected(unesc(t, l), "real part"), TOK_INVAL;
+                }
+            }
+            else
+            {
+                if (lexeme)
+                    *lexeme = dchop(src);
+
+                return TOK_LITER_INTGR_DEC;
+            }
         }
         else if ((l == 'X') || (l == 'x'))
         {
@@ -698,28 +768,34 @@ static tokcode_t _gettok(doub_t *const src, char **const lexeme)
 
             if (((((l = dtopc(src)) >= '0') && (l <= '9')) || ((l >= 'A') && (l <= 'F')) || ((l >= 'a') && (l <= 'f'))))
             {
-                dadvance(src);
-
                 do
+                {
                     src->fwd++;
-                while (((((l = dtopc(src)) >= '0') && (l <= '9')) || ((l >= 'A') && (l <= 'F')) || ((l >= 'a') && (l <= 'f'))));
+
+                    if (!n && (l == '0'))
+                        continue;
+                    else
+                        t[n++] = l;
+                } while (((((l = dtopc(src)) >= '0') && (l <= '9')) || ((l >= 'A') && (l <= 'F')) || ((l >= 'a') && (l <= 'f'))));
+
+                if (!n)
+                    t[n++] = '0';
             }
             else
             {
-                expected("hexadecimal digit", &l);
-                dadvance(src);
-
-                return TOK_INVAL;
+                return expected("hexadecimal digit", unesc(t, l)), TOK_INVAL;
             }
 
-            if (l == DECSEP)
-                return 0;
-
             if (lexeme)
-                *lexeme = dchop(src);
+                t[n] = NUL, *lexeme = t;
 
             return TOK_LITER_INTGR_HEX;
-            ;
+        }
+        else if (l == DECSEP)
+        {
+            dadvance(src);
+
+            goto real;
         }
         else
         {
@@ -733,11 +809,7 @@ static tokcode_t _gettok(doub_t *const src, char **const lexeme)
 
     default:
         src->fwd++;
-
-        notvalid((const char *const)&l);
-        dadvance(src);
-
-        return TOK_INVAL;
+        return notvalid(unesc(t, l)), TOK_INVAL;
     }
 }
 

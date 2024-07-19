@@ -397,6 +397,68 @@ char *strdcpy(char *const dest, const char *const source)
 	return strndcpy(dest, source, strlen(source));
 }
 
+char *unesc(char *const dest, int c)
+{
+	char buf[3] = { '\\', '\0', '\0' };
+
+	switch (c)
+	{
+	case '\a':
+		buf[1] = 'a';
+		break;
+
+	case '\b':
+		buf[1] = 'b';
+		break;
+
+	case '\f':
+		buf[1] = 'f';
+		break;
+
+	case '\n':
+		buf[1] = 'n';
+		break;
+
+	case '\r':
+		buf[1] = 'r';
+		break;
+
+	case '\t':
+		buf[1] = 't';
+		break;
+
+	case '\v':
+		buf[1] = 'v';
+		break;
+
+	case '\\':
+		buf[1] = '\\';
+		break;
+
+	case '\'':
+		buf[1] = '\'';
+		break;
+
+	case '\"':
+		buf[1] = '"';
+		break;
+
+	case '\?':
+		buf[1] = '?';
+		break;
+
+	case '\0':
+		buf[1] = '0';
+		break;
+
+	default:
+		buf[0] = c;
+		break;
+	}
+
+	return strdcpy(dest, buf);
+}
+
 #pragma endregion
 
 /* =---- Exceptions Management ---------------------------------= */

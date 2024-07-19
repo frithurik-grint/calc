@@ -245,14 +245,8 @@ deflit(INTGR_DEC,                                   "dec")
 /// @brief 'hex' numeric constant literal. (hexadecimal integers)
 deflit(INTGR_HEX,                                   "hex")
 
-/// @brief 'fbin' numeric constant literal. (binary floats)
-deflit(FLOAT_BIN,                                   "fbin")
-/// @brief 'foct' numeric constant literal. (octal floats)
-deflit(FLOAT_OCT,                                   "foct")
-/// @brief 'fdec' numeric constant literal. (decimal floats)
-deflit(FLOAT_DEC,                                   "fdec")
-/// @brief 'fhex' numeric constant literal. (hexadecimal floats)
-deflit(FLOAT_HEX,                                   "fhex")
+/// @brief 'float' numeric constant literal. (floating-point numbers)
+deflit(FLOAT,                                       "float")
 
 // Textual Literals
 

@@ -208,6 +208,10 @@ typedef struct _calc_lexer
     tokcode_t    last;
 } lexer_t;
 
+/// @brief Create a new lexer status record.
+/// @param bufsiz Size of the source buffer.
+/// @param tabsiz Size of the hash table.
+/// @return A pointer to the new lexer.
 lexer_t *create_lexer(unsigned int bufsiz, unsigned int tabsiz);
 
 /// @brief Gets the next token and puts it into

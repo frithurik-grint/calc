@@ -568,6 +568,11 @@ char *strndcpy(char *const dest, const char *const source, size_t length);
 /// @return A pointer to a new string or dest.
 char *strdcpy(char *const dest, const char *const source);
 
+/// @brief Unescape a character.
+/// @param str Source char.
+/// @return The pointer to unescaped str.
+char *unesc(char *const dest, int c);
+
 #pragma endregion
 
 /* =---- Exceptions Management ---------------------------------= */
