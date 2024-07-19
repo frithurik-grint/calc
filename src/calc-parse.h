@@ -254,11 +254,6 @@ bool_t lmatch(lexer_t *const lex, tokcode_t match, char **const lexeme);
 
 #pragma region Abstract Syntax Tree
 
-typedef struct _calc_ast_symbol
-{
-    void *_;
-} ast_symb_t;
-
 #pragma endregion
 
 // +---- Abstract Syntax Tree -- End

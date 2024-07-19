@@ -546,7 +546,9 @@ hash_t gethash(const char *const str)
 	return _get_hashcode((const char *)str);
 }
 
-// Symbol Table
+// +---- Hash Table
+
+#pragma region Hash Table
 
 hashkey_t *create_hashkey(const char *const name, unsigned int data, hashkey_t *const prev)
 {
@@ -602,7 +604,10 @@ bool_t hashtab_exists(hashtab_t *const tab, const char *const name)
 		} while (s);
 	}
 
-	return FALSE;
+	if (tab->prev)
+		return hashtab_exists(tab->prev, name);
+	else
+		return FALSE;
 }
 
 hashkey_t *hashtab_add(hashtab_t *const tab, const char *const name, unsigned int attr)
@@ -646,7 +651,10 @@ hashkey_t *hashtab_get(hashtab_t *const tab, const char *const name)
 		} while (s);
 	}
 
-	return NULL;
+	if (tab->prev)
+		return hashtab_get(tab, name);
+	else
+		return NULL;
 }
 
 hashkey_t *hashtab_set(hashtab_t *const tab, const char *const name, unsigned int attr)
@@ -666,7 +674,10 @@ hashkey_t *hashtab_set(hashtab_t *const tab, const char *const name, unsigned in
 		} while (s);
 	}
 
-	return NULL;
+	if (tab->prev)
+		return hashtab_set(tab, name, attr);
+	else
+		return NULL;
 }
 
 hashtab_t *delete_hashtab(hashtab_t *const tab)
@@ -693,9 +704,12 @@ hashtab_t *delete_hashtab(hashtab_t *const tab)
 		}
 	}
 
-	free(tab->keys);
+	hashtab_t *r = tab->prev;
 
-	return (hashtab_t *)tab->prev;
+	free(tab->keys);
+	free(tab);
+
+	return r;
 }
 
 #ifdef CALC_DEBUG
@@ -728,6 +742,339 @@ void hashtab_print(hashtab_t *const tab)
 }
 
 #endif // CALC_DEBUG
+
+#pragma endregion
+
+// +---- Hash Table -- End
+
+// +---- Symbol Record
+
+#pragma region Symbol Record
+
+// Generic Symbols
+
+bool_t is_type_kind(const symbkind_t kind)
+{
+	return (kind == SYMB_DTYPE)
+		|| (kind == SYMB_STYPE);
+}
+
+symb_t *create_symb(hashkey_t *const hkey, const symbkind_t kind)
+{
+	symb_t *symb = alloc(symb_t);
+
+	symb->hkey = hkey;
+	symb->kind = kind;
+
+	switch (kind)
+	{
+	case SYMB_DTYPE:
+		symb->addr.datatype = alloc(symb_dtype_t);
+		break;
+
+	case SYMB_STYPE:
+		symb->addr.structure = alloc(symb_stype_t);
+		break;
+
+	case SYMB_CONST:
+		symb->addr.constant = alloc(symb_const_t);
+		break;
+
+	case SYMB_LOCAL:
+		symb->addr.variable = alloc(symb_local_t);
+		break;
+
+	case SYMB_FUNCT:
+		symb->addr.function = alloc(symb_funct_t);
+		break;
+
+	case SYMB_PARAM:
+		symb->addr.parameter = alloc(symb_param_t);
+		break;
+
+	default:
+		symb->addr.datatype = NULL;
+		break;
+	}
+
+	return symb;
+}
+
+unsigned int sizeof_symb(symb_t *const symb)
+{
+	switch (symb->kind)
+	{
+	case SYMB_DTYPE:
+		return symb->addr.datatype->width;
+
+	case SYMB_STYPE:
+		return symb->addr.structure->width;
+
+	case SYMB_CONST:
+		return sizeof_symb(symb->addr.constant->type);
+
+	case SYMB_LOCAL:
+		return sizeof_symb(symb->addr.variable->type);
+
+		/*
+		case SYMB_FUNCT:
+			return sizeof_symb(symb->addr.function->type);
+
+		case SYMB_PARAM:
+			return sizeof_symb(symb->addr.parameter->type);*/
+
+	default:
+		return 0;
+	}
+}
+
+unsigned int alignof_symb(symb_t *const symb)
+{
+	switch (symb->kind)
+	{
+	case SYMB_DTYPE:
+		return symb->addr.datatype->align;
+
+	case SYMB_STYPE:
+		return symb->addr.structure->align;
+
+	case SYMB_CONST:
+		return alignof_symb(symb->addr.constant->type);
+
+	case SYMB_LOCAL:
+		return alignof_symb(symb->addr.variable->type);
+
+		/*
+		case SYMB_FUNCT:
+			return alignof_symb(symb->addr.function->type);
+
+		case SYMB_PARAM:
+			return alignof_symb(symb->addr.parameter->type);*/
+
+	default:
+		return 0;
+	}
+}
+
+unsigned int aligned_sizeof_symb(symb_t *const symb)
+{
+	switch (symb->kind)
+	{
+	case SYMB_DTYPE:
+		return alignto(symb->addr.datatype->width, symb->addr.datatype->align);
+
+	case SYMB_STYPE:
+		return alignto(symb->addr.structure->width, symb->addr.structure->align);
+
+	case SYMB_CONST:
+		return aligned_sizeof_symb(symb->addr.constant->type);
+
+	case SYMB_LOCAL:
+		return aligned_sizeof_symb(symb->addr.variable->type);
+
+		/*
+		case SYMB_FUNCT:
+			return sizeof_symb(symb->addr.function->type);
+
+		case SYMB_PARAM:
+			return sizeof_symb(symb->addr.parameter->type);*/
+
+	default:
+		return 0;
+	}
+}
+
+symbdata_t *create_symbdata(const char *const name, const symb_t *const type)
+{
+	symbdata_t *data = alloc(symbdata_t);
+
+	data->name = (char *)name;
+	data->type = type;
+
+	return data;
+}
+
+symbdata_t *create_symbdata_array(unsigned int count, const char *const *const names, const symb_t *const *const types)
+{
+	symbdata_t *data;
+
+	if (count > 0)
+	{
+		unsigned int i;
+
+		data = dim(symbdata_t, count);
+
+		for (i = 0; i < count; i++)
+		{
+			data[i].name = names[i];
+			data[i].type = types[i];
+		}
+	}
+	else
+	{
+		data = NULL;
+	}
+
+	return data;
+}
+
+symbdata_t *create_symbdata_va(unsigned int count, ...)
+{
+	symbdata_t *data;
+
+	if (count > 0)
+	{
+		unsigned int i;
+		va_list args;
+
+		data = dim(symbdata_t, count);
+
+		va_start(args, count);
+
+		for (i = 0; i < count; i++)
+		{
+			data[i].name = va_arg(args, char *);
+			data[i].type = va_arg(args, symb_t *);
+		}
+
+		va_end(args);
+	}
+	else
+	{
+		data = NULL;
+	}
+
+	return data;
+}
+
+unsigned int sizeof_symbdata(const symbdata_t *const data)
+{
+	return sizeof_symb(data->type);
+}
+
+unsigned int sizeof_symbdata_array(unsigned int count, const symbdata_t *const data)
+{
+	unsigned int i, s;
+
+	for (i = 0, s = 0; i < count; i++)
+		s += sizeof_symb(data[i].type);
+
+	return s;
+}
+
+unsigned int alignof_symbdata(const symbdata_t *const data)
+{
+	return alignof_symb(data->type);
+}
+
+unsigned int alignof_symbdata_array(unsigned int count, const symbdata_t *const data)
+{
+	if (count > 0)
+	{
+		unsigned int i, m, t;
+
+		m = alignof_symb(data->type);
+
+		for (i = 1; i < count; i++)
+		{
+			t = alignof_symb(data[i].type);
+
+			if (m < t)
+				m = t;
+			else
+				continue;
+		}
+
+		return m;
+	}
+	else
+	{
+		return 0;
+	}
+}
+
+unsigned int aligned_sizeof_symbdata(const symbdata_t *const data)
+{
+	return aligned_sizeof_symb(data->type);
+}
+
+unsigned int aligned_sizeof_symbdata_array(unsigned int count, const symbdata_t *const data)
+{
+	unsigned int i, s;
+
+	for (i = 0, s = 0; i < count; i++)
+		s += aligned_sizeof_symb(data[i].type);
+
+	return s;
+}
+
+// Specialized Symbols
+
+symb_t *create_symb_dtype(hashkey_t *const hkey, unsigned int width, unsigned int align)
+{
+	symb_t *symb = create_symb(hkey, SYMB_DTYPE);
+
+	symb->addr.datatype->width = width;
+	symb->addr.datatype->align = align;
+
+	return symb;
+}
+
+symb_t *create_symb_stype(hashkey_t *const hkey, unsigned int width, unsigned int align, unsigned int membc, const symbdata_t *const membv)
+{
+	symb_t *symb = create_symb(hkey, SYMB_STYPE);
+
+	symb->addr.structure->width = width;
+	symb->addr.structure->align = align;
+	symb->addr.structure->membc = membc;
+	symb->addr.structure->membv = membv;
+
+	return symb;
+}
+
+symb_t *create_symb_stype_autosiz(hashkey_t *const hkey, unsigned int membc, const symbdata_t *const membv)
+{
+	symb_t *symb = create_symb(hkey, SYMB_STYPE);
+
+	symb->addr.structure->width = sizeof_symbdata_array(membc, membv);
+	symb->addr.structure->align = alignof_symbdata_array(membc, membv);
+	symb->addr.structure->membc = membc;
+	symb->addr.structure->membv = membv;
+
+	return symb;
+}
+
+symb_t *create_symb_const(hashkey_t *const hkey, const symb_t *const type, const byte_t *const data)
+{
+	symb_t *symb = create_symb(hkey, SYMB_CONST);
+
+	symb->addr.constant->type = type;
+	symb->addr.constant->data = data;
+
+	return symb;
+}
+
+symb_t *create_symb_local(hashkey_t *const hkey, const symb_t *const type)
+{
+	symb_t *symb = create_symb(hkey, SYMB_LOCAL);
+
+	symb->addr.variable->type = type;
+	symb->addr.variable->data = NULL;
+
+	return symb;
+}
+
+#pragma endregion
+
+// +---- Symbol Record -- End
+
+// +---- Symbol Table
+
+#pragma region Symbol Table
+
+#pragma endregion
+
+// +---- Symbol Table -- End
 
 #pragma endregion
 
