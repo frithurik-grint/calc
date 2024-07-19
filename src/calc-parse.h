@@ -254,6 +254,15 @@ bool_t lmatch(lexer_t *const lex, tokcode_t match, char **const lexeme);
 
 #pragma region Abstract Syntax Tree
 
+typedef struct _calc_ast_expression ast_expr_t;
+
+typedef struct _calc_ast_binary_expression
+{
+    ast_expr_t *lhs;
+    ast_expr_t *rhs;
+    char        op;
+} ast_binexpr_t;
+
 #pragma endregion
 
 // +---- Abstract Syntax Tree -- End

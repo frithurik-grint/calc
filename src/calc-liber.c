@@ -1010,12 +1010,13 @@ unsigned int aligned_sizeof_symbdata_array(unsigned int count, const symbdata_t 
 
 // Specialized Symbols
 
-symb_t *create_symb_dtype(hashkey_t *const hkey, unsigned int width, unsigned int align)
+symb_t *create_symb_dtype(hashkey_t *const hkey, unsigned int width, unsigned int align, dtype_kind_t dkind)
 {
 	symb_t *symb = create_symb(hkey, SYMB_DTYPE);
 
 	symb->addr.datatype->width = width;
 	symb->addr.datatype->align = align;
+	symb->addr.datatype->dkind = dkind;
 
 	return symb;
 }

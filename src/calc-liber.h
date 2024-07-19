@@ -899,12 +899,22 @@ unsigned int aligned_sizeof_symbdata_array(unsigned int count, const symbdata_t 
 
 // Specialized Symbols
 
+typedef enum _calc_symbol_datatype_kind
+{
+    DT_SIGND,
+    DT_UNSIG,
+    DT_FLOAT,
+} dtype_kind_t;
+
 struct _calc_symbol_datatype
 {
     /// @brief Size of the type.
     unsigned int width;
     /// @brief Alignment of the type.
     unsigned int align;
+    /// @brief Datatype kind, defines which
+    ///        operations choose to do.
+    dtype_kind_t dkind;
 };
 
 /// @brief Create a new primitive data type.
@@ -912,7 +922,7 @@ struct _calc_symbol_datatype
 /// @param width Width (not size, in bytes) of the type.
 /// @param align Alignment (in bytes) of the type.
 /// @return A pointer to the new symbol.
-symb_t *create_symb_dtype(hashkey_t *const hkey, unsigned int width, unsigned int align);
+symb_t *create_symb_dtype(hashkey_t *const hkey, unsigned int width, unsigned int align, dtype_kind_t dkind);
 
 struct _calc_symbol_structure
 {
