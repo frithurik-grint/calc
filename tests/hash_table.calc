@@ -1,8 +1,0 @@
-// This file is an example of a hashing table data
-// structure.
-//
-HashTable<T> <- struct {
-  array[] : T;
-  count   : i32;
-  maxsz   : i32;
-};
