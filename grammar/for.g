@@ -2,7 +2,7 @@
 --
 stmt-loop-cntrld
   : 'for' '(' stmt-loop-cntrld-head ')' stmt
-  | 'do'? stmt 'for '(' stmt-loop-cntrld-head ')' ';'
+  | 'do'? stmt 'for' '(' stmt-loop-cntrld-head ')' ';'
   ;
 
 stmt-loop-cntrld-head
