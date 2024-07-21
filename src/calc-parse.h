@@ -246,7 +246,7 @@ bool_t lmatch(lexer_t *const lex, tokcode_t match, char **const lexeme);
 
 #pragma endregion
 
-/* =---- Semantic Analyzer -------------------------------------= */
+/* =---- Syntax Analyzer ---------------------------------------= */
 
 #pragma region Semantic Analyzer
 
@@ -254,14 +254,91 @@ bool_t lmatch(lexer_t *const lex, tokcode_t match, char **const lexeme);
 
 #pragma region Abstract Syntax Tree
 
-typedef struct _calc_ast_expression ast_expr_t;
+/// @brief Expression AST node datatype.
+typedef struct _calc_ast_expr ast_expr_t;
+/// @brief Statement AST node datatype.
+typedef struct _calc_ast_stmt ast_stmt_t;
+/// @brief Declaration AST node datatype.
+typedef struct _calc_ast_decl ast_decl_t;
+/// @brief Pragmatic AST node datatype.
+typedef struct _calc_ast_prag ast_prag_t;
 
-typedef struct _calc_ast_binary_expression
+/// @brief Parse an AST expression node.
+/// @param lex 
+/// @return 
+ast_expr_t *parse_expr(lexer_t *const lex);
+/// @brief Parse an AST statement node.
+/// @param lex 
+/// @return 
+ast_stmt_t *parse_stmt(lexer_t *const lex);
+/// @brief Parse an AST declaration node.
+/// @param lex 
+/// @return 
+ast_decl_t *parse_decl(lexer_t *const lex);
+/// @brief Parse an AST pragmatic node
+/// @param lex 
+/// @return 
+ast_prag_t *parse_prag(lexer_t *const lex);
+
+// Unary Expressions
+
+// Binary Expressions
+
+/// @brief Binary expression AST operation.
+typedef enum _calc_ast_expr_bin_op
 {
+    /// @brief 
+    AST_BINOP_ADD = TOK_PUNCT_PLUSS,
+    /// @brief 
+    AST_BINOP_SUB = TOK_PUNCT_MINUS,
+    /// @brief 
+    AST_BINOP_MUL = TOK_PUNCT_STARR,
+    /// @brief 
+    AST_BINOP_DIV = TOK_PUNCT_SLASH,
+    /// @brief 
+    AST_BINOP_MOD = TOK_PUNCT_PERCN,
+} ast_binop_t;
+
+/// @brief Binary expression AST node.
+typedef struct _calc_ast_expr_bin
+{
+    /// @brief Left-hand side.
     ast_expr_t *lhs;
+    /// @brief Right-hand side.
     ast_expr_t *rhs;
-    char        op;
+    /// @brief Operation specifier.
+    ast_binop_t op;
 } ast_binexpr_t;
+
+// Ternary Expressions
+
+// Expression Node
+
+/// @brief AST expression kind.
+typedef enum _calc_ast_expr_kind
+{
+    /// @brief Binary expression AST node kind.
+    AST_EXPR_BINRY,
+    /// @brief Identifier AST node kind.
+    AST_EXPR_SYMBL,
+} ast_expr_kind_t;
+
+/// @brief AST expression node.
+typedef union _calc_ast_expr_node
+{
+    /// @brief Binary expression AST node.
+    ast_binexpr_t *binexpr;
+    /// @brief Symbol AST node.
+    symb_t        *smbexpr;
+} ast_expr_node_t;
+
+struct _calc_ast_expr
+{
+    /// @brief 
+    ast_expr_node_t node;
+    /// @brief 
+    ast_expr_kind_t kind;
+};
 
 #pragma endregion
 

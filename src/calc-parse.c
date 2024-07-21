@@ -1020,7 +1020,7 @@ bool_t lmatch(lexer_t *const lex, tokcode_t match, char **const lexeme) // match
 
 #pragma endregion
 
-/* =---- Semantic Analyzer -------------------------------------= */
+/* =---- Syntax Analyzer ---------------------------------------= */
 
 #pragma region Semantic Analyzer
 

@@ -56,14 +56,24 @@ deftrv(IDENT,                                       "id")
 #   define defkey(name, lexeme) deftok(name, lexeme) defstr(name, lexeme)
 #endif // defkey
 
+/// @brief 'case' keyword token.
+defkey(KWORD_CASE,                                  "case")
 /// @brief 'const' keyword token.
 defkey(KWORD_CONST,                                 "const")
+/// @brief 'static' keyword token.
+defkey(KWORD_DEFAULT,                               "default")
+/// @brief 'do' keyword token.
+defkey(KWORD_DO,                                    "do")
 /// @brief 'else' keyword token.
 defkey(KWORD_ELSE,                                  "else")
 /// @brief 'end' keyword token.
 defkey(KWORD_END,                                   "end")
+/// @brief 'extern' keyword token.
+defkey(KWORD_EXTERN,                                "extern")
 /// @brief 'for' keyword token.
 defkey(KWORD_FOR,                                   "for")
+/// @brief 'goto' keyword token.
+defkey(KWORD_GOTO,                                  "goto")
 /// @brief 'if' keyword token.
 defkey(KWORD_IF,                                    "if")
 /// @brief 'int' keyword token.
@@ -74,6 +84,14 @@ defkey(KWORD_LET,                                   "let")
 defkey(KWORD_REAL,                                  "real")
 /// @brief 'return' keyword token.
 defkey(KWORD_RETURN,                                "return")
+/// @brief 'signed' keyword token.
+defkey(KWORD_SIGNED,                                "signed")
+/// @brief 'static' keyword token.
+defkey(KWORD_STATIC,                                "static")
+/// @brief 'switch' keyword token.
+defkey(KWORD_SWITCH,                                "switch")
+/// @brief 'unsigned' keyword token.
+defkey(KWORD_UNSIGNED,                              "unsigned")
 /// @brief 'void' keyword token.
 defkey(KWORD_VOID,                                  "void")
 /// @brief 'while' keyword token.
