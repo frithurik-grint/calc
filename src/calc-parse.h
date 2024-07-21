@@ -206,6 +206,8 @@ typedef struct _calc_lexer
     hashtab_t   *htab;
     /// @brief Pointer to the last inserted symbol.
     hashkey_t   *hkey;
+    /// @brief Pointer to the last scanned lexeme.
+    char        *lexm;
     /// @brief Lookahead token.
     tokcode_t    look;
     /// @brief Last lexed token.
@@ -230,7 +232,7 @@ tokcode_t llook(lexer_t *const lex);
 /// @param lexeme The corresponding lexeme
 ///               (only if token need it).
 /// @return The next token in the stream.
-tokcode_t lnext(lexer_t *const lex, char **const lexeme);
+tokcode_t lnext(lexer_t *const lex);
 /// @brief Looks the next tokens and advance
 ///        only when it matches with match.
 /// @param lex Lexer reference.
@@ -238,7 +240,15 @@ tokcode_t lnext(lexer_t *const lex, char **const lexeme);
 /// @param lexeme The corresponding lexeme
 ///               (only if token need it).
 /// @return TRUE if matches, else FALSE.
-bool_t lmatch(lexer_t *const lex, tokcode_t match, char **const lexeme);
+bool_t lmatch(lexer_t *const lex, tokcode_t match);
+/// @brief Looks the next tokens and advance
+///        only when it matches with match.
+/// @param lex Lexer reference.
+/// @param others Match tokens.
+/// @param lexeme The corresponding lexeme
+///               (only if token need it).
+/// @return TRUE if matches, else FALSE.
+bool_t vlmatch(lexer_t *const lex, unsigned int count, ...);
 
 #pragma endregion
 
@@ -310,6 +320,8 @@ typedef struct _calc_ast_expr_bin
     ast_binop_t op;
 } ast_binexpr_t;
 
+ast_binexpr_t *parse_binexpr(lexer_t *const lex);
+
 // Ternary Expressions
 
 // Expression Node
@@ -317,19 +329,25 @@ typedef struct _calc_ast_expr_bin
 /// @brief AST expression kind.
 typedef enum _calc_ast_expr_kind
 {
-    /// @brief Binary expression AST node kind.
-    AST_EXPR_BINRY,
+    /// @brief Numeric unsigned integer AST node kind.
+    AST_EXPR_UNSIG,
     /// @brief Identifier AST node kind.
     AST_EXPR_SYMBL,
+    /// @brief Binary expression AST node kind.
+    AST_EXPR_BINRY,
 } ast_expr_kind_t;
 
 /// @brief AST expression node.
 typedef union _calc_ast_expr_node
 {
+    /// @brief 
+    long long          sint;
+    /// @brief 
+    unsigned long long uint;
     /// @brief Binary expression AST node.
-    ast_binexpr_t *binexpr;
+    ast_binexpr_t     *binexpr;
     /// @brief Symbol AST node.
-    symb_t        *smbexpr;
+    symb_t            *smbexpr;
 } ast_expr_node_t;
 
 struct _calc_ast_expr
@@ -339,6 +357,11 @@ struct _calc_ast_expr
     /// @brief 
     ast_expr_kind_t kind;
 };
+
+/// @brief Create a new AST expression node.
+/// @param kind Kind of the expression.
+/// @return A pointer to the new AST node.
+ast_expr_t *create_ast_expr(ast_expr_kind_t kind);
 
 #pragma endregion
 

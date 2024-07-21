@@ -909,7 +909,7 @@ const char *const tokname_to_str(const tokcode_t code)
 
 void tokenize()
 {
-    char line[BUFSIZ], *lexeme;
+    char line[BUFSIZ];
     bool_t end = FALSE;
     lexer_t *lex = create_lexer(BUFSIZ, 32);
 
@@ -923,10 +923,10 @@ void tokenize()
 
         do
         {
-            c = lnext(lex, &lexeme);
+            c = lnext(lex);
 
-            if (lexeme)
-                printfn("(%02d) %-24s -> '%s'", (int)c, tokname_to_str(c), lexeme);
+            if (lex->lexm)
+                printfn("(%02d) %-24s -> '%s'", (int)c, tokname_to_str(c), lex->lexm);
             else
                 printfn("(%02d) %-24s -> '%s'", (int)c, tokname_to_str(c), tokcode_to_str(c));
 
@@ -977,32 +977,30 @@ tokcode_t llook(lexer_t *const lex) // lookahead
     return lex->look = code;
 }
 
-tokcode_t lnext(lexer_t *const lex, char **const lexeme) // lex
+tokcode_t lnext(lexer_t *const lex) // lex
 {
-    if (lexeme)
-        *lexeme = NULL;
+    lex->lexm = NULL;
 
-    tokcode_t code = _gettok(lex->doub, lexeme);
+    tokcode_t code = _gettok(lex->doub, &lex->lexm);
 
-    if (lexeme && (code == TOK_IDENT))
-        lex->hkey = hashtab_add(lex->htab, strndcpy(NULL, *lexeme, lex->doub->fwd), (lex->htab->used > 0 ? lex->hkey->data + 1 : 0));
+    if (lex->lexm && (code == TOK_IDENT))
+        lex->hkey = hashtab_add(lex->htab, strndcpy(NULL, lex->lexm, lex->doub->fwd), (lex->htab->used > 0 ? lex->hkey->data + 1 : 0));
 
     dadvance(lex->doub);
 
     return lex->last = code;
 }
 
-bool_t lmatch(lexer_t *const lex, tokcode_t match, char **const lexeme) // match
+bool_t lmatch(lexer_t *const lex, tokcode_t match) // match
 {
-    if (lexeme)
-        *lexeme = NULL;
+    lex->lexm = NULL;
 
-    tokcode_t code = _gettok(lex->doub, lexeme);
+    tokcode_t code = _gettok(lex->doub, &lex->lexm);
 
     if (code == match)
     {
-        if (lexeme && (code == TOK_IDENT))
-            lex->hkey = hashtab_add(lex->htab, strndcpy(NULL, *lexeme, lex->doub->fwd), (lex->htab->used > 0 ? lex->hkey->data + 1 : 0));
+        if (lex->lexm && (code == TOK_IDENT))
+            lex->hkey = hashtab_add(lex->htab, strndcpy(NULL, lex->lexm, lex->doub->fwd), (lex->htab->used > 0 ? lex->hkey->data + 1 : 0));
 
         dadvance(lex->doub);
 
@@ -1010,8 +1008,45 @@ bool_t lmatch(lexer_t *const lex, tokcode_t match, char **const lexeme) // match
     }
     else
     {
-        return FALSE;
+        return lex->doub->fwd = 0, FALSE;
     }
+}
+
+bool_t vlmatch(lexer_t *const lex, unsigned int count, ...)
+{
+    lex->lexm = NULL;
+
+    unsigned int i;
+    bool_t result = FALSE;
+    tokcode_t code = _gettok(lex->doub, &lex->lexm);
+    va_list list;
+
+    va_start(list, count);
+
+    for (i = 0; !result && (i < count); i++)
+    {
+        if (code == va_arg(list, tokcode_t))
+        {
+            if (lex->lexm && (code == TOK_IDENT))
+                lex->hkey = hashtab_add(lex->htab, strndcpy(NULL, lex->lexm, lex->doub->fwd), (lex->htab->used > 0 ? lex->hkey->data + 1 : 0));
+
+            dadvance(lex->doub);
+
+            lex->last = code;
+            result = TRUE;
+        }
+        else
+        {
+            continue;
+        }
+    }
+
+    va_end(list);
+
+    if (!result)
+        lex->doub->fwd = 0;
+
+    return result;
 }
 
 #pragma endregion
@@ -1027,6 +1062,186 @@ bool_t lmatch(lexer_t *const lex, tokcode_t match, char **const lexeme) // match
 // +---- Abstract Syntax Tree
 
 #pragma region Abstract Syntax Tree
+
+// +---- Internal
+
+#pragma region Internal (Expression Parsers)
+
+// Value Expressions
+
+static inline ast_expr_t *parse_expr_lval(char *const lexm, tokcode_t tok)
+{
+    ast_expr_t *lval;
+
+    switch (tok)
+    {
+    case TOK_LITER_INTGR_BIN:
+        lval = create_ast_expr(AST_EXPR_UNSIG);
+        lval->node.uint = strtoull(lexm, NULL, 0x02);
+
+        free(lexm);
+
+        break;
+
+    case TOK_LITER_INTGR_OCT:
+        lval = create_ast_expr(AST_EXPR_UNSIG);
+        lval->node.uint = strtoull(lexm, NULL, 0x08);
+
+        free(lexm);
+
+        break;
+
+    case TOK_LITER_INTGR_DEC:
+        lval = create_ast_expr(AST_EXPR_UNSIG);
+        lval->node.uint = strtoull(lexm, NULL, 0x0A);
+
+        free(lexm);
+
+        break;
+
+    case TOK_LITER_INTGR_HEX:
+        lval = create_ast_expr(AST_EXPR_UNSIG);
+        lval->node.uint = strtoull(lexm, NULL, 0x10);
+
+        free(lexm);
+
+        break;
+
+    default:
+        expected("a valid value", lexm);
+        return NULL;
+    }
+
+    return lval;
+}
+
+static inline ast_expr_t *parse_expr_rval(lexer_t *const lex)
+{
+    tokcode_t tok = lnext(lex);
+
+    return parse_expr_lval(lex->lexm, tok);
+}
+
+// Binary Expressions
+
+static inline tokcode_t parse_expr_binr_prod(lexer_t *const lex, ast_binexpr_t *const expr, tokcode_t op)
+{
+    ast_expr_t *rhs = parse_expr_rval(lex);
+
+    expr->op = op;
+
+    while (vlmatch(lex, 3, TOK_PUNCT_STARR, TOK_PUNCT_SLASH, TOK_PUNCT_PERCN))
+    {
+        ast_expr_t *lhs = rhs;
+
+        rhs = create_ast_expr(AST_EXPR_BINRY);
+        rhs->node.binexpr->lhs = lhs;
+
+        op = parse_expr_binr_prod(lex, rhs->node.binexpr, op);
+    }
+
+    expr->rhs = rhs;
+
+    return op;
+}
+
+static inline tokcode_t parse_expr_binr_summ(lexer_t *const lex, ast_binexpr_t *const expr, tokcode_t op)
+{
+    ast_expr_t *rhs = parse_expr_rval(lex);
+
+    expr->op = op;
+
+    if (vlmatch(lex, 3, TOK_PUNCT_STARR, TOK_PUNCT_SLASH, TOK_PUNCT_PERCN))
+    {
+        ast_expr_t *lhs = rhs;
+
+        rhs = create_ast_expr(AST_EXPR_BINRY);
+        rhs->node.binexpr->lhs = lhs;
+
+        op = parse_expr_binr_prod(lex, rhs->node.binexpr, lex->last);
+    }
+
+    expr->rhs = rhs;
+
+    if (vlmatch(lex, 2, TOK_PUNCT_PLUSS, TOK_PUNCT_MINUS))
+    {
+        ast_expr_t *tmp = create_ast_expr(AST_EXPR_BINRY);
+
+        tmp->node.binexpr->op = expr->op;
+        tmp->node.binexpr->lhs = expr->lhs;
+        tmp->node.binexpr->rhs = expr->rhs;
+
+        expr->lhs = tmp;
+
+        op = parse_expr_binr_summ(lex, expr, lex->last);
+    }
+    
+    return op;
+}
+
+static ast_expr_t *parse_expr_binr(lexer_t *const lex, ast_expr_t *expr)
+{
+    tokcode_t op;
+    
+    expr->node.binexpr->lhs = parse_expr_lval(lex->lexm, lex->last);
+
+    op = lnext(lex);
+
+    if ((op == TOK_PUNCT_STARR) || (op == TOK_PUNCT_SLASH) || (op == TOK_PUNCT_PERCN))
+        op = parse_expr_binr_prod(lex, expr->node.binexpr, op);
+
+    if ((op == TOK_PUNCT_PLUSS) || (op == TOK_PUNCT_MINUS))
+        op = parse_expr_binr_summ(lex, expr->node.binexpr, op);
+
+    return expr;
+}
+
+#pragma endregion
+
+// +---- Internal -- End
+
+ast_expr_t *parse_expr(lexer_t *const lex)
+{
+    ast_expr_t *expr = NULL;
+    tokcode_t last = lnext(lex);
+
+    switch (last)
+    {
+    case TOK_LITER_INTGR_BIN:
+    case TOK_LITER_INTGR_OCT:
+    case TOK_LITER_INTGR_DEC:
+    case TOK_LITER_INTGR_HEX:
+        expr = parse_expr_binr(lex, create_ast_expr(AST_EXPR_BINRY));
+        break;
+    }
+
+    return expr;
+}
+
+// Expression Node
+
+ast_expr_t *create_ast_expr(ast_expr_kind_t kind)
+{
+    ast_expr_t *expr = alloc(ast_expr_t);
+
+    expr->kind = kind;
+    
+    switch (kind)
+    {
+    case AST_EXPR_BINRY:
+        expr->node.binexpr = alloc(ast_binexpr_t);
+        break;
+    }
+
+    return expr;
+}
+
+// Binary Expressions
+
+ast_binexpr_t *parse_binexpr(lexer_t *const lex)
+{
+    return parse_expr_binr(lex, create_ast_expr(AST_EXPR_BINRY))->node.binexpr;
+}
 
 #pragma endregion
 
