@@ -1,0 +1,18 @@
+# In this module is defined the Complex data type
+# and its methods, functions and constants.
+#
+module complex;
+
+use module base;
+use module base.io;
+
+complex_t <- object {
+    re : i32;
+    im : i32;
+
+    public Re : {
+        get() -> i32           =  .re;
+        set(value : i32) -> () => .re = value;
+    };
+    
+};
