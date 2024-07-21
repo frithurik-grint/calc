@@ -1,0 +1,8 @@
+// This file is the Hello, world! calc program
+//
+use module base.io;
+
+let static main(...args : *char) -> int {
+  println("Hello, world!");
+  return 0;
+}
