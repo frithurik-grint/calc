@@ -4,18 +4,41 @@
 
 uint64_t test_expr(ast_expr_t *const expr)
 {
-    static uint64_t stack[32];
-    static uint32_t index = 0;
+    static int64_t stack[32];
+    static int32_t index = 0;
 
     switch (expr->kind)
     {
+    case AST_EXPR_UNARY:
+        test_expr(expr->node.unexpr->val);
+
+        switch (expr->node.unexpr->op)
+        {
+            int64_t val;
+
+        case AST_UNOP_POS:
+            val = stack[--index];
+            stack[index++] = +val;
+            break;
+
+        case AST_UNOP_NEG:
+            val = stack[--index];
+            stack[index++] = -val;
+            break;
+
+        default:
+            break;
+        }
+
+        break;
+
     case AST_EXPR_BINRY:
         test_expr(expr->node.binexpr->lhs);
         test_expr(expr->node.binexpr->rhs);
 
         switch (expr->node.binexpr->op)
         {
-            uint64_t lhs, rhs;
+            int64_t lhs, rhs;
 
         case AST_BINOP_ADD:
             rhs = stack[--index];
@@ -52,7 +75,7 @@ uint64_t test_expr(ast_expr_t *const expr)
         break;
 
     case AST_EXPR_UNSIG:
-        stack[index++] = expr->node.uint;
+        stack[index++] = (int64_t)expr->node.uint;
         break;
     }
 

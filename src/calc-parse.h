@@ -292,10 +292,24 @@ ast_prag_t *parse_prag(lexer_t *const lex);
 
 // Unary Expressions
 
+typedef enum _calc_ast_expr_unop
+{
+    AST_UNOP_POS = TOK_PUNCT_PLUSS,
+    AST_UNOP_NEG = TOK_PUNCT_MINUS,
+} ast_unop_t;
+
+typedef struct _calc_ast_expr_un
+{
+    ast_expr_t *val;
+    ast_unop_t  op;
+} ast_unexpr_t;
+
+ast_expr_t *create_ast_expr_un(ast_expr_t *const val, tokcode_t op);
+
 // Binary Expressions
 
 /// @brief Binary expression AST operation.
-typedef enum _calc_ast_expr_bin_op
+typedef enum _calc_ast_expr_binop
 {
     /// @brief 
     AST_BINOP_ADD = TOK_PUNCT_PLUSS,
@@ -320,7 +334,7 @@ typedef struct _calc_ast_expr_bin
     ast_binop_t op;
 } ast_binexpr_t;
 
-ast_binexpr_t *parse_binexpr(lexer_t *const lex);
+ast_expr_t *create_ast_expr_bin(ast_expr_t *const lhs, ast_expr_t *const rhs, tokcode_t op);
 
 // Ternary Expressions
 
@@ -333,6 +347,8 @@ typedef enum _calc_ast_expr_kind
     AST_EXPR_UNSIG,
     /// @brief Identifier AST node kind.
     AST_EXPR_SYMBL,
+    /// @brief 
+    AST_EXPR_UNARY,
     /// @brief Binary expression AST node kind.
     AST_EXPR_BINRY,
 } ast_expr_kind_t;
@@ -344,10 +360,12 @@ typedef union _calc_ast_expr_node
     long long          sint;
     /// @brief 
     unsigned long long uint;
+    /// @brief 
+    ast_unexpr_t      *unexpr;
     /// @brief Binary expression AST node.
     ast_binexpr_t     *binexpr;
     /// @brief Symbol AST node.
-    symb_t            *smbexpr;
+    symb_t            *symbol;
 } ast_expr_node_t;
 
 struct _calc_ast_expr

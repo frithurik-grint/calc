@@ -1069,7 +1069,7 @@ bool_t vlmatch(lexer_t *const lex, unsigned int count, ...)
 
 // Value Expressions
 
-static inline ast_expr_t *parse_expr_lval(char *const lexm, tokcode_t tok)
+static inline ast_expr_t *parse_expr_lval(tokcode_t tok, char *const lexm)
 {
     ast_expr_t *lval;
 
@@ -1108,7 +1108,7 @@ static inline ast_expr_t *parse_expr_lval(char *const lexm, tokcode_t tok)
         break;
 
     default:
-        expected("a valid value", lexm);
+        expected("a valid operator", lexm);
         return NULL;
     }
 
@@ -1117,81 +1117,95 @@ static inline ast_expr_t *parse_expr_lval(char *const lexm, tokcode_t tok)
 
 static inline ast_expr_t *parse_expr_rval(lexer_t *const lex)
 {
-    tokcode_t tok = lnext(lex);
+    return parse_expr_lval(lnext(lex), lex->lexm);
+}
 
-    return parse_expr_lval(lex->lexm, tok);
+// Unary Expressions
+
+static ast_expr_t *_parse_ast_expr_un_sig(lexer_t *const lex, tokcode_t op)
+{
+    bool_t flag;
+    ast_expr_t *expr, *val;
+
+    do
+    {
+        val = parse_expr_rval(lex);
+        expr = create_ast_expr_un(val, op);
+
+        if (flag = vlmatch(lex, 2, TOK_PUNCT_PLUSS, TOK_PUNCT_MINUS))
+            val = expr, op = lex->last;
+    } while (flag);
+
+    return expr;
 }
 
 // Binary Expressions
 
-static inline tokcode_t parse_expr_binr_prod(lexer_t *const lex, ast_binexpr_t *const expr, tokcode_t op)
+static ast_expr_t *_parse_ast_expr_bin_prd(lexer_t *const lex, ast_expr_t *lhs, tokcode_t op)
 {
-    ast_expr_t *rhs = parse_expr_rval(lex);
+    bool_t flag;
+    ast_expr_t *expr, *rhs;
 
-    expr->op = op;
-
-    while (vlmatch(lex, 3, TOK_PUNCT_STARR, TOK_PUNCT_SLASH, TOK_PUNCT_PERCN))
+    do
     {
-        ast_expr_t *lhs = rhs;
+        if (vlmatch(lex, 2, TOK_PUNCT_PLUSS, TOK_PUNCT_MINUS))
+            rhs = _parse_ast_expr_un_sig(lex, lex->last);
+        else
+            rhs = parse_expr_rval(lex);
 
-        rhs = create_ast_expr(AST_EXPR_BINRY);
-        rhs->node.binexpr->lhs = lhs;
+        expr = create_ast_expr_bin(lhs, rhs, op);
 
-        op = parse_expr_binr_prod(lex, rhs->node.binexpr, op);
-    }
+        if (flag = vlmatch(lex, 3, TOK_PUNCT_STARR, TOK_PUNCT_SLASH, TOK_PUNCT_PERCN))
+            lhs = expr, op = lex->last;
+    } while (flag);
 
-    expr->rhs = rhs;
-
-    return op;
+    return expr;
 }
 
-static inline tokcode_t parse_expr_binr_summ(lexer_t *const lex, ast_binexpr_t *const expr, tokcode_t op)
+static ast_expr_t *_parse_ast_expr_bin_sum(lexer_t *const lex, ast_expr_t *lhs, tokcode_t op)
 {
-    ast_expr_t *rhs = parse_expr_rval(lex);
+    bool_t flag;
+    ast_expr_t *expr, *rhs;
 
-    expr->op = op;
-
-    if (vlmatch(lex, 3, TOK_PUNCT_STARR, TOK_PUNCT_SLASH, TOK_PUNCT_PERCN))
+    do
     {
-        ast_expr_t *lhs = rhs;
+        rhs = parse_expr_rval(lex);
 
-        rhs = create_ast_expr(AST_EXPR_BINRY);
-        rhs->node.binexpr->lhs = lhs;
+        if (vlmatch(lex, 3, TOK_PUNCT_STARR, TOK_PUNCT_SLASH, TOK_PUNCT_PERCN))
+            rhs = _parse_ast_expr_bin_prd(lex, rhs, lex->last);
 
-        op = parse_expr_binr_prod(lex, rhs->node.binexpr, lex->last);
-    }
+        expr = create_ast_expr_bin(lhs, rhs, op);
 
-    expr->rhs = rhs;
+        if (flag = vlmatch(lex, 2, TOK_PUNCT_PLUSS, TOK_PUNCT_MINUS))
+            lhs = expr, op = lex->last;
+    } while (flag);
 
-    if (vlmatch(lex, 2, TOK_PUNCT_PLUSS, TOK_PUNCT_MINUS))
-    {
-        ast_expr_t *tmp = create_ast_expr(AST_EXPR_BINRY);
-
-        tmp->node.binexpr->op = expr->op;
-        tmp->node.binexpr->lhs = expr->lhs;
-        tmp->node.binexpr->rhs = expr->rhs;
-
-        expr->lhs = tmp;
-
-        op = parse_expr_binr_summ(lex, expr, lex->last);
-    }
-    
-    return op;
+    return expr;
 }
 
-static ast_expr_t *parse_expr_binr(lexer_t *const lex, ast_expr_t *expr)
+static ast_expr_t *_parse_ast_expr_bin(lexer_t *const lex)
 {
-    tokcode_t op;
-    
-    expr->node.binexpr->lhs = parse_expr_lval(lex->lexm, lex->last);
+    ast_expr_t *expr = NULL, *lhs;
 
-    op = lnext(lex);
+    lhs = parse_expr_lval(lex->last, lex->lexm);
 
-    if ((op == TOK_PUNCT_STARR) || (op == TOK_PUNCT_SLASH) || (op == TOK_PUNCT_PERCN))
-        op = parse_expr_binr_prod(lex, expr->node.binexpr, op);
+    switch (lnext(lex))
+    {
+    case TOK_PUNCT_PLUSS:
+    case TOK_PUNCT_MINUS:
+        expr = _parse_ast_expr_bin_sum(lex, lhs, lex->last);
+        break;
 
-    if ((op == TOK_PUNCT_PLUSS) || (op == TOK_PUNCT_MINUS))
-        op = parse_expr_binr_summ(lex, expr->node.binexpr, op);
+    case TOK_PUNCT_STARR:
+    case TOK_PUNCT_SLASH:
+    case TOK_PUNCT_PERCN:
+        expr = _parse_ast_expr_bin_prd(lex, lhs, lex->last);
+        break;
+
+    default:
+        unexpected("operator", "binary operator");
+        break;
+    }
 
     return expr;
 }
@@ -1202,20 +1216,19 @@ static ast_expr_t *parse_expr_binr(lexer_t *const lex, ast_expr_t *expr)
 
 ast_expr_t *parse_expr(lexer_t *const lex)
 {
-    ast_expr_t *expr = NULL;
-    tokcode_t last = lnext(lex);
+    tokcode_t tok = lnext(lex);
 
-    switch (last)
+    switch (tok)
     {
     case TOK_LITER_INTGR_BIN:
     case TOK_LITER_INTGR_OCT:
     case TOK_LITER_INTGR_DEC:
     case TOK_LITER_INTGR_HEX:
-        expr = parse_expr_binr(lex, create_ast_expr(AST_EXPR_BINRY));
+        return _parse_ast_expr_bin(lex);
+
+    default:
         break;
     }
-
-    return expr;
 }
 
 // Expression Node
@@ -1228,6 +1241,9 @@ ast_expr_t *create_ast_expr(ast_expr_kind_t kind)
     
     switch (kind)
     {
+    case AST_EXPR_UNARY:
+        expr->node.unexpr = alloc(ast_unexpr_t);
+
     case AST_EXPR_BINRY:
         expr->node.binexpr = alloc(ast_binexpr_t);
         break;
@@ -1236,11 +1252,29 @@ ast_expr_t *create_ast_expr(ast_expr_kind_t kind)
     return expr;
 }
 
+// Unary Expressions
+
+ast_expr_t *create_ast_expr_un(ast_expr_t *const val, tokcode_t op)
+{
+    ast_expr_t *expr = create_ast_expr(AST_EXPR_UNARY);
+
+    expr->node.unexpr->val = val;
+    expr->node.unexpr->op = op;
+
+    return expr;
+}
+
 // Binary Expressions
 
-ast_binexpr_t *parse_binexpr(lexer_t *const lex)
+ast_expr_t *create_ast_expr_bin(ast_expr_t *const lhs, ast_expr_t *const rhs, tokcode_t op)
 {
-    return parse_expr_binr(lex, create_ast_expr(AST_EXPR_BINRY))->node.binexpr;
+    ast_expr_t *expr = create_ast_expr(AST_EXPR_BINRY);
+
+    expr->node.binexpr->lhs = lhs;
+    expr->node.binexpr->rhs = rhs;
+    expr->node.binexpr->op = op;
+
+    return expr;
 }
 
 #pragma endregion
