@@ -221,6 +221,8 @@ void to_cil(FILE *const stream, ast_expr_t *const expr)
     fprintln(stream, "call void [mscorlib]System.Console::WriteLine(int32)");
     fprintln(stream, "ret");
     fprintln(stream, "}");
+
+    fclose(stream);
 }
 
 int main()
@@ -235,4 +237,6 @@ int main()
     ast_expr_t *root = parse_ast_expr_bnary(lex);
 
     to_cil(fopen("test.il", "w+"), root);
+
+
 }

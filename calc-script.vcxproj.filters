@@ -67,7 +67,7 @@
     <None Include="src\calc-parse.inc">
       <Filter>File di intestazione</Filter>
     </None>
-    <None Include="src\calc-liber.inc">
+    <None Include="src\calc-build-cil.inc">
       <Filter>File di intestazione</Filter>
     </None>
   </ItemGroup>
