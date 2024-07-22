@@ -404,6 +404,8 @@ typedef union _calc_ast_expr_data
     unsigned long long unsig;
     /// @brief AST real const expression.
     long double        reall;
+    /// @brief AST symbol expression.
+    symb_t            *symbl;
     /// @brief AST unary expression.
     ast_expr_unary_t  *unary;
     /// @brief AST binary expression.
@@ -485,6 +487,13 @@ ast_expr_t *parse_ast_expr_unary(lexer_t *const lex);
 /// @param lex Lexer reference.
 /// @return A pointer to the parsed expression.
 ast_expr_t *parse_ast_expr_bnary(lexer_t *const lex);
+
+// Ternary Expressions
+
+/// @brief Parse a ternary expression.
+/// @param lex Lexer reference.
+/// @return A pointer to the parsed expression.
+ast_expr_t *parse_ast_expr_tnary(lexer_t *const lex);
 
 #pragma endregion
 
