@@ -1157,6 +1157,203 @@ ast_expr_t *create_ast_expr(ast_expr_kind_t kind)
 
 // +---- Abstract Syntax Tree -- End
 
+// +---- Parser
+
+#pragma region Parser
+
+// +---- Expressions Parser
+
+#pragma region Expressions Parser
+
+// Value Expressions
+
+ast_expr_t *parse_ast_expr_value(lexer_t *const lex)
+{
+    ast_expr_t *expr = NULL;
+
+    switch (lnext(lex))
+    {
+    case TOK_LITER_INTGR_BIN:
+        expr = create_ast_expr(AST_EXPR_UNSIG);
+        expr->data.unsig = strtoull(lex->lexm, NULL, 0x02);
+        
+        free(lex->lexm);
+
+        break;
+
+    case TOK_LITER_INTGR_OCT:
+        expr = create_ast_expr(AST_EXPR_UNSIG);
+        expr->data.unsig = strtoull(lex->lexm, NULL, 0x08);
+
+        free(lex->lexm);
+
+        break;
+
+    case TOK_LITER_INTGR_DEC:
+        expr = create_ast_expr(AST_EXPR_UNSIG);
+        expr->data.unsig = strtoull(lex->lexm, NULL, 0x0A);
+
+        free(lex->lexm);
+
+        break;
+
+    case TOK_LITER_INTGR_HEX:
+        expr = create_ast_expr(AST_EXPR_UNSIG);
+        expr->data.unsig = strtoull(lex->lexm, NULL, 0x10);
+
+        free(lex->lexm);
+
+        break;
+
+    default:
+        errorfn("syntax error: invalid constant value '%s'", lex->lexm);
+        break;
+    }
+
+    extern ast_expr_t *parse_ast_expr_unary_post(lexer_t *const lex, ast_expr_t *const val);
+
+    return parse_ast_expr_unary_post(lex, expr);
+}
+
+// Unary Expressions
+
+// +---- Internal (Unary Expressions)
+
+#pragma region Internal (Unary Expressions)
+
+static ast_expr_t *parse_ast_expr_unary_sign(lexer_t *const lex, tokcode_t op)
+{
+    ast_expr_t *val;
+
+    if (vlmatch(lex, 2, TOK_PUNCT_PLUSS, TOK_PUNCT_MINUS))
+        val = parse_ast_expr_unary_sign(lex, lex->last);
+    else
+        val = parse_ast_expr_value(lex);
+
+    return create_ast_expr_unary(val, op);
+}
+
+static ast_expr_t *parse_ast_expr_unary_post(lexer_t *const lex, ast_expr_t *const val)
+{
+    ast_expr_t *expr;
+
+    if (vlmatch(lex, 2, TOK_PUNCT_PLUSS_PLUSS, TOK_PUNCT_MINUS_MINUS))
+        expr = create_ast_expr_unary(val, lex->last);
+    else
+        expr = val;
+
+    return expr;
+}
+
+#pragma endregion
+
+// +---- Internal (Unary Expressions) -- End
+
+ast_expr_t *parse_ast_expr_unary(lexer_t *const lex)
+{
+    ast_expr_t *expr = NULL;
+
+    if (vlmatch(lex, 2, TOK_PUNCT_PLUSS, TOK_PUNCT_MINUS))
+        expr = parse_ast_expr_unary_sign(lex, lex->last);
+
+    return expr ? expr : parse_ast_expr_value(lex);
+}
+
+// Binary Expressions
+
+// +---- Internal (Binary Expressions)
+
+#pragma region Internal (Binary Expressions)
+
+static ast_expr_t *parse_ast_expr_bnary_prods(lexer_t *const lex, ast_expr_t *lhs, tokcode_t op)
+{
+    bool_t flag;
+    ast_expr_t *expr, *rhs;
+
+    do
+    {
+        rhs = parse_ast_expr_unary(lex);
+        expr = create_ast_expr_bnary(lhs, rhs, op);
+
+        if (flag = vlmatch(lex, 3, TOK_PUNCT_STARR, TOK_PUNCT_SLASH, TOK_PUNCT_PERCN))
+            lhs = expr, op = lex->last;
+    } while (flag);
+
+    return expr;
+}
+
+static ast_expr_t *parse_ast_expr_bnary_summs(lexer_t *const lex, ast_expr_t *lhs, tokcode_t op)
+{
+    bool_t flag;
+    ast_expr_t *expr, *rhs;
+
+    do
+    {
+        rhs = parse_ast_expr_unary(lex);
+
+        if (vlmatch(lex, 3, TOK_PUNCT_STARR, TOK_PUNCT_SLASH, TOK_PUNCT_PERCN))
+            rhs = parse_ast_expr_bnary_prods(lex, rhs, lex->last);
+
+        expr = create_ast_expr_bnary(lhs, rhs, op);
+
+        if (flag = vlmatch(lex, 2, TOK_PUNCT_PLUSS, TOK_PUNCT_MINUS))
+            lhs = expr, op = lex->last;
+    } while (flag);
+
+    return expr;
+}
+
+static ast_expr_t *parse_ast_expr_bnary_bitws(lexer_t *const lex, ast_expr_t *lhs, tokcode_t op)
+{
+    bool_t flag;
+    ast_expr_t *expr, *rhs;
+
+    do
+    {
+        rhs = parse_ast_expr_unary(lex);
+
+        if (vlmatch(lex, 2, TOK_PUNCT_PLUSS, TOK_PUNCT_MINUS))
+            rhs = parse_ast_expr_bnary_summs(lex, rhs, lex->last);
+
+        expr = create_ast_expr_bnary(lhs, rhs, op);
+
+        if (flag = vlmatch(lex, 3, TOK_PUNCT_AMPER, TOK_PUNCT_PIPEE, TOK_PUNCT_CARET))
+            lhs = expr, op = lex->last;
+    } while (flag);
+
+    return expr;
+}
+
+#pragma endregion
+
+// +---- Internal (Binary Expressions) -- End
+
+ast_expr_t *parse_ast_expr_bnary(lexer_t *const lex)
+{
+    ast_expr_t *expr;
+
+    expr = parse_ast_expr_unary(lex);
+
+    if (vlmatch(lex, 3, TOK_PUNCT_STARR, TOK_PUNCT_SLASH, TOK_PUNCT_PERCN))
+        expr = parse_ast_expr_bnary_prods(lex, expr, lex->last);
+
+    if (vlmatch(lex, 2, TOK_PUNCT_PLUSS, TOK_PUNCT_MINUS))
+        expr = parse_ast_expr_bnary_summs(lex, expr, lex->last);
+
+    if (vlmatch(lex, 3, TOK_PUNCT_AMPER, TOK_PUNCT_PIPEE, TOK_PUNCT_CARET))
+        expr = parse_ast_expr_bnary_bitws(lex, expr, lex->last);
+
+    return expr;
+}
+
+#pragma endregion
+
+// +---- Expressions Parser -- End
+
+#pragma endregion
+
+// +---- Parser -- End
+
 #pragma endregion
 
 /* =------------------------------------------------------------= */

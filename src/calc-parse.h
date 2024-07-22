@@ -420,15 +420,79 @@ struct _calc_ast_expr
     ast_expr_data_t data;
 };
 
+/// @brief Create a AST expression node.
+/// @param kind Kind of the node.
+/// @return A pointer to the new node.
 ast_expr_t *create_ast_expr(ast_expr_kind_t kind);
 
 #pragma endregion
 
 // +---- AST Expressions -- End
 
+// +---- AST Declarations
+
+#pragma region AST Declarations
+
+#pragma endregion
+
+// +---- AST Declarations -- End
+
+// +---- AST Statements
+
+#pragma region AST Statements
+
+#pragma endregion
+
+// +---- AST Statements -- End
+
+// +---- AST Pragmatics
+
+#pragma region AST Pragmatics
+
+#pragma endregion
+
+// +---- AST Pragmatics -- End
+
 #pragma endregion
 
 // +---- Abstract Syntax Tree -- End
+
+// +---- Parser
+
+#pragma region Parser
+
+// +---- Expressions Parser
+
+#pragma region Expressions Parser
+
+// Value Expressions
+
+/// @brief Parse r-value expression.
+/// @param lex Lexer reference.
+/// @return A pointer to the parsed expression.
+ast_expr_t *parse_ast_expr_value(lexer_t *const lex);
+
+// Unary Expressions
+
+/// @brief Parse a unary expression.
+/// @param lex Lexer reference.
+/// @return A pointer to the parsed expression.
+ast_expr_t *parse_ast_expr_unary(lexer_t *const lex);
+
+// Binary Expressions
+
+/// @brief Parse a binary expression.
+/// @param lex Lexer reference.
+/// @return A pointer to the parsed expression.
+ast_expr_t *parse_ast_expr_bnary(lexer_t *const lex);
+
+#pragma endregion
+
+// +---- Expressions Parser
+
+#pragma endregion
+
+// +---- Parser -- End
 
 #pragma endregion
 
