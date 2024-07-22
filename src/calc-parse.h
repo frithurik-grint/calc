@@ -256,136 +256,181 @@ bool_t vlmatch(lexer_t *const lex, unsigned int count, ...);
 
 #pragma endregion
 
-/* =---- Syntax Analyzer ---------------------------------------= */
+/* =---- Syntactic Analyzer ------------------------------------= */
 
-#pragma region Semantic Analyzer
+#pragma region Syntactic Analyzer
 
 // +---- Abstract Syntax Tree
 
 #pragma region Abstract Syntax Tree
 
-/// @brief Expression AST node datatype.
+/// @brief AST expression node struct.
 typedef struct _calc_ast_expr ast_expr_t;
-/// @brief Statement AST node datatype.
-typedef struct _calc_ast_stmt ast_stmt_t;
-/// @brief Declaration AST node datatype.
+/// @brief AST declaration node struct.
 typedef struct _calc_ast_decl ast_decl_t;
-/// @brief Pragmatic AST node datatype.
-typedef struct _calc_ast_prag ast_prag_t;
+/// @brief AST statement node struct.
+typedef struct _calc_ast_stmt ast_stmt_t;
+/// @brief AST pragma node struct.
+typedef struct _calc_ast_prgm ast_prgm_t;
 
-/// @brief Parse an AST expression node.
-/// @param lex 
-/// @return 
-ast_expr_t *parse_expr(lexer_t *const lex);
-/// @brief Parse an AST statement node.
-/// @param lex 
-/// @return 
-ast_stmt_t *parse_stmt(lexer_t *const lex);
-/// @brief Parse an AST declaration node.
-/// @param lex 
-/// @return 
-ast_decl_t *parse_decl(lexer_t *const lex);
-/// @brief Parse an AST pragmatic node
-/// @param lex 
-/// @return 
-ast_prag_t *parse_prag(lexer_t *const lex);
+// +---- AST Expressions
+
+#pragma region AST Expressions
 
 // Unary Expressions
 
-typedef enum _calc_ast_expr_unop
+/// @brief AST unary expression operators.
+typedef enum _calc_ast_expr_unary_op
 {
-    AST_UNOP_POS = TOK_PUNCT_PLUSS,
-    AST_UNOP_NEG = TOK_PUNCT_MINUS,
-} ast_unop_t;
+    /// @brief Positive sign operator.
+    OP_UNARY_POS = TOK_PUNCT_PLUSS,
+    /// @brief Negative sign operator.
+    OP_UNARY_NEG = TOK_PUNCT_MINUS,
+} ast_expr_unop_t;
 
-typedef struct _calc_ast_expr_un
+/// @brief AST unary expression node struct.
+typedef struct _calc_ast_expr_unary
 {
-    ast_expr_t *val;
-    ast_unop_t  op;
-} ast_unexpr_t;
+    /// @brief Operand value.
+    ast_expr_t    *val;
+    /// @brief Operator code.
+    ast_expr_unop_t op;
+} ast_expr_unary_t;
 
-ast_expr_t *create_ast_expr_un(ast_expr_t *const val, tokcode_t op);
+/// @brief Create a new unary expression AST node.
+/// @param val Operand of the expression.
+/// @param op Operator of the expression.
+/// @return A new unary expression node.
+ast_expr_t *create_ast_expr_unary(ast_expr_t *const val, ast_expr_unop_t op);
 
 // Binary Expressions
 
-/// @brief Binary expression AST operation.
-typedef enum _calc_ast_expr_binop
+/// @brief AST binary expression operators.
+typedef enum _calc_ast_expr_bnary_op
 {
-    /// @brief 
-    AST_BINOP_ADD = TOK_PUNCT_PLUSS,
-    /// @brief 
-    AST_BINOP_SUB = TOK_PUNCT_MINUS,
-    /// @brief 
-    AST_BINOP_MUL = TOK_PUNCT_STARR,
-    /// @brief 
-    AST_BINOP_DIV = TOK_PUNCT_SLASH,
-    /// @brief 
-    AST_BINOP_MOD = TOK_PUNCT_PERCN,
-} ast_binop_t;
+    /// @brief Addition operator.
+    OP_BNARY_ADD = TOK_PUNCT_PLUSS,
+    /// @brief Subtraction operator.
+    OP_BNARY_SUB = TOK_PUNCT_MINUS,
+    /// @brief Multiplication operator.
+    OP_BNARY_MUL = TOK_PUNCT_STARR,
+    /// @brief Division operator.
+    OP_BNARY_DIV = TOK_PUNCT_SLASH,
+    /// @brief Modulus operator.
+    OP_BNARY_MOD = TOK_PUNCT_PERCN,
+    /// @brief Bitwise and operator.
+    OP_BNARY_AND = TOK_PUNCT_AMPER,
+    /// @brief Bitwise or operator.
+    OP_BNARY_ORR = TOK_PUNCT_PIPEE,
+    /// @brief Bitwise exclusive or operator.
+    OP_BNARY_XOR = TOK_PUNCT_CARET,
+} ast_expr_bnop_t;
 
-/// @brief Binary expression AST node.
-typedef struct _calc_ast_expr_bin
+/// @brief AST binary expression node struct.
+typedef struct _calc_ast_expr_bnary
 {
-    /// @brief Left-hand side.
-    ast_expr_t *lhs;
-    /// @brief Right-hand side.
-    ast_expr_t *rhs;
-    /// @brief Operation specifier.
-    ast_binop_t op;
-} ast_binexpr_t;
+    /// @brief Left-hand side operand. (lvalue)
+    ast_expr_t     *lhs;
+    /// @brief Right-hand side operand. (rvalue)
+    ast_expr_t     *rhs;
+    /// @brief Operator code.
+    ast_expr_bnop_t op;
+} ast_expr_bnary_t;
 
-ast_expr_t *create_ast_expr_bin(ast_expr_t *const lhs, ast_expr_t *const rhs, tokcode_t op);
+/// @brief Create a new AST binary expression node.
+/// @param lhs Left-hand side operand of the expression.
+/// @param rhs Right-hand side operand of the expression.
+/// @param op Operator of the expression.
+/// @return A pointer to the new node.
+ast_expr_t *create_ast_expr_bnary(ast_expr_t *const lhs, ast_expr_t *const rhs, ast_expr_bnop_t op);
 
 // Ternary Expressions
 
-// Expression Node
+/// @brief AST ternary expression operators.
+typedef enum _calc_ast_expr_tnary_op
+{
+    /// @brief Conditional ternary operator.
+    OP_TNARY_IFF = TOK_PUNCT_QUEST,
+    /// @brief Switch ternary operator.
+    OP_TNARY_SWT = TOK_PUNCT_QUEST_EQUAL,
+} ast_expr_tnop_t;
 
-/// @brief AST expression kind.
+/// @brief AST ternary expression node struct.
+typedef struct _calc_ast_expr_tnary
+{
+    /// @brief Operand 1.
+    ast_expr_t     *vl1;
+    /// @brief Operand 2.
+    ast_expr_t     *vl2;
+    /// @brief Operand 3.
+    ast_expr_t     *vl3;
+    /// @brief Operator code.
+    ast_expr_tnop_t op;
+} ast_expr_tnary_t;
+
+/// @brief Create a new AST ternary expression node.
+/// @param vl1 Operand 1 of the expression.
+/// @param vl2 Operand 2 of the expression. 
+/// @param vl3 Operand 3 of the expression.
+/// @param op Operator of the expression.
+/// @return A pointer to the new node.
+ast_expr_t *create_ast_expr_tnary(ast_expr_t *const vl1, ast_expr_t *const vl2, ast_expr_t *const vl3, ast_expr_tnop_t op);
+
+// AST Expression node
+
+/// @brief AST expression node kinds.
 typedef enum _calc_ast_expr_kind
 {
-    /// @brief Numeric unsigned integer AST node kind.
+    /// @brief AST constant unsigned integer expression.
     AST_EXPR_UNSIG,
-    /// @brief Identifier AST node kind.
-    AST_EXPR_SYMBL,
-    /// @brief 
+    /// @brief AST constant signed integer expression.
+    AST_EXPR_SIGND,
+    /// @brief AST constant real expression.
+    AST_EXPR_REALL,
+    /// @brief AST unary expression.
     AST_EXPR_UNARY,
-    /// @brief Binary expression AST node kind.
-    AST_EXPR_BINRY,
+    /// @brief AST binary expression.
+    AST_EXPR_BNARY,
+    /// @brief AST ternary expression.
+    AST_EXPR_TNARY,
 } ast_expr_kind_t;
 
-/// @brief AST expression node.
-typedef union _calc_ast_expr_node
+/// @brief AST expression node data union.
+typedef union _calc_ast_expr_data
 {
-    /// @brief 
-    long long          sint;
-    /// @brief 
-    unsigned long long uint;
-    /// @brief 
-    ast_unexpr_t      *unexpr;
-    /// @brief Binary expression AST node.
-    ast_binexpr_t     *binexpr;
-    /// @brief Symbol AST node.
-    symb_t            *symbol;
-} ast_expr_node_t;
+    /// @brief AST signed integer const expression.
+    long long          signd;
+    /// @brief AST unsigned integer const expression.
+    unsigned long long unsig;
+    /// @brief AST real const expression.
+    long double        reall;
+    /// @brief AST unary expression.
+    ast_expr_unary_t  *unary;
+    /// @brief AST binary expression.
+    ast_expr_bnary_t  *bnary;
+    /// @brief AST ternary expression.
+    ast_expr_tnary_t  *tnary;
+} ast_expr_data_t;
 
 struct _calc_ast_expr
 {
-    /// @brief 
-    ast_expr_node_t node;
-    /// @brief 
+    /// @brief Expression kind.
     ast_expr_kind_t kind;
+    /// @brief Expression data union.
+    ast_expr_data_t data;
 };
 
-/// @brief Create a new AST expression node.
-/// @param kind Kind of the expression.
-/// @return A pointer to the new AST node.
 ast_expr_t *create_ast_expr(ast_expr_kind_t kind);
+
+#pragma endregion
+
+// +---- AST Expressions -- End
 
 #pragma endregion
 
 // +---- Abstract Syntax Tree -- End
 
-#pragma region
+#pragma endregion
 
 /* =------------------------------------------------------------= */
 

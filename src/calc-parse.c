@@ -1055,197 +1055,48 @@ bool_t vlmatch(lexer_t *const lex, unsigned int count, ...)
 
 #pragma endregion
 
-/* =---- Syntax Analyzer ---------------------------------------= */
+/* =---- Syntactic Analyzer ------------------------------------= */
 
-#pragma region Semantic Analyzer
+#pragma region Syntactic Analyzer
 
 // +---- Abstract Syntax Tree
 
 #pragma region Abstract Syntax Tree
 
-// +---- Internal
+// +---- AST Expressions
 
-#pragma region Internal (Expression Parsers)
+#pragma region AST Expressions
 
-// Value Expressions
-
-static inline ast_expr_t *parse_expr_lval(tokcode_t tok, char *const lexm)
-{
-    ast_expr_t *lval;
-
-    switch (tok)
-    {
-    case TOK_LITER_INTGR_BIN:
-        lval = create_ast_expr(AST_EXPR_UNSIG);
-        lval->node.uint = strtoull(lexm, NULL, 0x02);
-
-        free(lexm);
-
-        break;
-
-    case TOK_LITER_INTGR_OCT:
-        lval = create_ast_expr(AST_EXPR_UNSIG);
-        lval->node.uint = strtoull(lexm, NULL, 0x08);
-
-        free(lexm);
-
-        break;
-
-    case TOK_LITER_INTGR_DEC:
-        lval = create_ast_expr(AST_EXPR_UNSIG);
-        lval->node.uint = strtoull(lexm, NULL, 0x0A);
-
-        free(lexm);
-
-        break;
-
-    case TOK_LITER_INTGR_HEX:
-        lval = create_ast_expr(AST_EXPR_UNSIG);
-        lval->node.uint = strtoull(lexm, NULL, 0x10);
-
-        free(lexm);
-
-        break;
-
-    default:
-        expected("a valid operator", lexm);
-        return NULL;
-    }
-
-    return lval;
-}
-
-static inline ast_expr_t *parse_expr_rval(lexer_t *const lex)
-{
-    return parse_expr_lval(lnext(lex), lex->lexm);
-}
-
-// Unary Expressions
-
-static ast_expr_t *_parse_ast_expr_un_sig(lexer_t *const lex, tokcode_t op)
-{
-    bool_t flag;
-    ast_expr_t *expr, *val;
-
-    do
-    {
-        val = parse_expr_rval(lex);
-        expr = create_ast_expr_un(val, op);
-
-        if (flag = vlmatch(lex, 2, TOK_PUNCT_PLUSS, TOK_PUNCT_MINUS))
-            val = expr, op = lex->last;
-    } while (flag);
-
-    return expr;
-}
-
-// Binary Expressions
-
-static ast_expr_t *_parse_ast_expr_bin_prd(lexer_t *const lex, ast_expr_t *lhs, tokcode_t op)
-{
-    bool_t flag;
-    ast_expr_t *expr, *rhs;
-
-    do
-    {
-        if (vlmatch(lex, 2, TOK_PUNCT_PLUSS, TOK_PUNCT_MINUS))
-            rhs = _parse_ast_expr_un_sig(lex, lex->last);
-        else
-            rhs = parse_expr_rval(lex);
-
-        expr = create_ast_expr_bin(lhs, rhs, op);
-
-        if (flag = vlmatch(lex, 3, TOK_PUNCT_STARR, TOK_PUNCT_SLASH, TOK_PUNCT_PERCN))
-            lhs = expr, op = lex->last;
-    } while (flag);
-
-    return expr;
-}
-
-static ast_expr_t *_parse_ast_expr_bin_sum(lexer_t *const lex, ast_expr_t *lhs, tokcode_t op)
-{
-    bool_t flag;
-    ast_expr_t *expr, *rhs;
-
-    do
-    {
-        rhs = parse_expr_rval(lex);
-
-        if (vlmatch(lex, 3, TOK_PUNCT_STARR, TOK_PUNCT_SLASH, TOK_PUNCT_PERCN))
-            rhs = _parse_ast_expr_bin_prd(lex, rhs, lex->last);
-
-        expr = create_ast_expr_bin(lhs, rhs, op);
-
-        if (flag = vlmatch(lex, 2, TOK_PUNCT_PLUSS, TOK_PUNCT_MINUS))
-            lhs = expr, op = lex->last;
-    } while (flag);
-
-    return expr;
-}
-
-static ast_expr_t *_parse_ast_expr_bin(lexer_t *const lex)
-{
-    ast_expr_t *expr = NULL, *lhs;
-
-    lhs = parse_expr_lval(lex->last, lex->lexm);
-
-    switch (lnext(lex))
-    {
-    case TOK_PUNCT_PLUSS:
-    case TOK_PUNCT_MINUS:
-        expr = _parse_ast_expr_bin_sum(lex, lhs, lex->last);
-        break;
-
-    case TOK_PUNCT_STARR:
-    case TOK_PUNCT_SLASH:
-    case TOK_PUNCT_PERCN:
-        expr = _parse_ast_expr_bin_prd(lex, lhs, lex->last);
-        break;
-
-    default:
-        unexpected("operator", "binary operator");
-        break;
-    }
-
-    return expr;
-}
-
-#pragma endregion
-
-// +---- Internal -- End
-
-ast_expr_t *parse_expr(lexer_t *const lex)
-{
-    tokcode_t tok = lnext(lex);
-
-    switch (tok)
-    {
-    case TOK_LITER_INTGR_BIN:
-    case TOK_LITER_INTGR_OCT:
-    case TOK_LITER_INTGR_DEC:
-    case TOK_LITER_INTGR_HEX:
-        return _parse_ast_expr_bin(lex);
-
-    default:
-        break;
-    }
-}
-
-// Expression Node
-
-ast_expr_t *create_ast_expr(ast_expr_kind_t kind)
+static inline ast_expr_t *_create_ast_expr(ast_expr_kind_t kind)
 {
     ast_expr_t *expr = alloc(ast_expr_t);
 
     expr->kind = kind;
-    
+
     switch (kind)
     {
-    case AST_EXPR_UNARY:
-        expr->node.unexpr = alloc(ast_unexpr_t);
+    case AST_EXPR_UNSIG:
+        expr->data.unsig = 0;
+        break;
 
-    case AST_EXPR_BINRY:
-        expr->node.binexpr = alloc(ast_binexpr_t);
+    case AST_EXPR_SIGND:
+        expr->data.signd = 0;
+        break;
+
+    case AST_EXPR_UNARY:
+        expr->data.unary = alloc(ast_expr_unary_t);
+        break;
+
+    case AST_EXPR_BNARY:
+        expr->data.bnary = alloc(ast_expr_bnary_t);
+        break;
+
+    case AST_EXPR_TNARY:
+        expr->data.tnary = alloc(ast_expr_tnary_t);
+        break;
+
+    default:
+        errorfn("syntax error: expression code '%d' not valid", kind);
         break;
     }
 
@@ -1254,28 +1105,53 @@ ast_expr_t *create_ast_expr(ast_expr_kind_t kind)
 
 // Unary Expressions
 
-ast_expr_t *create_ast_expr_un(ast_expr_t *const val, tokcode_t op)
+ast_expr_t *create_ast_expr_unary(ast_expr_t *const val, ast_expr_unop_t op)
 {
-    ast_expr_t *expr = create_ast_expr(AST_EXPR_UNARY);
+    ast_expr_t *expr = _create_ast_expr(AST_EXPR_UNARY);
 
-    expr->node.unexpr->val = val;
-    expr->node.unexpr->op = op;
+    expr->data.unary->val = val;
+    expr->data.unary->op = op;
 
     return expr;
 }
 
 // Binary Expressions
 
-ast_expr_t *create_ast_expr_bin(ast_expr_t *const lhs, ast_expr_t *const rhs, tokcode_t op)
+ast_expr_t *create_ast_expr_bnary(ast_expr_t *const lhs, ast_expr_t *const rhs, ast_expr_bnop_t op)
 {
-    ast_expr_t *expr = create_ast_expr(AST_EXPR_BINRY);
+    ast_expr_t *expr = _create_ast_expr(AST_EXPR_BNARY);
 
-    expr->node.binexpr->lhs = lhs;
-    expr->node.binexpr->rhs = rhs;
-    expr->node.binexpr->op = op;
+    expr->data.bnary->lhs = lhs;
+    expr->data.bnary->rhs = rhs;
+    expr->data.bnary->op = op;
 
     return expr;
 }
+
+// Ternary Expressions
+
+ast_expr_t *create_ast_expr_tnary(ast_expr_t *const vl1, ast_expr_t *const vl2, ast_expr_t *const vl3, ast_expr_tnop_t op)
+{
+    ast_expr_t *expr = _create_ast_expr(AST_EXPR_TNARY);
+
+    expr->data.tnary->vl1 = vl1;
+    expr->data.tnary->vl2 = vl2;
+    expr->data.tnary->vl3 = vl3;
+    expr->data.tnary->op = op;
+
+    return expr;
+}
+
+// AST Expression node
+
+ast_expr_t *create_ast_expr(ast_expr_kind_t kind)
+{
+    return _create_ast_expr(kind);
+}
+
+#pragma endregion
+
+// +---- AST Expressions -- End
 
 #pragma endregion
 
