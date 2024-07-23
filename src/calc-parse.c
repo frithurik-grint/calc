@@ -1206,6 +1206,9 @@ ast_expr_t *parse_ast_expr_value(lexer_t *const lex)
 
     switch (llook(lex))
     {
+    case TOK_IDENT:
+        break;
+
     case TOK_LITER_INTGR_BIN:
         lnext(lex);
 
@@ -1234,15 +1237,22 @@ ast_expr_t *parse_ast_expr_value(lexer_t *const lex)
         expr->data.unsig = strtoull(lex->lexm, NULL, 0x10);
         break;
 
+    case TOK_LITER_FLOAT:
+        lnext(lex);
+
+        expr = create_ast_expr(AST_EXPR_REALL);
+        expr->data.reall = strtold(lex->lexm, NULL);
+        break;
+
     case TOK_PUNCT_LROUN:
         lnext(lex);
 
         expr = parse_ast_expr(lex);
 
-        if (lmatch(lex, TOK_PUNCT_RROUN))
-            break;
-        else
+        if (!lmatch(lex, TOK_PUNCT_RROUN))
             return expected("')'", NULL), NULL;
+
+        break;
 
     default:
         errorfn("syntax error: invalid constant value '%s'", lex->lexm);
@@ -1270,14 +1280,30 @@ static ast_expr_t *parse_ast_expr_unary_sign(lexer_t *const lex, tokcode_t op)
     return create_ast_expr_unary(val, op);
 }
 
+static ast_expr_t *parse_ast_expr_unary_pmul(lexer_t *const lex, ast_expr_t *const val) // parenthesis multiplication
+{
+    ast_expr_t *expr = val;
+
+    do
+    {
+        expr = create_ast_expr_bnary(expr, parse_ast_expr(lex), OP_BNARY_MUL);
+
+        if (!lmatch(lex, TOK_PUNCT_RROUN))
+            return expected("')", NULL), expr;
+    } while (lmatch(lex, TOK_PUNCT_LROUN));
+
+    return expr;
+}
+
 static ast_expr_t *parse_ast_expr_unary_post(lexer_t *const lex, ast_expr_t *const val)
 {
-    ast_expr_t *expr;
+    ast_expr_t *expr = val;
 
     if (vlmatch(lex, 2, TOK_PUNCT_PLUSS_PLUSS, TOK_PUNCT_MINUS_MINUS))
-        expr = create_ast_expr_unary(val, lex->last);
-    else
-        expr = val;
+        expr = create_ast_expr_unary(expr, lex->last);
+
+    if (lmatch(lex, TOK_PUNCT_LROUN))
+        expr = parse_ast_expr_unary_pmul(lex, expr);
 
     return expr;
 }
@@ -1370,14 +1396,6 @@ ast_expr_t *parse_ast_expr_bnary(lexer_t *const lex)
     ast_expr_t *expr;
 
     expr = parse_ast_expr_unary(lex);
-
-    if (lmatch(lex, TOK_PUNCT_LROUN))
-    {
-        expr = create_ast_expr_bnary(expr, parse_ast_expr(lex), OP_BNARY_MUL);
-
-        if (!lmatch(lex, TOK_PUNCT_RROUN))
-            return expected("')", NULL), NULL;
-    }
 
     if (vlmatch(lex, 3, TOK_PUNCT_STARR, TOK_PUNCT_SLASH, TOK_PUNCT_PERCN))
         expr = parse_ast_expr_bnary_prods(lex, expr, lex->last);

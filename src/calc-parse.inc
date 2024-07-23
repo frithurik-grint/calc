@@ -56,11 +56,17 @@ deftrv(IDENT,                                       "id")
 #   define defkey(name, lexeme) deftok(name, lexeme) defstr(name, lexeme)
 #endif // defkey
 
+/// @brief 'break' keyword token.
+defkey(KWORD_BREAK,                                 "break")
+/// @brief 'call' keyword token.
+defkey(KWORD_CALL,                                  "call")
 /// @brief 'case' keyword token.
 defkey(KWORD_CASE,                                  "case")
 /// @brief 'const' keyword token.
 defkey(KWORD_CONST,                                 "const")
-/// @brief 'static' keyword token.
+/// @brief 'continue' keyword token.
+defkey(KWORD_CONTINUE,                              "continue")
+/// @brief 'default' keyword token.
 defkey(KWORD_DEFAULT,                               "default")
 /// @brief 'do' keyword token.
 defkey(KWORD_DO,                                    "do")
