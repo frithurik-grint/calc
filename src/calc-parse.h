@@ -376,6 +376,22 @@ typedef struct _calc_ast_expr_tnary
 /// @return A pointer to the new node.
 ast_expr_t *create_ast_expr_tnary(ast_expr_t *const vl1, ast_expr_t *const vl2, ast_expr_t *const vl3, ast_expr_tnop_t op);
 
+// AST Other Expressions
+
+/// @brief AST expressions list node struct.
+typedef struct _calc_ast_expr_lists
+{
+    /// @brief Current expression.
+    ast_expr_t  *expr;
+    /// @brief Next expression in list.
+    ast_expr_t  *next;
+} ast_expr_lists_t;
+
+/// @brief Create a new AST expressions list node.
+/// @param expr First expression in the list.
+/// @return A pointer the new node.
+ast_expr_t *create_ast_expr_lists(ast_expr_t *const expr, ast_expr_t *const next);
+
 // AST Expression node
 
 /// @brief AST expression node kinds.
@@ -393,6 +409,8 @@ typedef enum _calc_ast_expr_kind
     AST_EXPR_BNARY,
     /// @brief AST ternary expression.
     AST_EXPR_TNARY,
+    /// @brief AST expressions list.
+    AST_EXPR_LISTS,
 } ast_expr_kind_t;
 
 /// @brief AST expression node data union.
@@ -412,6 +430,8 @@ typedef union _calc_ast_expr_data
     ast_expr_bnary_t  *bnary;
     /// @brief AST ternary expression.
     ast_expr_tnary_t  *tnary;
+    /// @brief AST expressions list.
+    ast_expr_lists_t  *lists;
 } ast_expr_data_t;
 
 struct _calc_ast_expr
@@ -466,6 +486,11 @@ ast_expr_t *create_ast_expr(ast_expr_kind_t kind);
 // +---- Expressions Parser
 
 #pragma region Expressions Parser
+
+/// @brief Parse an expression.
+/// @param lex Lexer reference.
+/// @return A pointer to the parsed expression.
+ast_expr_t *parse_ast_expr(lexer_t *const lex);
 
 // Value Expressions
 

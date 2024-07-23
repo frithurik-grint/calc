@@ -272,7 +272,10 @@ tokcode_t get_keyword_or_id(const char *const lexeme)
 
 static inline int expected(const char *const what, char *const got)
 {
-    return errorfn("syntax error: expected %s (got '%s')", what, got);
+    if (got)
+        return errorfn("syntax error: expected %s (got '%s')", what, got);
+    else
+        return errorfn("syntax error: expected %s", what, got);
 }
 
 static inline int unexpected(const char *const what, char *const expected)
@@ -785,7 +788,7 @@ static tokcode_t _gettok(doub_t *const src, char **const lexeme)
             else
             {
                 if (lexeme)
-                    *lexeme = dchop(src);
+                    t[n] = NUL, *lexeme = t;
 
                 return TOK_LITER_INTGR_DEC;
             }
@@ -1095,6 +1098,10 @@ static inline ast_expr_t *_create_ast_expr(ast_expr_kind_t kind)
         expr->data.tnary = alloc(ast_expr_tnary_t);
         break;
 
+    case AST_EXPR_LISTS:
+        expr->data.lists = alloc(ast_expr_lists_t);
+        break;
+
     default:
         errorfn("syntax error: expression code '%d' not valid", kind);
         break;
@@ -1142,6 +1149,18 @@ ast_expr_t *create_ast_expr_tnary(ast_expr_t *const vl1, ast_expr_t *const vl2, 
     return expr;
 }
 
+// Other Expressions
+
+ast_expr_t *create_ast_expr_lists(ast_expr_t *const expr, ast_expr_t *const next)
+{
+    ast_expr_t *list = _create_ast_expr(AST_EXPR_LISTS);
+
+    list->data.lists->expr = expr;
+    list->data.lists->next = next;
+
+    return list;
+}
+
 // AST Expression node
 
 ast_expr_t *create_ast_expr(ast_expr_kind_t kind)
@@ -1165,52 +1184,70 @@ ast_expr_t *create_ast_expr(ast_expr_kind_t kind)
 
 #pragma region Expressions Parser
 
+ast_expr_t *parse_ast_expr(lexer_t *const lex)
+{
+    ast_expr_t *expr;
+
+    expr = parse_ast_expr_tnary(lex);
+
+    while (lmatch(lex, TOK_PUNCT_COMMA))
+        expr = create_ast_expr_lists(expr, parse_ast_expr_tnary(lex));
+
+    return expr;
+}
+
 // Value Expressions
 
 ast_expr_t *parse_ast_expr_value(lexer_t *const lex)
 {
+    extern ast_expr_t *parse_ast_expr_unary_post(lexer_t *const lex, ast_expr_t *const val);
+
     ast_expr_t *expr = NULL;
 
-    switch (lnext(lex))
+    switch (llook(lex))
     {
     case TOK_LITER_INTGR_BIN:
+        lnext(lex);
+
         expr = create_ast_expr(AST_EXPR_UNSIG);
         expr->data.unsig = strtoull(lex->lexm, NULL, 0x02);
-        
-        free(lex->lexm);
-
         break;
 
     case TOK_LITER_INTGR_OCT:
+        lnext(lex);
+
         expr = create_ast_expr(AST_EXPR_UNSIG);
         expr->data.unsig = strtoull(lex->lexm, NULL, 0x08);
-
-        free(lex->lexm);
-
         break;
 
     case TOK_LITER_INTGR_DEC:
+        lnext(lex);
+
         expr = create_ast_expr(AST_EXPR_UNSIG);
         expr->data.unsig = strtoull(lex->lexm, NULL, 0x0A);
-
-        free(lex->lexm);
-
         break;
 
     case TOK_LITER_INTGR_HEX:
+        lnext(lex);
+
         expr = create_ast_expr(AST_EXPR_UNSIG);
         expr->data.unsig = strtoull(lex->lexm, NULL, 0x10);
-
-        free(lex->lexm);
-
         break;
+
+    case TOK_PUNCT_LROUN:
+        lnext(lex);
+
+        expr = parse_ast_expr(lex);
+
+        if (lmatch(lex, TOK_PUNCT_RROUN))
+            break;
+        else
+            return expected("')'", NULL), NULL;
 
     default:
         errorfn("syntax error: invalid constant value '%s'", lex->lexm);
         break;
     }
-
-    extern ast_expr_t *parse_ast_expr_unary_post(lexer_t *const lex, ast_expr_t *const val);
 
     return parse_ast_expr_unary_post(lex, expr);
 }
@@ -1334,6 +1371,14 @@ ast_expr_t *parse_ast_expr_bnary(lexer_t *const lex)
 
     expr = parse_ast_expr_unary(lex);
 
+    if (lmatch(lex, TOK_PUNCT_LROUN))
+    {
+        expr = create_ast_expr_bnary(expr, parse_ast_expr(lex), OP_BNARY_MUL);
+
+        if (!lmatch(lex, TOK_PUNCT_RROUN))
+            return expected("')", NULL), NULL;
+    }
+
     if (vlmatch(lex, 3, TOK_PUNCT_STARR, TOK_PUNCT_SLASH, TOK_PUNCT_PERCN))
         expr = parse_ast_expr_bnary_prods(lex, expr, lex->last);
 
@@ -1342,6 +1387,28 @@ ast_expr_t *parse_ast_expr_bnary(lexer_t *const lex)
 
     if (vlmatch(lex, 3, TOK_PUNCT_AMPER, TOK_PUNCT_PIPEE, TOK_PUNCT_CARET))
         expr = parse_ast_expr_bnary_bitws(lex, expr, lex->last);
+
+    return expr;
+}
+
+// Ternary Expressions
+
+// +---- Internal (Ternary Expressions)
+
+#pragma region Internal (Ternary Expressions)
+
+#pragma endregion
+
+// +---- Internal (Ternary Expressions) -- End
+
+ast_expr_t *parse_ast_expr_tnary(lexer_t *const lex)
+{
+    ast_expr_t *expr;
+
+    expr = parse_ast_expr_bnary(lex);
+
+    if (lmatch(lex, TOK_PUNCT_QUEST))
+        ;
 
     return expr;
 }
