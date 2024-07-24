@@ -2,6 +2,7 @@
 //
 use module base.io;
 
+# This is the default entry point of the program
 let static main(...args : *char) -> int {
   println("Hello, world!");
   return 0;

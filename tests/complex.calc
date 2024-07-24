@@ -3,16 +3,33 @@
 #
 module complex;
 
-use module base;
-use module base.io;
+use module std::lib;
+use module std::lib.io;
 
-complex_t <- object {
-    re : i32;
-    im : i32;
+complex <- object {
+    private re : real;
+    private im : real;
 
-    public Re : {
-        get() -> i32           =  .re;
-        set(value : i32) -> () => .re = value;
-    };
-    
-};
+    # complex object constructor
+    let static .(re, im) : real -> real
+        = complex { re; im };
+        
+    # complex addition operation
+    let static +(c1, c2) : complex -> complex
+        = complex { (c1.re + c2.re); (c1.im + c2.im) };
+
+    # complex subtraction operation
+    let static -(c1, c2) : complex -> complex
+        = complex { (c1.re - c2.re); (c1.im - c2.im) };
+
+    # complex multiplication operation
+    let static *(c1, c2) : complex -> complex
+        = complex { ((c1.re * c2.re) - (c1.im * c2.im)); ((c1.re * c2.im) - (c1.im * c2.re)) };
+
+    # complex division operation
+    let static /(c1, c2) : complex -> complex
+        = ;
+
+    let static !(c1) : complex -> complex
+        = complex { c1.re; -c1.im };
+}

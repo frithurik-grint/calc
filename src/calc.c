@@ -91,12 +91,16 @@ int main()
 {
     char line[BUFSIZ];
     lexer_t *const lex = create_lexer(BUFSIZ, BUFSIZ);
+    
+    do
+    {
+        printf("RUN > ");
+        fgets(line, BUFSIZ, stdin);
+        dputs(lex->doub, line);
 
-    printf("TOK > ");
-    fgets(line, BUFSIZ, stdin);
-    dputs(lex->doub, line);
+        ast_expr_t *expr = parse_ast_expr(lex);
 
-    ast_expr_t *expr = parse_ast_expr(lex);
-
-    test(expr, 0);
+        test(expr, 0);
+        putln();
+    } while (TRUE);
 }
