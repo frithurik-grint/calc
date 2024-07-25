@@ -525,37 +525,6 @@ char *unesc(char *const dest, int c)
 
 #pragma region Datastructs
 
-// +---- Internal (Hashing)
-
-#pragma region Internal (Hashing)
-
-static inline hash_t _get_hashcode(char *str)
-{
-	if (!str || (*str <= 0x20))
-		return HASH_INV; // intentionally returns an unmanageable value
-
-	hash_t hash;
-
-	for (hash = HASH_MIN; *str > 0x20; str++)
-		hash += *str - 0x21;
-
-	return hash;
-}
-
-static inline hash_t _get_hashcode_mod(char *str, unsigned int siz)
-{
-	return _get_hashcode(str) % siz;
-}
-
-#pragma endregion
-
-// +---- Internal (Hashing) -- End
-
-hash_t gethash(const char *const str)
-{
-	return _get_hashcode((char *)str);
-}
-
 // Hash Table
 
 hashbuc_t *create_hashbuc(char *const name, hash_t hash, unsigned int data, hashbuc_t *const prev)
@@ -584,7 +553,7 @@ hashbuc_t *delete_hashbuc(hashbuc_t *const bucket)
     return next;
 }
 
-hashtab_t *create_hashtab(unsigned int size, hashtab_t *const prev)
+hashtab_t *create_hashtab(unsigned int size, hashfnc_t func, hashtab_t *const prev)
 {
     hashtab_t *tab = alloc(hashtab_t);
 
@@ -592,6 +561,7 @@ hashtab_t *create_hashtab(unsigned int size, hashtab_t *const prev)
         size = CALC_HASHTAB_BUCKSNUM;
 
     tab->buck = dimz(hashbuc_t *, size);
+	tab->func = func;
     tab->size = size;
     tab->used = 0;
     tab->prev = prev;
@@ -624,7 +594,7 @@ hashtab_t *delete_hashtab(hashtab_t *const tab)
 
 hashbuc_t *hashtab_add(hashtab_t *const tab, char *const key)
 {
-    hash_t hash = _get_hashcode_mod(key, tab->size);
+    hash_t hash = tab->func(key) % tab->size;
     hashbuc_t *prev;
 
     if (tab->buck[hash])
@@ -649,7 +619,7 @@ hashbuc_t *hashtab_add(hashtab_t *const tab, char *const key)
 
 hashbuc_t *hashtab_get(hashtab_t *const tab, char *const key)
 {
-    hash_t hash = _get_hashcode_mod(key, tab->size);
+    hash_t hash = tab->func(key) % tab->size;
     hashtab_t *tbp = tab;
 
     do
@@ -675,7 +645,7 @@ hashbuc_t *hashtab_get(hashtab_t *const tab, char *const key)
 
 hashbuc_t *hashtab_set(hashtab_t *const tab, char *const key, unsigned int data)
 {
-    hash_t hash = _get_hashcode_mod(key, tab->size);
+    hash_t hash = tab->func(key) % tab->size;
     hashtab_t *tbp = tab;
 
     do
@@ -701,7 +671,7 @@ hashbuc_t *hashtab_set(hashtab_t *const tab, char *const key, unsigned int data)
 
 bool_t hashtab_contains(hashtab_t *const tab, char *const key)
 {
-    hash_t hash = _get_hashcode_mod(key, tab->size);
+    hash_t hash = tab->func(key) % tab->size;
     hashtab_t *tbp = tab;
 
     do
@@ -727,7 +697,7 @@ bool_t hashtab_contains(hashtab_t *const tab, char *const key)
 
 hashbuc_t *hashtab_remove(hashtab_t *const tab, char *const key)
 {
-    hash_t hash = _get_hashcode_mod(key, tab->size);
+    hash_t hash = tab->func(key) % tab->size;
     hashtab_t *tbp = tab;
 
     do
@@ -753,7 +723,7 @@ hashbuc_t *hashtab_remove(hashtab_t *const tab, char *const key)
 
 hashbuc_t *hashtab_delete(hashtab_t *const tab, char *const key)
 {
-    hash_t hash = _get_hashcode_mod(key, tab->size);
+    hash_t hash = tab->func(key) % tab->size;
     hashtab_t *tbp = tab;
 
     do
@@ -776,6 +746,8 @@ hashbuc_t *hashtab_delete(hashtab_t *const tab, char *const key)
     
     return NULL;
 }
+
+#ifndef _CALC_MINIMAL_BUILD
 
 void hashtab_dump(FILE *const stream, hashtab_t *const tab)
 {
@@ -803,6 +775,8 @@ void hashtab_dump(FILE *const stream, hashtab_t *const tab)
 
 	return;
 }
+
+#endif // _CALC_MINIMAL_BUILD
 
 #pragma endregion
 

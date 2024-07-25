@@ -576,10 +576,8 @@ typedef unsigned int hash_t;
 #   define HASH_INV ((hash_t)-1)
 #endif // HASH_INV
 
-/// @brief Compute hash code of a string.
-/// @param str Key string.
-/// @return Computed hash code.
-hash_t gethash(const char *const str);
+/// @brief Hashing function data type.
+typedef hash_t (*hashfnc_t)(char *const);
 
 // Hash Table
 
@@ -628,6 +626,8 @@ typedef struct _calc_hash_table
 {
     /// @brief Array of pointers to the buckets.
     hashbuc_t **buck;
+    /// @brief Hashing function for this table.
+    hashfnc_t func;
     /// @brief Maximum number of buckets.
     unsigned int size;
     /// @brief Number of used buckets.
@@ -645,7 +645,7 @@ typedef struct _calc_hash_table
 ///             CALC_HASHTAB_BUCKSNUM buckets)
 /// @param prev Pointer to the previous chunk.
 /// @return A pointer to the new hash table chunk.
-hashtab_t *create_hashtab(unsigned int size, hashtab_t *const prev);
+hashtab_t *create_hashtab(unsigned int size, hashfnc_t func, hashtab_t *const prev);
 /// @brief Deletes the specified hash table with
 ///        its buckets, releasing all used memory.
 /// @param tab Pointer to table to delete.
@@ -688,12 +688,16 @@ hashbuc_t *hashtab_remove(hashtab_t *const tab, char *const key);
 /// @return A pointer to the colliding bucket.
 hashbuc_t *hashtab_delete(hashtab_t *const tab, char *const key);
 
+#ifndef _CALC_MINIMAL_BUILD
+
 /// @brief Dumps hash table content on a stream.
 /// @param stream Stream in which dump content of the hash
 ///               table.
 /// @param tab Pointer to the last hash table chunk of the
 ///            hash table to dump on the selected stream.
 void hashtab_dump(FILE *const stream, hashtab_t *const tab);
+
+#endif // _CALC_MINIMAL_BUILD
 
 #pragma endregion
 
