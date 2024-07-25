@@ -49,13 +49,15 @@ deftrv(IDENT,                                       "id")
 #   undef deftrv
 #endif // UNDEF deftrv
 
-/* =---- Reserved Word Tokens ----------------------------------= */
+/* =---- Keyword Tokens ----------------------------------------= */
 
 #ifndef defkey
 /// @brief Internal macro for keyword tokens defintion.
 #   define defkey(name, lexeme) deftok(name, lexeme) defstr(name, lexeme)
 #endif // defkey
 
+/// @brief 'bool' keyword token.
+defkey(KWORD_BOOL,                                  "bool")
 /// @brief 'break' keyword token.
 defkey(KWORD_BREAK,                                 "break")
 /// @brief 'call' keyword token.
@@ -74,6 +76,8 @@ defkey(KWORD_DO,                                    "do")
 defkey(KWORD_ELSE,                                  "else")
 /// @brief 'end' keyword token.
 defkey(KWORD_END,                                   "end")
+/// @brief 'enum' keyword token.
+defkey(KWORD_ENUM,                                  "enum")
 /// @brief 'extern' keyword token.
 defkey(KWORD_EXTERN,                                "extern")
 /// @brief 'for' keyword token.
@@ -86,6 +90,18 @@ defkey(KWORD_IF,                                    "if")
 defkey(KWORD_INT,                                   "int")
 /// @brief 'let' keyword token. (constant declaration)
 defkey(KWORD_LET,                                   "let")
+/// @brief 'module' keyword token.
+defkey(KWORD_MODULE,                                "module")
+/// @brief 'object' keyword token.
+defkey(KWORD_OBJECT,                                "object")
+/// @brief 'pragma' keyword token.
+defkey(KWORD_PRAGMA,                                "pragma")
+/// @brief 'private' keyword token.
+defkey(KWORD_PRIVATE,                               "private")
+/// @brief 'protected' keyword token.
+defkey(KWORD_PROTECTED,                             "protected")
+/// @brief 'public' keyword token.
+defkey(KWORD_PUBLIC,                                "public")
 /// @brief 'real' keyword token.
 defkey(KWORD_REAL,                                  "real")
 /// @brief 'return' keyword token.
@@ -94,10 +110,18 @@ defkey(KWORD_RETURN,                                "return")
 defkey(KWORD_SIGNED,                                "signed")
 /// @brief 'static' keyword token.
 defkey(KWORD_STATIC,                                "static")
+/// @brief 'struct' keyword token.
+defkey(KWORD_STRUCT,                                "struct")
 /// @brief 'switch' keyword token.
 defkey(KWORD_SWITCH,                                "switch")
+/// @brief 'undef' keyword token.
+defkey(KWORD_UNDEF,                                 "undef")
+/// @brief 'union' keyword token.
+defkey(KWORD_UNION,                                 "union")
 /// @brief 'unsigned' keyword token.
 defkey(KWORD_UNSIGNED,                              "unsigned")
+/// @brief 'use' keyword token.
+defkey(KWORD_USE,                                   "use")
 /// @brief 'void' keyword token.
 defkey(KWORD_VOID,                                  "void")
 /// @brief 'while' keyword token.
@@ -113,6 +137,31 @@ defkey(KWORD_WHILE,                                 "while")
 #ifdef defkey
 #   undef defkey
 #endif // UNDEF defkey
+
+/* =---- Pragmatic Tokens --------------------------------------= */
+
+#ifndef defprg
+/// @brief Internal macro for pragmatic tokens defintion.
+#   define defprg(name, lexeme) deftok(name, lexeme) defstr(name, lexeme)
+#endif // defprg
+
+/// @brief 'def' pragmatic token.
+defprg(PRAGM_DEF,                                   "def")
+/// @brief 'set' pragmatic token.
+defprg(PRAGM_SET,                                   "set")
+/// @brief 'undef' pragmatic token.
+defprg(PRAGM_UNDEF,                                 "undef")
+
+#ifndef CALC_SORTED_PRAGMATICS
+/// @brief If its value is 1, pragmatics are in alphabetical
+///        order. If pragmatics are not sorted, set this macro
+///        to zero.
+#   define CALC_SORTED_PRAGMATICS 1
+#endif // CALC_SORTED_PRAGMATICS
+
+#ifdef defprg
+#   undef defprg
+#endif // UNDEF defprg
 
 /* =---- Punctuation Tokens ------------------------------------= */
 

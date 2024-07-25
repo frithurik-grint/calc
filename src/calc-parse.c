@@ -1,234 +1,354 @@
 #include "calc-parse.h"
 
-#pragma warning(push)
-#pragma warning(disable: 6385)
-#pragma warning(disable: 6386)
+/* =---- Lexical Analyser --------------------------------------= */
 
-/* =---- Lexical Analyzer --------------------------------------= */
+#pragma region Lexical Analyser
 
-#pragma region Lexical Analyzer
+// +---- Sources
 
-// +---- Source Stream
+#pragma region Sources
 
-#pragma region Source Stream
+// Source Buffer
 
-// Double Buffer
-
-doub_t *create_doub(char *const buffer, unsigned int length)
+srcbuf_t *create_srcbuf(char *const buffer, unsigned int length)
 {
-    doub_t *buf = alloc(doub_t);
+    srcbuf_t *sb = alloc(srcbuf_t);
 
     if (!length)
+#ifdef _CALC_USE_BUFSIZ
         length = BUFSIZ;
+#else
+        length = pagesiz;
+#endif // _CALC_USE_BUFSIZ
 
-    buf->buf = (!buffer ? stralloc(length) : buffer);
-    buf->pos = 0;
-    buf->fwd = 0;
-    buf->len = length;
+    sb->buf = !buffer ? stralloc(length) : buffer;
+    sb->pos = 0;
+    sb->fwd = 0;
+    sb->len = length;
 
-    return buf;
+    return sb;
 }
 
-int dtopc(const doub_t *const buf)
+srcbuf_t *create_srcbuf_auto()
 {
-    if ((buf->pos + buf->fwd) < buf->len)
-#ifdef CALC_DEBUG
-        return buf->buf[buf->fwd];
+    return create_srcbuf(NULL, 0);
+}
+
+void delete_srcbuf(srcbuf_t *const sb)
+{
+#if CALC_DEBUG
+    sbrewnd(sb);
 #else
-        return buf->buf[buf->pos + buf->fwd];
+    sb->pos = 0;
+    sb->fwd = 0;
+    sb->len = 0;
+#endif // CALC_DEBUG
+
+    free(sb->buf);
+    free(sb);
+
+    return;
+}
+
+int sbtopc(srcbuf_t *const sb)
+{
+    if ((sb->pos + sb->fwd) < sb->len)
+#ifdef CALC_DEBUG
+        return sb->buf[sb->fwd];
+#else
+        return sb->buf[sb->pos + sb->fwd];
+#endif // CALC_DEBUG
+    else
+        return EOF;
+}
+
+int sbgetc(srcbuf_t *const sb)
+{
+    if ((sb->pos + sb->fwd) < sb->len)
+#ifdef CALC_DEBUG
+        return sb->buf[++sb->fwd];
+#else
+        return sb->buf[sb->pos + ++sb->fwd];
+#endif // CALC_DEBUG
+    else
+        return EOF;
+}
+
+int sbsetc(srcbuf_t *const sb, int c)
+{
+    if ((sb->pos + sb->fwd) < sb->len)
+#ifdef CALC_DEBUG
+        return sb->buf[sb->fwd] = c;
+#else
+        return sb->buf[sb->pos + sb->fwd] = c;
 #endif
     else
         return EOF;
 }
 
-int dgetc(doub_t *const buf)
+int sbputc(srcbuf_t *const sb, int c)
 {
-    if ((buf->pos + buf->fwd) < buf->len)
+    if ((sb->pos + sb->fwd) < sb->len)
 #ifdef CALC_DEBUG
-        return buf->buf[buf->fwd++];
+        return sb->buf[++sb->fwd] = c;
 #else
-        return buf->buf[buf->pos + buf->fwd++];
+        return sb->buf[sb->pos + ++sb->fwd] = c;
 #endif
     else
         return EOF;
 }
 
-int dsetc(doub_t *const buf, int c)
+char *sbtops(char *const dst, srcbuf_t *const sb, unsigned int count)
 {
-    if ((buf->pos + buf->fwd) < buf->len)
-#ifdef CALC_DEBUG
-        return buf->buf[buf->fwd] = c;
-#else
-        return buf->buf[buf->pos + buf->fwd] = c;
-#endif
-    else
-        return EOF;
-}
+    if (!count)
+        return NULL;
 
-int dputc(doub_t *const buf, int c)
-{
-    if ((buf->pos + buf->fwd) < buf->len)
-#ifdef CALC_DEBUG
-        return buf->buf[buf->fwd++] = c;
-#else
-        return buf->buf[buf->pos + buf->fwd++] = c;
-#endif
-    else
-        return EOF;
-}
+    char *buf;
 
-char *dgets(char *const dest, doub_t *const buf)
-{
+    if (!dst)
+        buf = stralloc(count);
+    else
+        buf = dst;
+
     int i = 0, c;
 
     do
     {
-        c = dgetc(buf);
+        c = sbgetc(sb);
 
         if (c == EOF)
             break;
         else
-            dest[i++] = c;
-    } while ((c != '\n') && (c != '\0'));
+            buf[i++] = c;
+    } while ((c != EOL) && (c != NUL) && (i < count));
 
-    dest[i] = '\0';
+    sb->fwd = 0;
+    buf[i] = NUL;
 
-    return dest;
+    return buf;
 }
 
-char *dputs(doub_t *const buf, char *const str)
+char *sbgets(char *const dst, srcbuf_t *const sb, unsigned int count)
 {
+    if (!count)
+        return NULL;
+
+    char *buf;
+
+    if (!dst)
+        buf = stralloc(count);
+    else
+        buf = dst;
+
     int i = 0, c;
 
     do
-        c = dputc(buf, str[i++]);
-    while ((c != EOF) && str[i]);
+    {
+        c = sbgetc(sb);
 
-    dputc(buf, '\0');
+        if (c == EOF)
+            break;
+        else
+            buf[i++] = c;
+    } while ((c != EOL) && (c != NUL) && (i < count));
 
-    return buf->fwd = 0, str;
+    buf[i] = NUL;
+
+    return buf;
 }
 
-char *dchop(doub_t *const buf)
+char *sbsets(srcbuf_t *const sb, char *const src, unsigned int count)
+{
+    if (!src || !count)
+        return NULL;
+
+    int i = 0, c;
+
+    do
+        c = sbputc(sb, src[i++]);
+    while ((c != EOF) && src[i] && (i < count));
+
+    sbputc(sb, '\0');
+
+    return sb->fwd = 0, src;
+}
+
+char *sbputs(srcbuf_t *const sb, char *const src, unsigned int count)
+{
+    if (!src || !count)
+        return NULL;
+
+    int i = 0, c;
+
+    do
+        c = sbputc(sb, src[i++]);
+    while ((c != EOF) && src[i] && (i < count));
+
+    sbputc(sb, '\0');
+
+    return src;
+}
+
+char *sbchop(srcbuf_t *const sb)
 {
 #ifdef CALC_DEBUG
-    return strndcpy(NULL, buf->buf, buf->fwd);
+    return strndcpy(NULL, sb->buf, sb->fwd);
 #else
-    return strndcpy(NULL, buf->buf + buf->pos, buf->fwd);
-#endif
+    return strndcpy(NULL, sb->buf + sb->pos, sb->fwd);
+#endif // CALC_DEBUG
 }
 
-char *dchopto(doub_t *const buf, char *const dest)
+char *sbchto(char *const dst, srcbuf_t *const sb)
 {
 #ifdef CALC_DEBUG
-    return strndcpy(dest, buf->buf, buf->fwd);
+    return strndcpy(dst, sb->buf, sb->fwd);
 #else
-    return strndcpy(dest, buf->buf + buf->pos, buf->fwd);
-#endif
+    return strndcpy(dst, sb->buf + sb->pos, sb->fwd);
+#endif // CALC_DEBUG
 }
 
-char *dchopof(doub_t *const buf, size_t of)
+char *sbchof(char *const dst, srcbuf_t *const sb, unsigned int count)
 {
 #ifdef CALC_DEBUG
-    return strndcpy(NULL, buf->buf, of);
+    return strndcpy(dst, sb->buf, count);
 #else
-    return strndcpy(NULL, buf->buf + buf->pos, of);
-#endif
+    return strndcpy(dst, sb->buf + sb->pos, count);
+#endif // CALC_DEBUG
 }
 
-void dadvance(doub_t *const buf)
+char *sbgetbuf(srcbuf_t *const sb)
 {
-    if ((buf->pos + buf->fwd) < buf->len)
+#ifdef CALC_DEBUG
+    return sb->buf;
+#else
+    return sb->buf + sb->pos;
+#endif // CALC_DEBUG
+}
+
+void sbadvnc(srcbuf_t *const sb)
+{
+    if ((sb->pos + sb->fwd) < sb->len)
     {
 #ifdef CALC_DEBUG
-        buf->buf += buf->fwd;
+        sb->buf += sb->fwd;
 #endif
-        buf->pos += buf->fwd;
-        buf->fwd = 0;
+        sb->pos += sb->fwd;
+        sb->fwd = 0;
     }
     else
     {
 #ifdef CALC_DEBUG
-        buf->buf += (buf->pos + buf->fwd) - buf->len;
-#endif
-        buf->pos += (buf->pos + buf->fwd) - buf->len;
-        buf->fwd = 0;
+        sb->buf += (sb->pos + sb->fwd) - sb->len;
+#endif // CALC_DEBUG
+        sb->pos += (sb->pos + sb->fwd) - sb->len;
+        sb->fwd = 0;
     }
 
     return;
 }
 
-void dretreat(doub_t *const buf)
+void sbretrt(srcbuf_t *const sb)
 {
-    buf->fwd = 0;
-    return;
-}
-
-void drewind(doub_t *const buf)
-{
-#ifdef CALC_DEBUG
-    buf->buf -= buf->pos;
-#endif
-    buf->pos = 0;
-    buf->fwd = 0;
+    sb->fwd = 0;
 
     return;
 }
 
-char *dgetbuf(doub_t *const buf)
+void sbrewnd(srcbuf_t *const sb)
 {
 #ifdef CALC_DEBUG
-    return buf->buf;
-#else
-    return buf->buf + buf->pos;
-#endif
+    sb->buf -= sb->pos;
+#endif // CALC_DEBUG
+    sb->pos = 0;
+    sb->fwd = 0;
+
+    return;
 }
+
+// Source Stream
 
 #pragma endregion
 
-// +---- Source Stream -- End
+// +---- Sources -- End
 
 // +---- Tokens
 
 #pragma region Tokens
 
-// token structure
-struct tok_t
+// +---- Internal (Lexical Errors)
+
+#pragma region Internal (Lexical Errors)
+
+static inline int _expected(const char *const what, const char *const got)
 {
-    const char *lexm;
+    int result;
+
+    if (!what)
+        result = error("lexical error: unexpected input sequence");
+    else
+        result = errorf("lexical error: expected %s", what);
+
+    if (!got)
+        result += errorln(".");
+    else
+        result += errorfn(" (got %s).");
+
+    return result;
+}
+
+static inline int _unexpctd(const char *const what, const char *const expected)
+{
+    int result;
+
+    if (!what)
+        result = error("lexical error: unexpected input sequence");
+    else
+        result = errorf("lexical error: unexpected %s", what);
+
+    if (!expected)
+        result += errorln(".");
+    else
+        result += errorfn(" (expected %s).");
+
+    return result;
+}
+
+static inline int _notvalid(const char *const what)
+{
+    int result;
+
+    if (!what)
+        result = errorln("lexical error: input sequence not valid.");
+    else
+        result = errorfn("lexical error: invalid %s.", what);
+
+    return result;
+}
+
+#pragma endregion
+
+// +---- Internal (Lexical Errors) -- End
+
+// +---- Internal (Lexical Scanner)
+
+#pragma region Internal (Lexical Scanner)
+
+// token info structure
+struct token
+{
+    char *lexm;
     tokcode_t code;
 };
 
-tokcode_t get_keyword_or_id(const char *const lexeme)
+static inline const struct token *_tok_binsearch(const struct token *const tab, char *const lexeme, const unsigned int count)
 {
-    static const struct tok_t keystab[] = {
-#pragma push_macro("defkey")
-
-#ifndef defkey
-#   define defkey(tok_name, tok_lexeme) { .code = TOK_ ## tok_name, .lexm = tok_lexeme },
-#endif
-
-#include "calc-parse.inc"
-
-#ifdef defkey
-#   undef defkey
-#endif
-
-#pragma pop_macro("defkey")
-
-        NULL
-    };
-
-    static const int count = (sizeof(keystab) / sizeof(*keystab));
-
-#if CALC_SORTED_KEYWORDS // if keywords are soreted, it does a binary search
     int hig = 0, mid, low = count - 1, k = 0;
 
     do
     {
         mid = (hig + low) >> 1;
 
-        switch (numcmp(*(lexeme + k), *(keystab[mid].lexm + k)))
+        switch (numcmp(*(lexeme + k), *(tab[mid].lexm + k)))
         {
         case +1:
             hig = mid + 1, k = 0;
@@ -239,626 +359,130 @@ tokcode_t get_keyword_or_id(const char *const lexeme)
             break;
 
         default:
-            if (streq(lexeme, keystab[mid].lexm))
-                return keystab[mid].code;
+            if (streq(lexeme, tab[mid].lexm))
+                return &tab[mid];
             else
                 ++k;
-            
+
             break;
         }
     } while (hig <= low);
 
-    return TOK_IDENT;
-#else // if keywords aren't sorted, it does a linear search
+    return NULL;
+}
+
+static inline const struct token *_tok_linsearch(const struct token *const tab, char *const lexeme, const unsigned int count)
+{
     int i;
 
     for (i = 0; i < count; i++)
     {
-        if (streq(lexeme, keystab[i].lexm))
-            return keystab[i].code;
+        if (streq(lexeme, tab[i].lexm))
+            return &tab[i];
         else
             continue;
     }
 
-    return TOK_IDENT;
+    return NULL;
+}
+
+static const struct token *_getkword(char *const lexeme)
+{
+    static const struct token keystab[] = {
+#pragma push_macro("defkey")
+
+#ifndef defkey
+#   define defkey(tok_name, tok_lexeme) {.code = TOK_##tok_name, .lexm = tok_lexeme},
 #endif
+
+#include "calc-parse.inc"
+
+#ifdef defkey
+#   undef defkey
+#endif
+
+#pragma pop_macro("defkey")
+
+        NULL};
+
+    static const int count = (sizeof(keystab) / sizeof(*keystab));
+
+#if CALC_SORTED_KEYWORDS // if keywords are soreted, it does a binary search
+    return _tok_binsearch(keystab, lexeme, count);
+#else  // if keywords aren't sorted, it does a linear search
+    return _tok_linsearch(keystab, lexeme, count);
+#endif // CALC_SORTED_KEYWORDS
 }
 
-// +---- Internal
-
-#pragma region Internal (Lexical Errors)
-
-// TODO: better exception management...
-
-static inline int expected(const char *const what, char *const got)
+static const struct token *_getpragm(char *const lexeme)
 {
-    if (got)
-        return errorfn("syntax error: expected %s (got '%s')", what, got);
+    static const struct token pragtab[] = {
+#pragma push_macro("defprg")
+
+#ifndef defprg
+#   define defprg(tok_name, tok_lexeme) {.code = TOK_##tok_name, .lexm = tok_lexeme},
+#endif
+
+#include "calc-parse.inc"
+
+#ifdef defprg
+#   undef defprg
+#endif
+
+#pragma pop_macro("defprg")
+
+        NULL};
+
+    static const int count = (sizeof(pragtab) / sizeof(*pragtab));
+
+#if CALC_SORTED_PRAGMATICS // if pragmatics are soreted, it does a binary search
+    return _tok_binsearch(pragtab, lexeme, count);
+#else  // if pragmatics aren't sorted, it does a linear search
+    return _tok_linsearch(pragtab, lexeme, count);
+#endif // CALC_SORTED_PRAGMATICS
+}
+
+
+
+#pragma endregion
+
+// +---- Internal (Lexical Scanner) -- End
+
+tokcode_t getkword(char *const lexeme)
+{
+    const struct token *tok = _getkword(lexeme);
+
+    if (tok)
+        return tok->code;
     else
-        return errorfn("syntax error: expected %s", what, got);
+        return TOK_IDENT;
 }
 
-static inline int unexpected(const char *const what, char *const expected)
+tokcode_t getpragm(char *const lexeme)
 {
-    return errorfn("syntax error: unexpected %s (expected '%s')", what, expected);
+    const struct token *tok = _getpragm(lexeme);
+
+    if (tok)
+        return tok->code;
+    else
+        return TOK_IDENT;
 }
 
-static inline int notvalid(const char *const what)
+tokcode_t gettoken(srcbuf_t *const sb, char **const lexeme)
 {
-    return errorfn("syntax error: '%s' is not a valid token", what);
+    const struct token *tok = _gettoken(sb);
+
+    if (tok)
+        return (lexeme ? *lexeme = tok->lexm : 0), tok->code;
+    else
+        return TOK_INVAL;
 }
 
-#pragma endregion
+#ifndef _CALC_MINIMAL_BUILD
 
-// +---- Internal -- End
-
-// +---- Scanner
-
-#pragma region Internal (Lexical Scanner)
-
-static tokcode_t _gettok(doub_t *const src, char **const lexeme)
+const char *const toktostr(const tokcode_t tok)
 {
-    int l, n = 0, o = 0; // lookahead character
-
-    while (isspace(l = dtopc(src)))
-        src->buf++, src->pos++;
-
-    static char t[BUFSIZ] = { 0 };
-
-    switch (l)
-    {
-        // Trivia
-
-    case EOF:
-        return TOK_ENDOF;
-
-    case NUL:
-        return TOK_NULCH;
-
-        // Brackets
-
-    case '(':
-        src->fwd++;
-
-        while (isspace(l = dtopc(src)))
-            src->fwd++;
-
-        if (l == ')')
-            return src->fwd++, TOK_PUNCT_ROUND;
-        else
-            return TOK_PUNCT_LROUN;
-
-    case ')':
-        return src->fwd++, TOK_PUNCT_RROUN;
-
-    case '[':
-        src->fwd++;
-
-        while (isspace(l = dtopc(src)))
-            src->fwd++;
-
-        if (l == ']')
-            return src->fwd++, TOK_PUNCT_SQRED;
-        else
-            return TOK_PUNCT_LSQRD;
-
-    case ']':
-        return src->fwd++, TOK_PUNCT_RSQRD;
-
-    case '{':
-        src->fwd++;
-
-        while (isspace(l = dtopc(src)))
-            src->fwd++;
-
-        if (l == '}')
-            return src->fwd++, TOK_PUNCT_CURLY;
-        else
-            return TOK_PUNCT_LCURL;
-
-    case '}':
-        return src->fwd++, TOK_PUNCT_RCURL;
-
-        // Punctuators
-
-    case '~':
-        return src->fwd++, TOK_PUNCT_TILDE;
-
-    case '?':
-        src->fwd++;
-
-        if ((l = dtopc(src)) == '?')
-            return src->fwd++, TOK_PUNCT_QUEST_QUEST;
-        else if (l == '=')
-            return src->fwd++, TOK_PUNCT_QUEST_EQUAL;
-        else
-            return TOK_PUNCT_QUEST;
-
-    case '!':
-        src->fwd++;
-
-        if ((l = dtopc(src)) == '!')
-            return src->fwd++, TOK_PUNCT_EXCLM_EXCLM;
-        else if (l == '=')
-            return src->fwd++, TOK_PUNCT_EXCLM_EQUAL;
-        else
-            return TOK_PUNCT_EXCLM;
-
-    case '&':
-        src->fwd++;
-
-        if ((l = dtopc(src)) == '&')
-            return src->fwd++, TOK_PUNCT_AMPER_AMPER;
-        else if (l == '=')
-            return src->fwd++, TOK_PUNCT_AMPER_EQUAL;
-        else
-            return TOK_PUNCT_AMPER;
-
-    case '|':
-        src->fwd++;
-
-        if ((l = dtopc(src)) == '|')
-            return src->fwd++, TOK_PUNCT_PIPEE_PIPEE;
-        else if (l == '=')
-            return src->fwd++, TOK_PUNCT_PIPEE_EQUAL;
-        else
-            return TOK_PUNCT_PIPEE;
-
-    case '^':
-        src->fwd++;
-
-        if (dtopc(src) == '=')
-            return src->fwd++, TOK_PUNCT_CARET_EQUAL;
-        else
-            return TOK_PUNCT_CARET;
-
-    case '<':
-        src->fwd++;
-
-        if ((l = dtopc(src)) == '<')
-        {
-            src->fwd++;
-
-            if (dtopc(src) == '=')
-                return src->fwd++, TOK_PUNCT_LESST_LESST_EQUAL;
-            else
-                return TOK_PUNCT_LESST_LESST;
-        }
-        else if (l == '=')
-        {
-            return src->fwd++, TOK_PUNCT_LESST_EQUAL;
-        }
-        else if (l == '>')
-        {
-            return src->fwd++, TOK_PUNCT_EQVLN;
-        }
-        else
-        {
-            return TOK_PUNCT_LESST;
-        }
-
-    case '>':
-        src->fwd++;
-
-        if (dtopc(src) == '>')
-        {
-            src->fwd++;
-
-            if (dtopc(src) == '=')
-                return src->fwd++, TOK_PUNCT_GREAT_GREAT_EQUAL;
-            else
-                return TOK_PUNCT_GREAT_GREAT;
-        }
-        else if (l == '=')
-        {
-            return src->fwd++, TOK_PUNCT_GREAT_EQUAL;
-        }
-        else
-        {
-            return TOK_PUNCT_GREAT;
-        }
-
-    case '=':
-        src->fwd++;
-
-        if ((l = dtopc(src)) == '=')
-            return src->fwd++, TOK_PUNCT_EQUAL_EQUAL;
-        else if (l == '>')
-            return src->fwd++, TOK_PUNCT_THENN;
-        else
-            return TOK_PUNCT_EQUAL;
-
-    case '+':
-        src->fwd++;
-
-        if ((l = dtopc(src)) == '+')
-            return src->fwd++, TOK_PUNCT_PLUSS_PLUSS;
-        else if (l == '=')
-            return src->fwd++, TOK_PUNCT_PLUSS_EQUAL;
-        else
-            return TOK_PUNCT_PLUSS;
-
-    case '-':
-        src->fwd++;
-
-        if ((l = dtopc(src)) == '-')
-            return src->fwd++, TOK_PUNCT_MINUS_MINUS;
-        else if (l == '=')
-            return src->fwd++, TOK_PUNCT_MINUS_EQUAL;
-        else if (l == '>')
-            return src->fwd++, TOK_PUNCT_ARROW;
-        else
-            return TOK_PUNCT_MINUS;
-
-    case '*':
-        src->fwd++;
-
-        if (dtopc(src) == '=')
-            return src->fwd++, TOK_PUNCT_STARR_EQUAL;
-        else
-            return TOK_PUNCT_STARR;
-
-    case '/':
-        src->fwd++;
-
-        if (dtopc(src) == '=')
-            return src->fwd++, TOK_PUNCT_SLASH_EQUAL;
-        else
-            return TOK_PUNCT_SLASH;
-
-    case '%':
-        src->fwd++;
-
-        if (dtopc(src) == '=')
-            return src->fwd++, TOK_PUNCT_PERCN_EQUAL;
-        else
-            return TOK_PUNCT_PERCN;
-
-    case '#':
-        return src->fwd++, TOK_PUNCT_SHARP;
-
-    case '@':
-        src->fwd++;
-
-        if (isalnum(l = dtopc(src)) || (l == '_') || (l == '$') || (l == '.'))
-        {
-            dadvance(src);
-
-            do
-                src->fwd++;
-            while (isalnum(l = dtopc(src)) || (l == '_') || (l == '$') || (l == '.'));
-
-            dchopto(src, t);
-
-            if (lexeme)
-                *lexeme = t;
-
-            return TOK_IDENT;
-        }
-        else
-        {
-            return TOK_PUNCT_ATSIG;
-        }
-
-    case ',':
-        return src->fwd++, TOK_PUNCT_COMMA;
-
-    case '.':
-        src->fwd++;
-
-        if ((l = dtopc(src)) == '.')
-        {
-            src->fwd++;
-
-            if (dtopc(src) == '.')
-                return src->fwd++, TOK_PUNCT_ELLIP;
-            else
-                return TOK_PUNCT_POINT_POINT;
-        }
-        else if (isdigit(l))
-        {
-            goto real_part;
-        }
-        else
-        {
-            return TOK_PUNCT_POINT;
-        }
-
-    case ':':
-        src->fwd++;
-
-        if (dtopc(src) == ':')
-            return src->fwd++, TOK_PUNCT_COLON_COLON;
-        else
-            return TOK_PUNCT_COLON;
-
-    case ';':
-        return src->fwd++, TOK_PUNCT_SEMIC;
-
-    case '\\':
-        return src->fwd++, TOK_PUNCT_BACKS;
-
-    case '`':
-        return src->fwd++, TOK_PUNCT_BACKT;
-
-        // Reserved Words And Identifiers
-
-    case 'a':   case 'b':   case 'c':   case 'd':   case 'e':   case 'f':
-    case 'g':   case 'h':   case 'i':   case 'j':   case 'k':   case 'l':
-    case 'm':   case 'n':   case 'o':   case 'p':   case 'q':   case 'r':
-    case 's':   case 't':   case 'u':   case 'v':   case 'w':   case 'x':
-    case 'y':   case 'z':
-        src->fwd++;
-
-        if (islower(l = dtopc(src)))
-        {
-            do
-                src->fwd++;
-            while (islower(l = dtopc(src)));
-
-            if (!isalnum(l) && (l != '_') && (l != '$'))
-            {
-                tokcode_t c;
-
-                dchopto(src, t);
-
-                if (lexeme && ((c = get_keyword_or_id(t)) == TOK_IDENT))
-                    *lexeme = t;
-
-                return c;
-            }
-            else
-            {
-                goto id;
-            }
-        }
-        else
-        {
-            src->fwd--;
-        }
-
-        if (isalnum(l = dtopc(src)) || (l == '_') || (l == '$'))
-        {
-    case 'A':   case 'B':   case 'C':   case 'D':   case 'E':   case 'F':
-    case 'G':   case 'H':   case 'I':   case 'J':   case 'K':   case 'L':
-    case 'M':   case 'N':   case 'O':   case 'P':   case 'Q':   case 'R':
-    case 'S':   case 'T':   case 'U':   case 'V':   case 'W':   case 'X':
-    case 'Y':   case 'Z':   case '_':   case '$':   id:
-            do
-                src->fwd++;
-            while (isalnum(l = dtopc(src)) || (l == '_') || (l == '$'));
-
-            dchopto(src, t);
-
-            if (lexeme)
-                *lexeme = t;
-
-            return TOK_IDENT;
-        }
-
-        // Numerics
-
-    case '0':
-        do
-            src->fwd++;
-        while ((l = dtopc(src)) == '0');
-
-        if ((l == 'B') || (l == 'b'))
-        {
-            src->fwd++;
-
-            if ((((l = dtopc(src)) == '0') || (l == '1')))
-            {
-                do
-                {
-                    src->fwd++;
-
-                    if (!n && (l == '0'))
-                        continue;
-                    else
-                        t[n++] = l;
-                } while ((((l = dtopc(src)) == '0') || (l == '1')));
-
-                if (!n)
-                    t[n++] = '0';
-            }
-            else
-            {
-                return expected("binary digit", unesc(t, l)), TOK_INVAL;
-            }
-
-            if (lexeme)
-                t[n] = NUL, *lexeme = t;
-
-            return TOK_LITER_INTGR_BIN;
-        }
-        else if ((l == 'C') || (l == 'c'))
-        {
-            src->fwd++;
-
-            if ((((l = dtopc(src)) >= '0') && (l <= '7')))
-            {
-                do
-                {
-                    src->fwd++;
-
-                    if (!n && (l == '0'))
-                        continue;
-                    else
-                        t[n++] = l;
-                } while ((((l = dtopc(src)) >= '0') && (l <= '7')));
-
-                if (!n)
-                    t[n++] = '0';
-            }
-            else
-            {
-                return expected("octal digit", unesc(t, l)), TOK_INVAL;
-            }
-
-            if (lexeme)
-                t[n] = NUL, *lexeme = t;
-
-            return TOK_LITER_INTGR_OCT;
-        }
-        else if ((l == 'D') || (l == 'd') || isdigit(l))
-        {
-            if (l >= 'D')
-                src->fwd++;
-
-            if ((((l = dtopc(src)) >= '0') && (l <= '9')))
-            {
-    case '1': case '2': case '3':
-    case '4': case '5': case '6':
-    case '7': case '8': case '9':
-                do
-                {
-                    src->fwd++;
-
-                    if (!n && (l == '0'))
-                        continue;
-                    else
-                        t[n++] = l;
-                } while ((((l = dtopc(src)) >= '0') && (l <= '9')));
-
-                if (!n)
-                    t[n++] = '0';
-            }
-            else
-            {
-                return expected("decimal digit", unesc(t, l)), TOK_INVAL;
-            }
-
-            if (l == DECSEP)
-            {
-            real:
-                src->fwd++, t[n++] = l;
-
-                if (isdigit(l = dtopc(src)))
-                {
-                real_part:
-                    do
-                        src->fwd++, t[n++] = l;
-                    while (((l = dtopc(src)) >= '0') && (l <= '9'));
-
-                    while ((t[n - 1] == '0') && (t[n - 2] != DECSEP))
-                        --n;
-
-                expo_part:
-                    if ((l == 'E') || (l == 'e'))
-                    {
-                        src->fwd++, t[n++] = l;
-                        
-                        if (((l = dtopc(src)) == '+') || (l == '-'))
-                            src->fwd++, t[n++] = l;
-                        
-                        if (isdigit(l = dtopc(src)))
-                        {
-                            o = n;
-
-                            do
-                            {
-                                src->fwd++;
-
-                                if ((n == o) && (l == '0'))
-                                    continue;
-                                else
-                                    t[n++] = l;
-                            } while (isdigit(l = dtopc(src)));
-
-                            if (n == o)
-                                t[n++] = '0';
-                        }
-                        else
-                        {
-                            return unexpected(unesc(t, l), "numeric exponent"), TOK_INVAL;
-                        }
-                    }
-
-                    if (lexeme)
-                        t[n] = NUL, *lexeme = t;
-
-                    return TOK_LITER_FLOAT;
-                }
-                else
-                {
-                    return unexpected(unesc(t, l), "real part"), TOK_INVAL;
-                }
-            }
-            else
-            {
-                if (lexeme)
-                    t[n] = NUL, *lexeme = t;
-
-                return TOK_LITER_INTGR_DEC;
-            }
-        }
-        else if ((l == 'X') || (l == 'x'))
-        {
-            src->fwd++;
-
-            if (((((l = dtopc(src)) >= '0') && (l <= '9')) || ((l >= 'A') && (l <= 'F')) || ((l >= 'a') && (l <= 'f'))))
-            {
-                do
-                {
-                    src->fwd++;
-
-                    if (!n && (l == '0'))
-                        continue;
-                    else
-                        t[n++] = l;
-                } while (((((l = dtopc(src)) >= '0') && (l <= '9')) || ((l >= 'A') && (l <= 'F')) || ((l >= 'a') && (l <= 'f'))));
-
-                if (!n)
-                    t[n++] = '0';
-            }
-            else
-            {
-                return expected("hexadecimal digit", unesc(t, l)), TOK_INVAL;
-            }
-
-            if (lexeme)
-                t[n] = NUL, *lexeme = t;
-
-            return TOK_LITER_INTGR_HEX;
-        }
-        else if (l == DECSEP)
-        {
-            goto real;
-        }
-        else
-        {
-            if (lexeme)
-                *lexeme = "0";
-
-            return TOK_LITER_INTGR_DEC;
-        }
-
-        // Others
-
-    default:
-        src->fwd++;
-        return notvalid(unesc(t, l)), TOK_INVAL;
-    }
-}
-
-#pragma endregion
-
-// +---- Scanner -- End
-
-tokcode_t gettok(doub_t *const src, char **lexeme)
-{
-    if (lexeme)
-        *lexeme = NULL;
-
-    return _gettok(src, lexeme);
-}
-
-#ifdef CALC_DEBUG
-
-const char *const tokcode_to_str(const tokcode_t code)
-{
-    switch (code)
+    switch (tok)
     {
     case TOK_INVAL:
         return "<inv>";
@@ -866,26 +490,27 @@ const char *const tokcode_to_str(const tokcode_t code)
 #pragma push_macro("defstr")
 
 #ifndef defstr
-#   define defstr(name, lexeme) case TOK_ ## name: \
-                                    return lexeme;
+#define defstr(name, lexeme) \
+    case TOK_##name:         \
+        return lexeme;
 #endif
 
 #include "calc-parse.inc"
 
 #ifdef defstr
-#   undef defstr
+#undef defstr
 #endif
 
 #pragma pop_macro("defstr")
 
     default:
-        return "<???>";
+        return "<\?\?\?>";
     }
 }
 
-const char *const tokname_to_str(const tokcode_t code)
+const char *const tokname(const tokcode_t tok)
 {
-    switch (code)
+    switch (tok)
     {
     case TOK_INVAL:
         return "INVALID";
@@ -893,14 +518,15 @@ const char *const tokname_to_str(const tokcode_t code)
 #pragma push_macro("defstr")
 
 #ifndef defstr
-#   define defstr(name, lexeme) case TOK_ ## name: \
-                                    return # name;
+#define defstr(name, lexeme) \
+    case TOK_##name:         \
+        return #name;
 #endif
 
 #include "calc-parse.inc"
 
 #ifdef defstr
-#   undef defstr
+#undef defstr
 #endif
 
 #pragma pop_macro("defstr")
@@ -910,42 +536,15 @@ const char *const tokname_to_str(const tokcode_t code)
     }
 }
 
-void tokenize()
+bool_t tokenize(FILE *const stream)
 {
-    char line[BUFSIZ];
-    bool_t end = FALSE;
-    lexer_t *lex = create_lexer(BUFSIZ, 32);
-
-    do
-    {
-        printf("TOK > ");
-        fgets(line, BUFSIZ, stdin);
-        dputs(lex->doub, line);
-
-        tokcode_t c;
-
-        do
-        {
-            c = lnext(lex);
-
-            if (lex->lexm)
-                printfn("(%02d) %-24s -> '%s'", (int)c, tokname_to_str(c), lex->lexm);
-            else
-                printfn("(%02d) %-24s -> '%s'", (int)c, tokname_to_str(c), tokcode_to_str(c));
-
-            if (c == TOK_KWORD_END)
-                end = TRUE;
-        } while (!end && (c > TOK_NULCH));
-
-        putln();
-    } while (!end);
-
-    hashtab_print(lex->htab);
-
-    return;
 }
 
-#endif // CALC_DEBUG
+bool_t tokenzto(FILE *const stream, FILE *const out)
+{
+}
+
+#endif // _CALC_MINIMAL_BUILD
 
 #pragma endregion
 
@@ -955,102 +554,19 @@ void tokenize()
 
 #pragma region Lexer
 
-lexer_t *create_lexer(unsigned int bufsiz, unsigned int tabsiz)
-{
-    lexer_t *lex = alloc(lexer_t);
+lexer_t *create_lexer(unsigned int bufsiz, unsigned int tabsiz);
+lexer_t *create_lexer_from(srcbuf_t *const sb, unsigned int tabsiz);
+void delete_lexer(lexer_t *const lex);
 
-    lex->doub = create_doub(NULL, bufsiz);
-    lex->htab = create_hashtab(tabsiz, NULL);
-    lex->hkey = NULL;
-    lex->look = 0;
-    lex->last = 0;
+hashbuc_t *ladd(lexer_t *const lex, char *const name);
+hashbuc_t *lget(lexer_t *const lex, char *const name);
+hashbuc_t *lset(lexer_t *const lex, char *const name, unsigned int data);
 
-    return lex;
-}
+tokcode_t llook(lexer_t *const lex);
+tokcode_t lnext(lexer_t *const lex);
 
-tokcode_t llook(lexer_t *const lex) // lookahead
-{
-    tokcode_t code = _gettok(lex->doub, NULL);
-
-    if (code != TOK_INVAL)
-        dretreat(lex->doub);
-    else
-        dadvance(lex->doub);
-
-    return lex->look = code;
-}
-
-tokcode_t lnext(lexer_t *const lex) // lex
-{
-    lex->lexm = NULL;
-
-    tokcode_t code = _gettok(lex->doub, &lex->lexm);
-
-    if (lex->lexm && (code == TOK_IDENT))
-        lex->hkey = hashtab_add(lex->htab, strndcpy(NULL, lex->lexm, lex->doub->fwd), (lex->htab->used > 0 ? lex->hkey->data + 1 : 0));
-
-    dadvance(lex->doub);
-
-    return lex->last = code;
-}
-
-bool_t lmatch(lexer_t *const lex, tokcode_t match) // match
-{
-    lex->lexm = NULL;
-
-    tokcode_t code = _gettok(lex->doub, &lex->lexm);
-
-    if (code == match)
-    {
-        if (lex->lexm && (code == TOK_IDENT))
-            lex->hkey = hashtab_add(lex->htab, strndcpy(NULL, lex->lexm, lex->doub->fwd), (lex->htab->used > 0 ? lex->hkey->data + 1 : 0));
-
-        dadvance(lex->doub);
-
-        return lex->last = code, TRUE;
-    }
-    else
-    {
-        return lex->doub->fwd = 0, FALSE;
-    }
-}
-
-bool_t vlmatch(lexer_t *const lex, unsigned int count, ...)
-{
-    lex->lexm = NULL;
-
-    unsigned int i;
-    bool_t result = FALSE;
-    tokcode_t code = _gettok(lex->doub, &lex->lexm);
-    va_list list;
-
-    va_start(list, count);
-
-    for (i = 0; !result && (i < count); i++)
-    {
-        if (code == va_arg(list, tokcode_t))
-        {
-            if (lex->lexm && (code == TOK_IDENT))
-                lex->hkey = hashtab_add(lex->htab, strndcpy(NULL, lex->lexm, lex->doub->fwd), (lex->htab->used > 0 ? lex->hkey->data + 1 : 0));
-
-            dadvance(lex->doub);
-
-            lex->last = code;
-            result = TRUE;
-        }
-        else
-        {
-            continue;
-        }
-    }
-
-    va_end(list);
-
-    if (!result)
-        lex->doub->fwd = 0;
-
-    return result;
-}
+bool_t lmatch(lexer_t *const lex, tokcode_t match);
+bool_t vlmatch(lexer_t *const lex, unsigned int count, ...);
 
 #pragma endregion
 
@@ -1058,393 +574,4 @@ bool_t vlmatch(lexer_t *const lex, unsigned int count, ...)
 
 #pragma endregion
 
-/* =---- Syntactic Analyzer ------------------------------------= */
-
-#pragma region Syntactic Analyzer
-
-// +---- Abstract Syntax Tree
-
-#pragma region Abstract Syntax Tree
-
-// +---- AST Expressions
-
-#pragma region AST Expressions
-
-static inline ast_expr_t *_create_ast_expr(ast_expr_kind_t kind)
-{
-    ast_expr_t *expr = alloc(ast_expr_t);
-
-    expr->kind = kind;
-
-    switch (kind)
-    {
-    case AST_EXPR_UNSIG:
-        expr->data.unsig = 0;
-        break;
-
-    case AST_EXPR_SIGND:
-        expr->data.signd = 0;
-        break;
-
-    case AST_EXPR_UNARY:
-        expr->data.unary = alloc(ast_expr_unary_t);
-        break;
-
-    case AST_EXPR_BNARY:
-        expr->data.bnary = alloc(ast_expr_bnary_t);
-        break;
-
-    case AST_EXPR_TNARY:
-        expr->data.tnary = alloc(ast_expr_tnary_t);
-        break;
-
-    case AST_EXPR_LISTS:
-        expr->data.lists = alloc(ast_expr_lists_t);
-        break;
-
-    default:
-        errorfn("syntax error: expression code '%d' not valid", kind);
-        break;
-    }
-
-    return expr;
-}
-
-// Unary Expressions
-
-ast_expr_t *create_ast_expr_unary(ast_expr_t *const val, ast_expr_unop_t op)
-{
-    ast_expr_t *expr = _create_ast_expr(AST_EXPR_UNARY);
-
-    expr->data.unary->val = val;
-    expr->data.unary->op = op;
-
-    return expr;
-}
-
-// Binary Expressions
-
-ast_expr_t *create_ast_expr_bnary(ast_expr_t *const lhs, ast_expr_t *const rhs, ast_expr_bnop_t op)
-{
-    ast_expr_t *expr = _create_ast_expr(AST_EXPR_BNARY);
-
-    expr->data.bnary->lhs = lhs;
-    expr->data.bnary->rhs = rhs;
-    expr->data.bnary->op = op;
-
-    return expr;
-}
-
-// Ternary Expressions
-
-ast_expr_t *create_ast_expr_tnary(ast_expr_t *const vl1, ast_expr_t *const vl2, ast_expr_t *const vl3, ast_expr_tnop_t op)
-{
-    ast_expr_t *expr = _create_ast_expr(AST_EXPR_TNARY);
-
-    expr->data.tnary->vl1 = vl1;
-    expr->data.tnary->vl2 = vl2;
-    expr->data.tnary->vl3 = vl3;
-    expr->data.tnary->op = op;
-
-    return expr;
-}
-
-// Other Expressions
-
-ast_expr_t *create_ast_expr_lists(ast_expr_t *const expr, ast_expr_t *const next)
-{
-    ast_expr_t *list = _create_ast_expr(AST_EXPR_LISTS);
-
-    list->data.lists->expr = expr;
-    list->data.lists->next = next;
-
-    return list;
-}
-
-// AST Expression node
-
-ast_expr_t *create_ast_expr(ast_expr_kind_t kind)
-{
-    return _create_ast_expr(kind);
-}
-
-#pragma endregion
-
-// +---- AST Expressions -- End
-
-#pragma endregion
-
-// +---- Abstract Syntax Tree -- End
-
-// +---- Parser
-
-#pragma region Parser
-
-// +---- Expressions Parser
-
-#pragma region Expressions Parser
-
-ast_expr_t *parse_ast_expr(lexer_t *const lex)
-{
-    ast_expr_t *expr;
-
-    expr = parse_ast_expr_tnary(lex);
-
-    while (lmatch(lex, TOK_PUNCT_COMMA))
-        expr = create_ast_expr_lists(expr, parse_ast_expr_tnary(lex));
-
-    return expr;
-}
-
-// Value Expressions
-
-ast_expr_t *parse_ast_expr_value(lexer_t *const lex)
-{
-    extern ast_expr_t *parse_ast_expr_unary_post(lexer_t *const lex, ast_expr_t *const val);
-
-    ast_expr_t *expr = NULL;
-
-    switch (llook(lex))
-    {
-    case TOK_IDENT:
-        break;
-
-    case TOK_LITER_INTGR_BIN:
-        lnext(lex);
-
-        expr = create_ast_expr(AST_EXPR_UNSIG);
-        expr->data.unsig = strtoull(lex->lexm, NULL, 0x02);
-        break;
-
-    case TOK_LITER_INTGR_OCT:
-        lnext(lex);
-
-        expr = create_ast_expr(AST_EXPR_UNSIG);
-        expr->data.unsig = strtoull(lex->lexm, NULL, 0x08);
-        break;
-
-    case TOK_LITER_INTGR_DEC:
-        lnext(lex);
-
-        expr = create_ast_expr(AST_EXPR_UNSIG);
-        expr->data.unsig = strtoull(lex->lexm, NULL, 0x0A);
-        break;
-
-    case TOK_LITER_INTGR_HEX:
-        lnext(lex);
-
-        expr = create_ast_expr(AST_EXPR_UNSIG);
-        expr->data.unsig = strtoull(lex->lexm, NULL, 0x10);
-        break;
-
-    case TOK_LITER_FLOAT:
-        lnext(lex);
-
-        expr = create_ast_expr(AST_EXPR_REALL);
-        expr->data.reall = strtold(lex->lexm, NULL);
-        break;
-
-    case TOK_PUNCT_LROUN:
-        lnext(lex);
-
-        expr = parse_ast_expr(lex);
-
-        if (!lmatch(lex, TOK_PUNCT_RROUN))
-            return expected("')'", NULL), NULL;
-
-        break;
-
-    default:
-        errorfn("syntax error: invalid constant value '%s'", lex->lexm);
-        break;
-    }
-
-    return parse_ast_expr_unary_post(lex, expr);
-}
-
-// Unary Expressions
-
-// +---- Internal (Unary Expressions)
-
-#pragma region Internal (Unary Expressions)
-
-static ast_expr_t *parse_ast_expr_unary_sign(lexer_t *const lex, tokcode_t op)
-{
-    ast_expr_t *val;
-
-    if (vlmatch(lex, 2, TOK_PUNCT_PLUSS, TOK_PUNCT_MINUS))
-        val = parse_ast_expr_unary_sign(lex, lex->last);
-    else
-        val = parse_ast_expr_value(lex);
-
-    return create_ast_expr_unary(val, op);
-}
-
-static ast_expr_t *parse_ast_expr_unary_pmul(lexer_t *const lex, ast_expr_t *const val) // parenthesis multiplication
-{
-    ast_expr_t *expr = val;
-
-    do
-    {
-        expr = create_ast_expr_bnary(expr, parse_ast_expr(lex), OP_BNARY_MUL);
-
-        if (!lmatch(lex, TOK_PUNCT_RROUN))
-            return expected("')", NULL), expr;
-    } while (lmatch(lex, TOK_PUNCT_LROUN));
-
-    return expr;
-}
-
-static ast_expr_t *parse_ast_expr_unary_post(lexer_t *const lex, ast_expr_t *const val)
-{
-    ast_expr_t *expr = val;
-
-    if (vlmatch(lex, 2, TOK_PUNCT_PLUSS_PLUSS, TOK_PUNCT_MINUS_MINUS))
-        expr = create_ast_expr_unary(expr, lex->last);
-
-    if (lmatch(lex, TOK_PUNCT_LROUN))
-        expr = parse_ast_expr_unary_pmul(lex, expr);
-
-    return expr;
-}
-
-#pragma endregion
-
-// +---- Internal (Unary Expressions) -- End
-
-ast_expr_t *parse_ast_expr_unary(lexer_t *const lex)
-{
-    ast_expr_t *expr = NULL;
-
-    if (vlmatch(lex, 2, TOK_PUNCT_PLUSS, TOK_PUNCT_MINUS))
-        expr = parse_ast_expr_unary_sign(lex, lex->last);
-
-    return expr ? expr : parse_ast_expr_value(lex);
-}
-
-// Binary Expressions
-
-// +---- Internal (Binary Expressions)
-
-#pragma region Internal (Binary Expressions)
-
-static ast_expr_t *parse_ast_expr_bnary_prods(lexer_t *const lex, ast_expr_t *lhs, tokcode_t op)
-{
-    bool_t flag;
-    ast_expr_t *expr, *rhs;
-
-    do
-    {
-        rhs = parse_ast_expr_unary(lex);
-        expr = create_ast_expr_bnary(lhs, rhs, op);
-
-        if (flag = vlmatch(lex, 3, TOK_PUNCT_STARR, TOK_PUNCT_SLASH, TOK_PUNCT_PERCN))
-            lhs = expr, op = lex->last;
-    } while (flag);
-
-    return expr;
-}
-
-static ast_expr_t *parse_ast_expr_bnary_summs(lexer_t *const lex, ast_expr_t *lhs, tokcode_t op)
-{
-    bool_t flag;
-    ast_expr_t *expr, *rhs;
-
-    do
-    {
-        rhs = parse_ast_expr_unary(lex);
-
-        if (vlmatch(lex, 3, TOK_PUNCT_STARR, TOK_PUNCT_SLASH, TOK_PUNCT_PERCN))
-            rhs = parse_ast_expr_bnary_prods(lex, rhs, lex->last);
-
-        expr = create_ast_expr_bnary(lhs, rhs, op);
-
-        if (flag = vlmatch(lex, 2, TOK_PUNCT_PLUSS, TOK_PUNCT_MINUS))
-            lhs = expr, op = lex->last;
-    } while (flag);
-
-    return expr;
-}
-
-static ast_expr_t *parse_ast_expr_bnary_bitws(lexer_t *const lex, ast_expr_t *lhs, tokcode_t op)
-{
-    bool_t flag;
-    ast_expr_t *expr, *rhs;
-
-    do
-    {
-        rhs = parse_ast_expr_unary(lex);
-
-        if (vlmatch(lex, 2, TOK_PUNCT_PLUSS, TOK_PUNCT_MINUS))
-            rhs = parse_ast_expr_bnary_summs(lex, rhs, lex->last);
-
-        expr = create_ast_expr_bnary(lhs, rhs, op);
-
-        if (flag = vlmatch(lex, 3, TOK_PUNCT_AMPER, TOK_PUNCT_PIPEE, TOK_PUNCT_CARET))
-            lhs = expr, op = lex->last;
-    } while (flag);
-
-    return expr;
-}
-
-#pragma endregion
-
-// +---- Internal (Binary Expressions) -- End
-
-ast_expr_t *parse_ast_expr_bnary(lexer_t *const lex)
-{
-    ast_expr_t *expr;
-
-    expr = parse_ast_expr_unary(lex);
-
-    if (vlmatch(lex, 3, TOK_PUNCT_STARR, TOK_PUNCT_SLASH, TOK_PUNCT_PERCN))
-        expr = parse_ast_expr_bnary_prods(lex, expr, lex->last);
-
-    if (vlmatch(lex, 2, TOK_PUNCT_PLUSS, TOK_PUNCT_MINUS))
-        expr = parse_ast_expr_bnary_summs(lex, expr, lex->last);
-
-    if (vlmatch(lex, 3, TOK_PUNCT_AMPER, TOK_PUNCT_PIPEE, TOK_PUNCT_CARET))
-        expr = parse_ast_expr_bnary_bitws(lex, expr, lex->last);
-
-    return expr;
-}
-
-// Ternary Expressions
-
-// +---- Internal (Ternary Expressions)
-
-#pragma region Internal (Ternary Expressions)
-
-#pragma endregion
-
-// +---- Internal (Ternary Expressions) -- End
-
-ast_expr_t *parse_ast_expr_tnary(lexer_t *const lex)
-{
-    ast_expr_t *expr;
-
-    expr = parse_ast_expr_bnary(lex);
-
-    if (lmatch(lex, TOK_PUNCT_QUEST))
-        ;
-
-    return expr;
-}
-
-#pragma endregion
-
-// +---- Expressions Parser -- End
-
-#pragma endregion
-
-// +---- Parser -- End
-
-#pragma endregion
-
-/* =------------------------------------------------------------= */
-
-#ifndef CALC_PARSE_C_
-#   define CALC_PARSE_C_
-#endif // CALC_PARSE_C_
-
-#pragma warning(pop)
+/* =---- Syntactic Analyser ------------------------------------= */

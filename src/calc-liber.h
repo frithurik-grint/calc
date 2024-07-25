@@ -55,9 +55,11 @@
 #include <ctype.h>
 #include <stdio.h>
 
+// +---- System Dependent Libraries
+
 #pragma region System Dependent Libraries
 
-#ifdef _WIN32            // unistd.h ports on windows
+#ifdef _WIN32
 #   include <io.h>
 #   include <process.h>
 #   include <direct.h>
@@ -71,7 +73,6 @@
 /// @brief Execution mode access.
 #   define X_OK 6
 
-#ifndef _UNICODE
 /// @brief Ddetermine accessibility of a file.
 /// @param path File or directory path.
 /// @param mode Read/write attribute.
@@ -79,11 +80,11 @@
 ///         The function returns -1 if the named
 ///         filedoesn't exist or doesn't have
 ///         the given mode.
-#       define access       _access
+#   define access       _access
 /// @brief Creates a second file descriptor for an open file.
 /// @param fd File descriptor referring to open file.
 /// @return A new file descriptor.
-#       define dup          _dup
+#   define dup          _dup
 /// @brief Reassigns a file descriptor.
 /// @param fd1 File descriptor referring to open file.
 /// @param fd2 Any file descriptor.
@@ -92,7 +93,7 @@
 ///         EBADF if the file descriptor is invalid,
 ///         or to EMFILE if no more file descriptors
 ///         are available.
-#       define dup2         _dup2
+#   define dup2         _dup2
 /// @brief Loads and executes new child processes.
 /// @param cmdname Path of the file to execute.
 /// @param argv Array of pointers to parameters.
@@ -100,30 +101,30 @@
 ///         to the calling process. A return value of -1
 ///         indicates an error, in which case the errno
 ///         global variable is set.
-#       define execve       _execve
+#   define execve       _execve
 /// @brief Changes the size of a file.
 /// @param fd File descriptor referring to an open file.
 /// @param size New length of the file in bytes.
 /// @return 0 if the file size is successfully changed.
 ///         A return value of -1 indicates an error.
-#       define ftruncate    _chsize
+#   define ftruncate    _chsize
 /// @brief Delete a file.
 /// @param filename Name of file to remove.
 /// @return 0 if successful. Otherwise, the function
 ///         returns -1 and sets errno to EACCES
-#       define unlink       _unlink
+#   define unlink       _unlink
 /// @brief Gets the file descriptor associated with a stream.
 /// @param stream Pointer to the FILE structure.
 /// @return _fileno returns the file descriptor. There's no
 ///         error return. The result is undefined if stream
 ///         doesn't specify an open file. 
-#       define fileno       _fileno
+#   define fileno       _fileno
 /// @brief Gets the current working directory.
 /// @param buffer Storage location for the path.
 /// @param maxlen Maximum length of the path in characters.
 /// @return Returns a pointer to buffer. A NULL return value
 ///         indicates an error.
-#       define getcwd       _getcwd
+#   define getcwd       _getcwd
 /// @brief Determines whether a file descriptor is
 ///        associated with a character device.
 /// @param fd File descriptor that refers to the device to
@@ -131,7 +132,7 @@
 /// @return _isatty returns a nonzero value if the descriptor
 ///         is associated with a character device. Otherwise,
 ///         _isatty returns 0.
-#       define chdir        _chdir
+#   define chdir        _chdir
 /// @brief Determines whether a file descriptor is
 ///        associated with a character device.
 /// @param fd File descriptor that refers to the device to
@@ -139,88 +140,14 @@
 /// @return _isatty returns a nonzero value if the descriptor
 ///         is associated with a character device. Otherwise,
 ///         _isatty returns 0.
-#       define isatty       _isatty
+#   define isatty       _isatty
 /// @brief Moves a file pointer to the specified location.
 /// @param fd File descriptor referring to an open file.
 /// @param offset Number of bytes from origin.
 /// @param origin Initial position.
 /// @return _lseek returns the offset, in bytes, of the
 ///         new position from the beginning of the file.
-#       define lseek        _lseek
-#else
-/// @brief Ddetermine accessibility of a file.
-/// @param path File or directory path.
-/// @param mode Read/write attribute.
-/// @return 0 if the file has the given mode.
-///         The function returns -1 if the named
-///         filedoesn't exist or doesn't have
-///         the given mode.
-#       define access       _waccess
-/// @brief Creates a second file descriptor for an open file.
-/// @param fd File descriptor referring to open file.
-/// @return A new file descriptor.
-#       define dup          _dup
-/// @brief Reassigns a file descriptor.
-/// @param fd1 File descriptor referring to open file.
-/// @param fd2 Any file descriptor.
-/// @return 0 to indicate success. If an error occurs,
-///         each function returns -1 and sets errno to
-///         EBADF if the file descriptor is invalid,
-///         or to EMFILE if no more file descriptors
-///         are available.
-#       define dup2         _dup2
-/// @brief Loads and executes new child processes.
-/// @param cmdname Path of the file to execute.
-/// @param argv Array of pointers to parameters.
-/// @return If successful, these functions don't return
-///         to the calling process. A return value of -1
-///         indicates an error, in which case the errno
-///         global variable is set.
-#       define execve       _wexecve
-/// @brief Changes the size of a file.
-/// @param fd File descriptor referring to an open file.
-/// @param size New length of the file in bytes.
-/// @return 0 if the file size is successfully changed.
-///         A return value of -1 indicates an error.
-#       define ftruncate    _chsize
-/// @brief Delete a file.
-/// @param filename Name of file to remove.
-/// @return 0 if successful. Otherwise, the function
-///         returns -1 and sets errno to EACCES
-#       define unlink       _wunlink
-/// @brief Gets the file descriptor associated with a stream.
-/// @param stream Pointer to the FILE structure.
-/// @return _fileno returns the file descriptor. There's no
-///         error return. The result is undefined if stream
-///         doesn't specify an open file. 
-#       define fileno       _fileno
-/// @brief Gets the current working directory.
-/// @param buffer Storage location for the path.
-/// @param maxlen Maximum length of the path in characters.
-/// @return Returns a pointer to buffer. A NULL return value
-///         indicates an error.
-#       define getcwd       _wgetcwd
-/// @brief Changes the current working directory.
-/// @param dirname Path of new working directory.
-/// @return These functions return a value of 0 if successful.
-///         A return value of -1 indicates failure.
-#       define chdir        _wchdir
-/// @brief Determines whether a file descriptor is
-///        associated with a character device.
-/// @param fd File descriptor that refers to the device to
-///           be tested.
-/// @return _isatty returns a nonzero value if the descriptor
-///         is associated with a character device. Otherwise,
-///         _isatty returns 0.
-#       define isatty       _isatty
-/// @brief Moves a file pointer to the specified location.
-/// @param fd File descriptor referring to an open file.
-/// @param offset Number of bytes from origin.
-/// @param origin Initial position.
-/// @return _lseek returns the offset, in bytes, of the
-///         new position from the beginning of the file.
-#       define lseek        _lseek
-#   endif // _UNICODE
+#   define lseek        _lseek
 
 #   ifdef _WIN64
 /// @brief Used for a count of bytes or an error indication.
@@ -237,8 +164,6 @@
 /// @brief stderr fileno.
 #   define STDERR_FILENO 2
 
-#   include <windows.h>
-
 CALC_C_HEADER_BEGIN
 
 /// @brief Gets memory page size.
@@ -250,7 +175,7 @@ CALC_C_HEADER_END
 /// @brief Gets memory page size.
 #   define pagesiz       _getpagesiz()
 /// @brief Gets data word size.
-#   define wordsiz       sizeof(int)
+#   define wordsiz       sizeof(void *)
 #else
 #   include <unistd.h>
 
@@ -260,11 +185,15 @@ CALC_C_HEADER_END
 #   define wordsiz       sizeof(int)
 #endif // _WIN32
 
+#pragma endregion
+
+// +---- System Dependent Libraries -- End
+
+// +---- System Output Functions
+
+#pragma region System Output Functions
+
 CALC_C_HEADER_BEGIN
-
-// +---- Output Functions
-
-#pragma region Output Functions
 
 /// @brief Puts the system endline char
 ///        sequence on stream.
@@ -276,60 +205,102 @@ int fputln(FILE *const stream);
 /// @return Number of characters printed.
 int putln();
 
-/// @brief Print a message in a stream.
+/// @brief Prints a message in a stream.
 /// @param stream Output stream.
 /// @param message Message to print.
 /// @return Number of characters written.
 int fprint(FILE *const stream, const char *const message);
-/// @brief Print a message in stdout.
+/// @brief Prints a message in stdout.
 /// @param message Message to print.
 /// @return Number of characters written.
 int print(const char *const message);
-/// @brief Print a message in a stream.
+/// @brief Prints a message in a stream.
 /// @param stream Output stream.
 /// @param message Message to print.
 /// @return Number of characters written.
 int fprintln(FILE *const stream, const char *const message);
-/// @brief Print a message in stdout.
+/// @brief Prints a message in stdout.
 /// @param message Message to print.
 /// @return Number of characters written.
 int println(const char *const message);
-/// @brief Print a message in stdout.
+
+/// @brief Prints a message in stdout.
 /// @param stream Output stream.
-/// @param format Fromat string to print.
+/// @param format Fromat of the string to print.
 /// @param arglist Arguments to use to format
 ///               the message.
 /// @return Number of characters written.
 int vfprintfn(FILE *const stream, const char *const format, va_list arglist);
-/// @brief Print a formatted message in a stream.
+/// @brief Prints a formatted message in a stream.
 /// @param stream Output stream.
-/// @param format Fromat string to print.
+/// @param format Fromat of the string to print.
 /// @param others Arguments to use to format
 ///               the message.
 /// @return Number of characters written.
 int fprintfn(FILE *const stream, const char *const format, ...);
 /// @brief Print a formatted message in stdout.
-/// @param format Fromat string to print.
+/// @param format Fromat of the string to print.
 /// @param arglist Arguments to use to format
 ///               the message.
 /// @return Number of characters written.
 int vprintfn(const char *const format, va_list arglist);
 /// @brief Print a formatted message in stdout.
-/// @param format Fromat string to print.
+/// @param format Fromat of the string to print.
 /// @param others Arguments to use to format
 ///               the message.
 /// @return Number of characters written.
 int printfn(const char *const format, ...);
 
-#pragma endregion
-
-// +---- Output Functions -- End
-
 CALC_C_HEADER_END
 
-#pragma endregion
+#pragma endregion System Output Functions
+
+// +---- System Output Functions -- End
 
 CALC_C_HEADER_BEGIN
+
+/* =---- Exceptions Management ---------------------------------= */
+
+#pragma region Exceptions Management
+
+// TODO: better exception management
+
+/// @brief Prints an error message.
+/// @param message Message to print.
+/// @return Number of characters written.
+int error(const char *const message);
+/// @brief Prints an error message on a line.
+/// @param message Message to print. If it's
+///                NULL it prints only an empty
+///                line.
+/// @return Number of characters written.
+int errorln(const char *const message);
+/// @brief Prints an error message.
+/// @param format Format of the message to print.
+/// @param arglist Arguments to use for format
+///                the message.
+/// @return Number of characters written.
+int verrorf(const char *const format, va_list arglist);
+/// @brief Prints an error message on a line.
+/// @param format Format of the message to print.
+/// @param arglist Arguments to use for format
+///                the message.
+/// @return Number of characters written.
+int verrorfn(const char *const format, va_list arglist);
+/// @brief 
+/// @param format Format of the message to print.
+/// @param others Arguments to use for format
+///                the message.
+/// @return Number of characters written.
+int errorf(const char *const format, ...);
+/// @brief 
+/// @param format Format of the message to print.
+/// @param others Arguments to use for format
+///                the message.
+/// @return Number of characters written.
+int errorfn(const char *const format, ...);
+
+#pragma endregion
 
 /* =---- Memory Management -------------------------------------= */
 
@@ -462,15 +433,19 @@ char *stralloc(size_t length);
 
 #pragma endregion
 
-/* =---- Datatypes Management ----------------------------------= */
+/* =---- Data Management ---------------------------------------= */
 
-#pragma region Datatypes Management
+#pragma region Data Management
 
 #ifndef numcmp
 /// @brief Compares two generic numbers.
 #   define numcmp(num1, num2)   ((num1) > (num2)) ? +1 : \
                                 ((num1) < (num2)) ? -1 : 0
 #endif // numcmp
+
+// +---- Datatypes
+
+#pragma region Datatypes
 
 // Boolean
 
@@ -517,6 +492,8 @@ typedef CALC_BYTE_T byte_t;
 ///        byte_t data type.
 #   define BYTE_MAX ((byte_t)0xFF)
 #endif // BYTE_MAX
+
+// String
 
 /// @brief Equals two strings.
 /// @param str1 First string. (is better to use a costant)
@@ -573,54 +550,39 @@ char *strdcpy(char *const dest, const char *const source);
 /// @return The pointer to unescaped str.
 char *unesc(char *const dest, int c);
 
-#pragma endregion
+/// @brief Formats a format string with a list of args.
+/// @param format String containing result format.
+/// @param arglist List of arguments to use to format
+///                the final value.
+/// @return The formatted string.
+char *vformatto(char *const dest, const char *const format, va_list arglist);
+/// @brief Formats a format string with some arguments.
+/// @param format String containing result format.
+/// @param others List of arguments to use to format
+///               the final value.
+/// @return The formatted string.
+char *formatto(char *const dest, const char *const format, ...);
 
-/* =---- Exceptions Management ---------------------------------= */
-
-#pragma region Exceptions Management
-
-// TODO: better exception management
-
-/// @brief Prints an error message.
-/// @param message Message to print.
-/// @return Number of characters written.
-int error(const char *const message);
-/// @brief Prints an error message on a line.
-/// @param message Message to print. If it's
-///                NULL it prints only an empty
-///                line.
-/// @return Number of characters written.
-int errorln(const char *const message);
-/// @brief Prints an error message.
-/// @param format Format of the message to print.
-/// @param arglist Arguments to use for format
-///                the message.
-/// @return Number of characters written.
-int verrorf(const char *const format, va_list arglist);
-/// @brief Prints an error message on a line.
-/// @param format Format of the message to print.
-/// @param arglist Arguments to use for format
-///                the message.
-/// @return Number of characters written.
-int verrorfn(const char *const format, va_list arglist);
-/// @brief 
-/// @param format Format of the message to print.
-/// @param others Arguments to use for format
-///                the message.
-/// @return Number of characters written.
-int errorf(const char *const format, ...);
-/// @brief 
-/// @param format Format of the message to print.
-/// @param others Arguments to use for format
-///                the message.
-/// @return Number of characters written.
-int errorfn(const char *const format, ...);
+/// @brief Formats a format string with a list of args.
+/// @param format String containing result format.
+/// @param arglist List of arguments to use to format
+///                the final value.
+/// @return The formatted string.
+char *vformat(const char *const format, va_list arglist);
+/// @brief Formats a format string with some arguments.
+/// @param format String containing result format.
+/// @param others List of arguments to use to format
+///               the final value.
+/// @return The formatted string.
+char *format(const char *const format, ...);
 
 #pragma endregion
 
-/* =---- Symbols Management ------------------------------------= */
+// +---- Datatypes -- End
 
-#pragma region Symbols Management
+// +---- Datastructs (DSA)
+
+#pragma region Datastructs
 
 /// @brief Hash code data type.
 typedef unsigned int hash_t;
@@ -640,383 +602,132 @@ typedef unsigned int hash_t;
 #   define HASH_INV ((hash_t)-1)
 #endif // HASH_INV
 
-/// @brief Compute hash code of a string.
-/// @param str Input string.
-/// @return Computed hash code.
-hash_t gethash(const char *const str);
+/// @brief Hashing function data type.
+typedef hash_t (*hashfnc_t)(char *const);
 
-// +---- Hash Table
+// Hash Table
 
-#pragma region Hash Table
-
-/// @brief Access record of a symbol.
-typedef struct _calc_symbol_key
+/// @brief Hash table bucket structure.
+typedef struct _calc_hash_table_bucket
 {
-    /// @brief Name of the symbol.
+    /// @brief Key string.
     char *name;
-    /// @brief References counter, it can be
-    ///        useful for garbage collection.
-    unsigned int             refs;
-    /// @brief Index of symbol datas in the
-    ///        symbols record.
-    unsigned int             data;
-    /// @brief Pointer to the collided symbol
-    ///        with the same hash.
-    struct _calc_symbol_key *next;
-} hashkey_t;
+    /// @brief Hash code of the bucket in
+    ///        the table.
+    hash_t hash;
+    /// @brief Index of the datas in the
+    ///        data record.
+    unsigned int data;
+    /// @brief Pointer to the colliding
+    ///        bucket with the same hash.
+    struct _calc_hash_table_bucket *next;
+} hashbuc_t;
 
-/// @brief Create a new symbol table key record.
-/// @param name Name of the symbol.
-/// @param data Index in symbol record.
+/// @brief Creates a new hash table bucket
+///        with data address and colliding
+///        bucket.
+/// @param name Key string.
+/// @param hash Computed hash code.
+/// @param data Data address.
 /// @param prev In case of collision this points
-///        to the other item.
-/// @return A pointer to the new symbol key.
-hashkey_t *create_hashkey(const char *const name, unsigned int data, hashkey_t *const prev);
+///             to the colliding bucket.
+/// @return A pointer to the new hash table
+///         bucket.
+hashbuc_t *create_hashbuc(char *const name, hash_t hash, unsigned int data, hashbuc_t *const prev);
+/// @brief Deletes the specified hash table
+///        bucket, releasing its memory. (this
+///        frees name pointer)
+/// @param bucket Bucket to delete.
+/// @return A pointer to the colliding bucket.
+hashbuc_t *delete_hashbuc(hashbuc_t *const bucket);
 
-#ifndef CALC_SYMBTAB_CHUNKSIZ
-/// @brief Number of symbols in a chunk.
-#   define CALC_SYMBTAB_CHUNKSIZ (BUFSIZ >> 2)
-#endif // CALC_SYMBTAB_CHUNKSIZ
+#ifndef CALC_HASHTAB_BUCKSNUM
+/// @brief Default number of buckets in a chunk
+///        of the hash table.
+#   define CALC_HASHTAB_BUCKSNUM 0xFF
+#endif // CALC_HASHTAB_BUCKSNUM
 
-/// @brief Hash table.
+/// @brief Hash table data structure.
 typedef struct _calc_hash_table
 {
-    /// @brief Pointer to first key.
-    hashkey_t                **keys;
-    /// @brief Number of max hashes.
-    unsigned int               size;
-    /// @brief Number of used hashes.
-    unsigned int               used;
-    /// @brief Previous hash table chunk.
+    /// @brief Array of pointers to the buckets.
+    hashbuc_t **buck;
+    /// @brief Hashing function for this table.
+    hashfnc_t func;
+    /// @brief Maximum number of buckets.
+    unsigned int size;
+    /// @brief Number of used buckets.
+    unsigned int used;
+    /// @brief Pointer to previous hash table
+    ///        chunk.
     struct _calc_hash_table *prev;
 } hashtab_t;
 
-/// @brief Create a symbol table.
-/// @param size Number of symbol key records.
-/// @param prev Previous symbol table chunk.
-/// @return A pointer to the new symbol table
-hashtab_t *create_hashtab(unsigned int size, hashtab_t *const prev);
-
-/// @brief Checks if a symbol is defined.
-/// @param tab Hash table reference.
-/// @param name Name of the symbol.
-/// @return TRUE if exists, else FALSE.
-bool_t hashtab_exists(hashtab_t *const tab, const char *const name);
-
-/// @brief Create a new symbol key if
-///        doesn't exists.
-/// @param tab Hash table reference.
-/// @param name Name of the symbol.
-/// @param attr Value to set to data attribute.
-/// @return Pointer to the symbol.
-hashkey_t *hashtab_add(hashtab_t *const tab, const char *const name, unsigned int attr);
-/// @brief Gets pointer to a symbol (if exists).
-/// @param tab Hash table reference.
-/// @param name Name of the symbol.
-/// @return Pointer to the symbol.
-hashkey_t *hashtab_get(hashtab_t *const tab, const char *const name);
-/// @brief Change data attribute value of a symbol (if exists).
-/// @param tab Hash table reference.
-/// @param name Name of the symbol.
-/// @param attr Value to set to data attribute.
-/// @return Pointer to the symbol.
-hashkey_t *hashtab_set(hashtab_t *const tab, const char *const name, unsigned int attr);
-
-/// @brief Free symbol table, deleting every entry.
-/// @param tab Hash table reference.
+/// @brief Creates a new hash table with the
+///        specified number of buckets.
+/// @param size Numeber of buckets to allocate
+///             in the chunk. (if size is 0 will
+///             be allocated a chunk of
+///             CALC_HASHTAB_BUCKSNUM buckets)
+/// @param prev Pointer to the previous chunk.
+/// @return A pointer to the new hash table chunk.
+hashtab_t *create_hashtab(unsigned int size, hashfnc_t func, hashtab_t *const prev);
+/// @brief Deletes the specified hash table with
+///        its buckets, releasing all used memory.
+/// @param tab Pointer to table to delete.
+/// @return A pointer to the previous hash table chunk.
 hashtab_t *delete_hashtab(hashtab_t *const tab);
 
-#ifdef CALC_DEBUG
+/// @brief If specified key is not inserted in the hash table
+///        chunk, inserts it, else gets it.
+/// @param tab Pointer to the hash table chunk on which operate.
+/// @param key Key to add or get.
+/// @return A pointer to the new (or old) hash bucket.
+hashbuc_t *hashtab_add(hashtab_t *const tab, char *const key);
+/// @brief Gets bucket with the specified key.
+/// @param tab Pointer to the hash table chunk on which operate.
+/// @param key Key to find.
+/// @return A pointer to the found bucket or null if not found.
+hashbuc_t *hashtab_get(hashtab_t *const tab, char *const key);
+/// @brief Sets the data address of the bucket at the specified
+///        key.
+/// @param tab Pointer to the hash table chunk on which operate.
+/// @param key Key to find.
+/// @param data Data address to set to the found bucket.
+/// @return A pointer to the found bucket or null if not found.
+hashbuc_t *hashtab_set(hashtab_t *const tab, char *const key, unsigned int data);
 
-/// @brief Prints symbol table entries on stdout.
-/// @param tab Hash table reference.
-void hashtab_print(hashtab_t *const tab);
+/// @brief Checks if hash table contains a specified key.
+/// @param tab Pointer to the hash table chunk on which operate.
+/// @param key Key to check.
+/// @return TRUE if the hash table contains the value, else FALSE.
+bool_t hashtab_contains(hashtab_t *const tab, char *const key);
 
-#endif // CALC_DEBUG
+/// @brief Removes an hash bucket from the table.
+/// @param tab Pointer to the hash table chunk on which operate.
+/// @param key Key of the bucket to remove.
+/// @return A pointer to the removed hash bucket.
+hashbuc_t *hashtab_remove(hashtab_t *const tab, char *const key);
+/// @brief Deletes an hash bucket from the table.
+/// @param tab Pointer to the hash table chunk on which operate.
+/// @param key Key of the bucket to delete.
+/// @return A pointer to the colliding bucket.
+hashbuc_t *hashtab_delete(hashtab_t *const tab, char *const key);
 
-#pragma endregion
+#ifndef _CALC_MINIMAL_BUILD
 
-// +---- Hash Table -- End
+/// @brief Dumps hash table content on a stream.
+/// @param stream Stream in which dump content of the hash
+///               table.
+/// @param tab Pointer to the last hash table chunk of the
+///            hash table to dump on the selected stream.
+void hashtab_dump(FILE *const stream, hashtab_t *const tab);
 
-// +---- Symbol Record
-
-#pragma region Symbol Record
-
-/// @brief Record for primitive types infos.
-typedef struct _calc_symbol_datatype  symb_dtype_t;
-/// @brief Record for structure types infos.
-typedef struct _calc_symbol_structure symb_stype_t;
-/// @brief Record for constants infos.
-typedef struct _calc_symbol_constant  symb_const_t;
-/// @brief Record for variables infos.
-typedef struct _calc_symbol_variable  symb_local_t;
-/// @brief Record for functions infos.
-typedef struct _calc_symbol_function  symb_funct_t;
-/// @brief Record for parameters infos.
-typedef struct _calc_symbol_parameter symb_param_t;
-
-// Generic Symbols
-
-/// @brief Union type of all possible symbols.
-typedef union _calc_symbol_addr
-{
-    /// @brief Datatype symbol infos.
-    symb_dtype_t *datatype;
-    /// @brief Structure symbol infos.
-    symb_stype_t *structure;
-    /// @brief Constant symbol infos.
-    symb_const_t *constant;
-    /// @brief Variable symbol infos.
-    symb_local_t *variable;
-    /// @brief Function symbol infos.
-    symb_funct_t *function;
-    /// @brief Parameter symbol infos.
-    symb_param_t *parameter;
-} symbaddr_t;
-
-/// @brief Enumerate symbol kinds.
-typedef enum _calc_symbol_kind
-{
-    /// @brief Undefined symbol kind.
-    SYMB_UNDEF,
-    /// @brief Datatype symbol kind.
-    SYMB_DTYPE,
-    /// @brief Structure symbol kind.
-    SYMB_STYPE,
-    /// @brief Constant symbol kind.
-    SYMB_CONST,
-    /// @brief Variable symbol kind.
-    SYMB_LOCAL,
-    /// @brief Function symbol kind.
-    SYMB_FUNCT,
-    /// @brief Parameter symbol kind.
-    SYMB_PARAM,
-} symbkind_t;
-
-/// @brief Check if kind is of a symbol that
-///        can be used as type.
-/// @param kind Kind to test.
-/// @return TRUE in case of success, else FALSE.
-bool_t is_type_kind(const symbkind_t kind);
-
-/// @brief Record of symbol infos.
-typedef struct _calc_symbol
-{
-    /// @brief Symbol hash key.
-    hashkey_t   *hkey;
-    /// @brief Kind of the symbol, useful
-    ///        to choose which field of
-    ///        addr use.
-    symbkind_t   kind;
-    /// @brief Union of pointers to symbol
-    ///        specific infos.
-    symbaddr_t   addr;
-} symb_t;
-
-/// @brief Create a new specialized symbol.
-/// @param name Name of the symbol.
-/// @param kind Kind of the symbol.
-/// @return A pointer to new symbol.
-symb_t *create_symb(hashkey_t *const hkey, const symbkind_t kind);
-
-/// @brief Get size of the symbol.
-/// @param symb Symbol.
-/// @return Size of symb.
-unsigned int sizeof_symb(symb_t *const symb);
-/// @brief Get alignment of the symbol.
-/// @param symb Symbol.
-/// @return Alignment of symb.
-unsigned int alignof_symb(symb_t *const symb);
-/// @brief Get size of the symbol if allocated
-///        aligned.
-/// @param symb Symbol.
-/// @return Size of symb.
-unsigned int aligned_sizeof_symb(symb_t *const symb);
-
-/// @brief Record for data layout.
-typedef struct _calc_symbol_data
-{
-    /// @brief Name of the member.
-    char *name;
-    /// @brief Type of the member.
-    symb_t *type;
-} symbdata_t;
-
-/// @brief Create a new symbol data (prototype).
-/// @param name Name of the symbol.
-/// @param type Type of the symbol.
-/// @return A pointer to the new symbol data.
-symbdata_t *create_symbdata(const char *const name, const symb_t *const type);
-/// @brief Create a new array of symbol datas
-///        (prototypes).
-/// @param count Number of prototypes in the
-///              array.
-/// @param names Names of protorypes.
-/// @param types Types of prototypes
-/// @return A pointer to the first element of
-///         the prototypes array.
-symbdata_t *create_symbdata_array(unsigned int count, char *const *const names, symb_t *const *const types);
-/// @brief Create a new array of symbol datas
-///        (prototypes) using varargs. Useful
-///        for built-in complex types.
-/// @param count Number of 
-/// @param others Pairs of name-type. E.g.
-///               create_symbdata_va(2, "x", i32, "y", i32)
-/// @return A pointer to the first element of
-///         the prototypes array.
-symbdata_t *create_symbdata_va(unsigned int count, ...);
-
-/// @brief Get the size of prototype. 
-/// @param data Prototype.
-/// @return Size of prototype.
-unsigned int sizeof_symbdata(const symbdata_t *const data);
-/// @brief Get the size of prototype array.
-/// @param count Number of prototypes.
-/// @param data Prototypes.
-/// @return Size of prototypes.
-unsigned int sizeof_symbdata_array(unsigned int count, const symbdata_t *const data);
-
-/// @brief Get the alignment of prototype. 
-/// @param data Prototype.
-/// @return Alignment of prototype.
-unsigned int alignof_symbdata(const symbdata_t *const data);
-/// @brief Get the alignment of prototype array.
-/// @param count Number of prototypes.
-/// @param data Prototypes.
-/// @return Alignment of prototypes.
-unsigned int alignof_symbdata_array(unsigned int count, const symbdata_t *const data);
-
-/// @brief Get the size of prototype. 
-/// @param data Prototype.
-/// @return Size of prototype.
-unsigned int aligned_sizeof_symbdata(const symbdata_t *const data);
-/// @brief Get size of the symbol if allocated
-///        aligned.
-/// @param count Number of prototypes.
-/// @param data Prototypes.
-/// @return Size of prototype.
-unsigned int aligned_sizeof_symbdata_array(unsigned int count, const symbdata_t *const data);
-
-// Specialized Symbols
-
-typedef enum _calc_symbol_datatype_kind
-{
-    DT_SIGND,
-    DT_UNSIG,
-    DT_FLOAT,
-} dtype_kind_t;
-
-struct _calc_symbol_datatype
-{
-    /// @brief Size of the type.
-    unsigned int width;
-    /// @brief Alignment of the type.
-    unsigned int align;
-    /// @brief Datatype kind, defines which
-    ///        operations choose to do.
-    dtype_kind_t dkind;
-};
-
-/// @brief Create a new primitive data type.
-/// @param name Name of the type.
-/// @param width Width (not size, in bytes) of the type.
-/// @param align Alignment (in bytes) of the type.
-/// @return A pointer to the new symbol.
-symb_t *create_symb_dtype(hashkey_t *const hkey, unsigned int width, unsigned int align, dtype_kind_t dkind);
-
-struct _calc_symbol_structure
-{
-    /// @brief Size of the type.
-    unsigned int width;
-    /// @brief Alignment of the type.
-    unsigned int align;
-    /// @brief Count of members.
-    unsigned int membc;
-    /// @brief Data layouts of members.
-    symbdata_t *membv;
-};
-
-/// @brief Create a new structure data type.
-/// @param name Name of the type.
-/// @param width Width (not size, in bytes) of the type.
-///              If it's uknown use create_symb_stype_autosiz.
-/// @param align Alignment (in bytes) of the type.
-///              If it's uknown use create_symb_stype_autosiz.
-/// @param membc Number of members. (can be 0)
-/// @param membv Members prototypes. (should be NULL only if
-///              membc is 0)
-/// @return A pointer to the new symbol.
-symb_t *create_symb_stype(hashkey_t *const hkey, unsigned int width, unsigned int align, unsigned int membc, const symbdata_t *const membv);
-/// @brief Create a new structure data type.
-/// @param name Name of the type.
-/// @param membc Number of members. (can be 0)
-/// @param membv Members prototypes. (should be NULL only if
-///              membc is 0)
-/// @return A pointer to the new symbol.
-symb_t *create_symb_stype_autosiz(hashkey_t *const hkey, unsigned int membc, const symbdata_t *const membv);
-
-struct _calc_symbol_constant
-{
-    /// @brief Type symbol pointer.
-    symb_t *type;
-    /// @brief Raw data value.
-    byte_t *data;
-};
-
-/// @brief Create a new constant symbol.
-/// @param name Name of the symbol to create
-/// @param type 
-/// @param data 
-/// @return 
-symb_t *create_symb_const(hashkey_t *const hkey, const symb_t *const type, const byte_t *const data);
-
-struct _calc_symbol_variable
-{
-    /// @brief Type symbol pointer.
-    symb_t *type;
-    /// @brief Raw data value.
-    byte_t *data;
-};
-
-/// @brief 
-/// @param name 
-/// @param type 
-/// @return 
-symb_t *create_symb_local(hashkey_t *const hkey, const symb_t *const type);
-
-struct _calc_symbol_function
-{
-    void *_;
-};
-
-//symb_t *create_symb_funct(hashkey_t *const hkey, ...);
-
-struct _calc_symbol_parameter
-{
-    void *_;
-};
-
-//symb_t *create_symb_param(hashkey_t *const hkey, ...);
-
-// Symbols Record
-
-#ifndef CALC_SYMBREC_CHUNKSIZ
-/// @brief Size of a symbol record chunk
-#   define CALC_SYMBREC_CHUNKSIZ 0x0040
-#endif // CALC_SYMBREC_CHUNKSIZ
-
-/// @brief Chunk of the symbol record data type.
-typedef symb_t *symbrec_chunk_t[CALC_SYMBREC_CHUNKSIZ];
+#endif // _CALC_MINIMAL_BUILD
 
 #pragma endregion
 
-// +---- Symbol Record -- End
-
-// +---- Symbol Table
-
-
-
-// +---- Symbol Table -- End
+// +---- Datastructs -- End
 
 #pragma endregion
 
