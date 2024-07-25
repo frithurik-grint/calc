@@ -311,6 +311,9 @@ defpct(PERCN_EQUAL,                                 "%=")
 
 // Composed Tokens
 
+/// @brief '?.' composed punctuator token.
+defpct(QUEST_POINT,                                 "?.")
+
 /// @brief '->' composed punctuator token. (arrow)
 defpct(ARROW,                                       "->")
 /// @brief '=>' composed punctuator token. (then arrow)

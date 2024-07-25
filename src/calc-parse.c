@@ -442,7 +442,625 @@ static const struct token *_getpragm(char *const lexeme)
 #endif // CALC_SORTED_PRAGMATICS
 }
 
+static tokcode_t _gettoken(srcbuf_t *const sb, char *const buf)
+{
+    int l /* lookahead character */, p = 0, q = 0, t = TOK_INVAL;
 
+redo:
+    while (isspace(l = sbtopc(sb)))
+        ++sb->buf, ++sb->pos;
+
+    switch (l)
+    {
+        // Trivia
+
+    case EOF:
+        t = TOK_ENDOF;
+        break;
+
+    case NUL:
+        t = TOK_NULCH;
+        break;
+
+        // Brackets
+
+    case '(':
+        do
+            ++sb->fwd;
+        while (isspace(l = sbtopc(sb)));
+
+        if ((l = sbtopc(sb)) == ')')
+            t = TOK_PUNCT_ROUND, ++sb->fwd;
+        else
+            t = TOK_PUNCT_LROUN;
+
+        break;
+
+    case ')':
+        t = TOK_PUNCT_RROUN, ++sb->fwd;
+        break;
+
+    case '[':
+        do
+            ++sb->fwd;
+        while (isspace(l = sbtopc(sb)));
+
+        if ((l = sbtopc(sb)) == ']')
+            t = TOK_PUNCT_SQRED, ++sb->fwd;
+        else
+            t = TOK_PUNCT_LSQRD;
+
+        break;
+    
+    case ']':
+        t = TOK_PUNCT_RSQRD, ++sb->fwd;
+        break;
+
+    case '{':
+        do
+            ++sb->fwd;
+        while (isspace(l = sbtopc(sb)));
+
+        if ((l = sbtopc(sb)) == '}')
+            t = TOK_PUNCT_CURLY, ++sb->fwd;
+        else
+            t = TOK_PUNCT_LCURL;
+
+        break;
+
+    case '}':
+        t = TOK_PUNCT_RCURL, ++sb->fwd;
+        break;
+
+        // Punctuators
+
+    case '~':
+        t = TOK_PUNCT_TILDE, ++sb->fwd;
+        break;
+
+    case '?':
+        ++sb->fwd;
+
+        if ((l = sbtopc(sb)) == '?')
+            t = TOK_PUNCT_QUEST_QUEST, ++sb->fwd;
+        else if (l == '=')
+            t = TOK_PUNCT_QUEST_EQUAL, ++sb->fwd;
+        else if (l == '.')
+            t = TOK_PUNCT_QUEST_POINT, ++sb->fwd;
+        else
+            t = TOK_PUNCT_QUEST;
+
+        break;
+
+    case '!':
+        ++sb->fwd;
+
+        if ((l = sbtopc(sb)) == '!')
+            t = TOK_PUNCT_EXCLM_EXCLM, ++sb->fwd;
+        else if (l == '=')
+            t = TOK_PUNCT_EXCLM_EQUAL, ++sb->fwd;
+        else
+            t = TOK_PUNCT_EXCLM;
+
+        break;
+
+    case '&':
+        ++sb->fwd;
+
+        if ((l = sbtopc(sb)) == '&')
+            t = TOK_PUNCT_AMPER_AMPER, ++sb->fwd;
+        else if (l == '=')
+            t = TOK_PUNCT_AMPER_EQUAL, ++sb->fwd;
+        else
+            t = TOK_PUNCT_AMPER;
+
+        break;
+
+    case '|':
+        ++sb->fwd;
+
+        if ((l = sbtopc(sb)) == '|')
+            t = TOK_PUNCT_PIPEE_PIPEE, ++sb->fwd;
+        else if (l == '=')
+            t = TOK_PUNCT_PIPEE_EQUAL, ++sb->fwd;
+        else
+            t = TOK_PUNCT_PIPEE;
+
+        break;
+
+    case '^':
+        ++sb->fwd;
+
+        if (l == '=')
+            t = TOK_PUNCT_CARET_EQUAL, ++sb->fwd;
+        else
+            t = TOK_PUNCT_CARET;
+
+        break;
+
+    case '<':
+        ++sb->fwd;
+
+        if ((l = sbtopc(sb)) == '<')
+        {
+            ++sb->fwd;
+
+            if ((l = sbtopc(sb)) == '=')
+                t = TOK_PUNCT_LESST_LESST_EQUAL;
+            else
+                t = TOK_PUNCT_LESST_LESST;
+        }
+        else if (l == '=')
+        {
+            t = TOK_PUNCT_LESST_EQUAL, ++sb->fwd;
+        }
+        else
+        {
+            t = TOK_PUNCT_LESST;
+        }
+
+        break;
+
+    case '>':
+        ++sb->fwd;
+
+        if ((l = sbtopc(sb)) == '<')
+        {
+            ++sb->fwd;
+
+            if ((l = sbtopc(sb)) == '=')
+                t = TOK_PUNCT_GREAT_GREAT_EQUAL;
+            else
+                t = TOK_PUNCT_GREAT_GREAT;
+        }
+        else if (l == '=')
+        {
+            t = TOK_PUNCT_GREAT_EQUAL, ++sb->fwd;
+        }
+        else
+        {
+            t = TOK_PUNCT_GREAT;
+        }
+
+        break;
+
+    case '=':
+        ++sb->fwd;
+
+        if ((l = sbtopc(sb)) == '=')
+            t = TOK_PUNCT_EQUAL_EQUAL, ++sb->fwd;
+        else if (l == '>')
+            t = TOK_PUNCT_THENN, ++sb->fwd;
+        else
+            t = TOK_PUNCT_EQUAL;
+
+        break;
+
+    case '+':
+        ++sb->fwd;
+
+        if ((l = sbtopc(sb)) == '+')
+            t = TOK_PUNCT_PLUSS_PLUSS, ++sb->fwd;
+        else if (l == '=')
+            t = TOK_PUNCT_PLUSS_EQUAL, ++sb->fwd;
+        else
+            t = TOK_PUNCT_PLUSS;
+
+        break;
+
+    case '-':
+        ++sb->fwd;
+
+        if ((l = sbtopc(sb)) == '-')
+            t = TOK_PUNCT_MINUS_MINUS, ++sb->fwd;
+        else if (l == '=')
+            t = TOK_PUNCT_MINUS_EQUAL, ++sb->fwd;
+        else if (l == '>')
+            t = TOK_PUNCT_ARROW, ++sb->fwd;
+        else
+            t = TOK_PUNCT_MINUS;
+
+        break;
+
+    case '*':
+        ++sb->fwd;
+
+        if ((l = sbtopc(sb)) == '=')
+            t = TOK_PUNCT_COLON_COLON, ++sb->fwd;
+        else
+            t = TOK_PUNCT_COLON;
+
+        break;
+
+    case '/':
+        ++sb->fwd;
+
+        if ((l = sbtopc(sb)) == '/')
+        {
+            do
+                ++sb->fwd;
+            while (((l = sbtopc(sb)) != EOF) && (l != EOL) && (l != NUL));
+
+            goto redo;
+        }
+        else if (l == '*')
+        {
+            bool_t stop = FALSE;
+
+            do
+            {
+                ++sb->fwd;
+
+                if ((l = sbtopc(sb)) == '*')
+                {
+                    ++sb->fwd;
+
+                    if ((l = sbtopc(sb)) == '/')
+                        stop = TRUE;
+                    else
+                        continue;
+                }
+            } while (!stop);
+            
+            goto redo;
+        }
+        else if (l == '=')
+        {
+            t = TOK_PUNCT_SLASH_EQUAL, ++sb->fwd;
+        }
+        else
+        {
+            t = TOK_PUNCT_SLASH;
+        }
+
+        break;
+
+    case '%':
+        ++sb->fwd;
+
+        if ((l = sbtopc(sb)) == '=')
+            t = TOK_PUNCT_PERCN_EQUAL, ++sb->fwd;
+        else
+            t = TOK_PUNCT_PERCN;
+
+        break;
+
+    case '#':
+        do
+        {
+            ++sb->fwd;
+
+            if ((l = sbtopc(sb)) == EOL)
+            {
+                do
+                    ++sb->fwd;
+                while (isspace(l = sbtopc(sb)));
+
+                if (l == '#')
+                    continue;
+                else
+                    break;
+            }
+        } while ((l != EOF) && (l != NUL));
+
+        sbchto(buf, sb);
+
+        t = TOK_PUNCT_SHARP;
+
+        break;
+
+    case '@':
+        ++sb->fwd;
+
+        if (isalnum(l = sbtopc(sb)) || (l == '_') || (l == '$') || (l == '.'))
+        {
+            do
+                buf[p++] = l, ++sb->fwd;
+            while (isalnum(l = sbtopc(sb)) || (l == '_') || (l == '$') || (l == '.'));
+
+            t = TOK_IDENT;
+        }
+        else
+        {
+            t = TOK_PUNCT_ATSIG;
+        }
+
+        break;
+
+    case ',':
+        t = TOK_PUNCT_COMMA, ++sb->fwd;
+        break;
+
+    case '.':
+        ++sb->fwd;
+
+        if ((l = sbtopc(sb)) == '.')
+        {
+            ++sb->fwd;
+
+            if ((l = sbtopc(sb)) == '.')
+                t = TOK_PUNCT_ELLIP;
+            else
+                t = TOK_PUNCT_POINT_POINT;
+        }
+        else if (isdigit(l))
+        {
+            buf[p++] = '.';
+        }
+        else
+        {
+            t = TOK_PUNCT_POINT;
+        }
+
+        break;
+
+    case ':':
+        ++sb->fwd;
+
+        if ((l = sbtopc(sb)) == ':')
+            t = TOK_PUNCT_COLON_COLON, ++sb->fwd;
+        else
+            t = TOK_PUNCT_COLON;
+
+        break;
+
+    case ';':
+        t = TOK_PUNCT_SEMIC, ++sb->fwd;
+        break;
+
+    case '\\':
+        t = TOK_PUNCT_BACKS, ++sb->fwd;
+        break;
+
+    case '`':
+        t = TOK_PUNCT_BACKT, ++sb->fwd;
+        break;
+
+        // Keywords and Identifiers
+
+    case 'a':   case 'b':   case 'c':   case 'd':   case 'e':   case 'f':
+    case 'g':   case 'h':   case 'i':   case 'j':   case 'k':   case 'l':
+    case 'm':   case 'n':   case 'o':   case 'p':   case 'q':   case 'r':
+    case 's':   case 't':   case 'u':   case 'v':   case 'w':   case 'x':
+    case 'y':   case 'z':   id_or_kw:
+        ++sb->fwd;
+
+        if (islower(l = sbtopc(sb)))
+        {
+            do
+                ++sb->fwd;
+            while (islower(l = sbtopc(sb)));
+
+            if (!isalnum(l) && (l != '_') && (l != '$'))
+            {
+                const struct token *tok;
+
+                sbchto(buf, sb);
+
+                if (!(tok = _getkword(buf)))
+                    t = TOK_IDENT;
+                else
+                    t = tok->code;
+
+                break;  
+            }
+            else
+            {
+                goto id;
+            }
+        }
+
+        if (isalnum(l) || (l == '_') || (l == '$'))
+        {
+    case 'A':   case 'B':   case 'C':   case 'D':   case 'E':   case 'F':
+    case 'G':   case 'H':   case 'I':   case 'J':   case 'K':   case 'L':
+    case 'M':   case 'N':   case 'O':   case 'P':   case 'Q':   case 'R':
+    case 'S':   case 'T':   case 'U':   case 'V':   case 'W':   case 'X':
+    case 'Y':   case 'Z':   case '_':   case '$':   id:
+            do
+                ++sb->fwd;
+            while (isalnum(l) || (l == '_') || (l == '$'));
+        }
+
+        sbchto(buf, sb);
+
+        t = TOK_IDENT;
+
+        break;
+
+        // Numerics
+
+    case '0':
+        do
+            ++sb->fwd;
+        while ((l = sbtopc(sb)) == '0');
+
+        if ((l == 'B') || (l == 'b'))
+        {
+            ++sb->fwd;
+
+            if ((((l = sbtopc(sb)) == '0') || (l == '1')))
+            {
+                do
+                {
+                    ++sb->fwd;
+
+                    if (!p && (l == '0'))
+                        continue;
+                    else
+                        buf[p++] = l;
+                } while ((((l = sbtopc(sb)) == '0') || (l == '1')));
+
+                if (!p)
+                    buf[p++] = '0';
+
+                t = TOK_LITER_INTGR_BIN, buf[p] = NUL;
+            }
+            else
+            {
+                t = TOK_INVAL, _expected("binary digit", unesc(buf, l));
+            }
+        }
+        else if ((l == 'C') || (l == 'c'))
+        {
+            ++sb->fwd;
+
+            if ((((l = sbtopc(sb)) >= '0') && (l <= '7')))
+            {
+                do
+                {
+                    ++sb->fwd;
+
+                    if (!p && (l == '0'))
+                        continue;
+                    else
+                        buf[p++] = l;
+                } while ((((l = sbtopc(sb)) >= '0') && (l <= '7')));
+
+                if (!p)
+                    buf[p++] = '0';
+
+                t = TOK_LITER_INTGR_OCT, buf[p] = NUL;
+            }
+            else
+            {
+                t = TOK_INVAL, _expected("octal digit", unesc(buf, l));
+            }
+        }
+        else if ((l == 'D') || (l == 'd'))
+        {
+            ++sb->fwd;
+
+            if ((((l = sbtopc(sb)) >= '0') && (l <= '9')))
+            {
+    case '1': case '2': case '3':
+    case '4': case '5': case '6':
+    case '7': case '8': case '9':
+                do
+                {
+                    ++sb->fwd;
+
+                    if (!p && (l == '0'))
+                        continue;
+                    else
+                        buf[p++] = l;
+                } while ((((l = sbtopc(sb)) >= '0') && (l <= '9')));
+
+                if (!p)
+                    buf[p++] = '0';
+
+                if (l == '.')
+                {
+                real:
+                    ++sb->fwd, buf[p++] = l;
+
+                    if (isdigit(l = sbtopc(sb)))
+                    {
+                    real_part:
+                        do
+                            ++sb->fwd, buf[p++] = l;
+                        while (((l = sbtopc(sb)) >= '0') && (l <= '9'));
+
+                        while ((buf[p - 1] == '0') && (buf[p - 2] != '.'))
+                            --p;
+
+                    expo_part:
+                        if ((l == 'E') || (l == 'e'))
+                        {
+                            ++sb->fwd, buf[p++] = l;
+                        
+                            if (((l = sbtopc(sb)) == '+') || (l == '-'))
+                                ++sb->fwd, buf[p++] = l;
+                        
+                            if (isdigit(l = sbtopc(sb)))
+                            {
+                                q = p;
+
+                                do
+                                {
+                                    ++sb->fwd;
+
+                                    if ((p == q) && (l == '0'))
+                                        continue;
+                                    else
+                                        buf[p++] = l;
+                                } while (isdigit(l = sbtopc(sb)));
+
+                                if (p == q)
+                                    buf[p++] = '0';
+                            }
+                            else
+                            {
+                                t = TOK_INVAL, _unexpctd(unesc(buf, l), "numeric exponent");
+                            }
+                        }
+
+                        t = TOK_LITER_FLOAT, buf[p] = NUL;
+                    }
+                    else
+                    {
+                        t = TOK_INVAL, _unexpctd(unesc(buf, l), "real part");
+                    }
+                }
+                else
+                {
+                    t = TOK_LITER_INTGR_DEC, buf[p] = NUL;
+                }
+            }
+            else
+            {
+                t = TOK_INVAL, _expected("decimal digit", unesc(buf, l));
+            }
+        }
+        else if ((l == 'X') || (l == 'x'))
+        {
+            ++sb->fwd;
+
+            if ((((l = sbtopc(sb)) >= '0') && (l <= '9')) || ((l >= 'A') && (l <= 'F')) || ((l >= 'a') && (l <= 'f')))
+            {
+                do
+                {
+                    ++sb->fwd;
+
+                    if (!p && (l == '0'))
+                        continue;
+                    else
+                        buf[p++] = l;
+                } while ((((l = sbtopc(sb)) >= '0') && (l <= '9')) || ((l >= 'A') && (l <= 'F')) || ((l >= 'a') && (l <= 'f')));
+
+                if (!p)
+                    buf[p++] = '0';
+            }
+            else
+            {
+                t = TOK_INVAL, _expected("hexadecimal digit", unesc(buf, l));
+            }
+
+            t = TOK_LITER_INTGR_HEX, buf[p] = NUL;
+        }
+        else if (l == '.')
+        {
+            goto real;
+        }
+        else
+        {
+            buf[0] = '0';
+            buf[1] = NUL;
+
+            t = TOK_LITER_INTGR_DEC;
+        }
+
+        break;
+
+        // Others
+
+    default:
+        _notvalid(formatto(buf, "token ('%s)", unesc(buf, l)));
+        break;
+    }
+
+    return (tokcode_t)t;
+}
 
 #pragma endregion
 
@@ -470,12 +1088,12 @@ tokcode_t getpragm(char *const lexeme)
 
 tokcode_t gettoken(srcbuf_t *const sb, char **const lexeme)
 {
-    const struct token *tok = _gettoken(sb);
+    static char buf[BUFSIZ] = { 0 };
 
-    if (tok)
-        return (lexeme ? *lexeme = tok->lexm : 0), tok->code;
-    else
-        return TOK_INVAL;
+    if (lexeme)
+        *lexeme = buf;
+
+    return _gettoken(sb, buf);
 }
 
 #ifndef _CALC_MINIMAL_BUILD
