@@ -442,13 +442,17 @@ static const struct token *_getpragm(char *const lexeme)
 #endif // CALC_SORTED_PRAGMATICS
 }
 
-static tokcode_t _gettoken(srcbuf_t *const sb, char *const buf)
+static tokcode_t _gettoken(srcbuf_t *const sb, char **const out)
 {
+    static char buf[BUFSIZ] = { 0 };
+
     int l /* lookahead character */, p = 0, q = 0, t = TOK_INVAL;
 
 redo:
     while (isspace(l = sbtopc(sb)))
         ++sb->buf, ++sb->pos;
+
+    buf[0] = NUL;
 
     switch (l)
     {
@@ -1044,8 +1048,8 @@ redo:
         }
         else
         {
-            buf[0] = '0';
-            buf[1] = NUL;
+            buf[p++] = '0';
+            buf[p++] = NUL;
 
             t = TOK_LITER_INTGR_DEC;
         }
@@ -1055,9 +1059,12 @@ redo:
         // Others
 
     default:
-        _notvalid(formatto(buf, "token ('%s)", unesc(buf, l)));
+        _notvalid(formatto(buf, "token ('%s)", unesc(buf, l))), buf[0] = NUL;
         break;
     }
+
+    if (out)
+        *out = buf;
 
     return (tokcode_t)t;
 }
@@ -1088,12 +1095,7 @@ tokcode_t getpragm(char *const lexeme)
 
 tokcode_t gettoken(srcbuf_t *const sb, char **const lexeme)
 {
-    static char buf[BUFSIZ] = { 0 };
-
-    if (lexeme)
-        *lexeme = buf;
-
-    return _gettoken(sb, buf);
+    return _gettoken(sb, lexeme);
 }
 
 #ifndef _CALC_MINIMAL_BUILD
@@ -1154,12 +1156,40 @@ const char *const tokname(const tokcode_t tok)
     }
 }
 
-bool_t tokenize(FILE *const stream)
+void tokenize()
 {
-}
+    char line[BUFSIZ];
+    bool_t end = FALSE;
+    lexer_t *lex = create_lexer(BUFSIZ, 32);
 
-bool_t tokenzto(FILE *const stream, FILE *const out)
-{
+    do
+    {
+        printf("TOK > ");
+        fgets(line, BUFSIZ, stdin);
+        sbputs(lex->sbuf, line, BUFSIZ);
+
+        tokcode_t c;
+
+        do
+        {
+            c = lnext(lex);
+
+            if (lex->lexm)
+                printfn("(%02d) %-24s -> '%s'", (int)c, toktostr(c), lex->lexm);
+            else
+                printfn("(%02d) %-24s -> '%s'", (int)c, tokname(c), toktostr(c));
+
+            if (c == TOK_KWORD_END)
+                end = TRUE;
+        } while (!end && (c > TOK_NULCH));
+
+        putln();
+    } while (!end);
+
+    hashtab_dump(stdout, lex->ptab);
+    hashtab_dump(stdout, lex->htab);
+
+    return;
 }
 
 #endif // _CALC_MINIMAL_BUILD
@@ -1172,19 +1202,165 @@ bool_t tokenzto(FILE *const stream, FILE *const out)
 
 #pragma region Lexer
 
-lexer_t *create_lexer(unsigned int bufsiz, unsigned int tabsiz);
-lexer_t *create_lexer_from(srcbuf_t *const sb, unsigned int tabsiz);
-void delete_lexer(lexer_t *const lex);
+// +---- Internal
 
-hashbuc_t *ladd(lexer_t *const lex, char *const name);
-hashbuc_t *lget(lexer_t *const lex, char *const name);
-hashbuc_t *lset(lexer_t *const lex, char *const name, unsigned int data);
+#pragma region Internal
 
-tokcode_t llook(lexer_t *const lex);
-tokcode_t lnext(lexer_t *const lex);
+static hash_t _get_id_hashcode(char *const id)
+{
+    char *str = id;
 
-bool_t lmatch(lexer_t *const lex, tokcode_t match);
-bool_t vlmatch(lexer_t *const lex, unsigned int count, ...);
+    if (!str || (*str <= 0x20))
+		return HASH_INV; // intentionally returns an unmanageable value
+
+	hash_t hash;
+
+	for (hash = HASH_MIN; *str > 0x20; str++)
+		hash += *str - 0x21;
+
+	return hash;
+}
+
+#pragma endregion
+
+// +---- Internal -- End
+
+lexer_t *create_lexer(unsigned int bufsiz, unsigned int tabsiz)
+{
+    return create_lexer_from(create_srcbuf(NULL, bufsiz), tabsiz);
+}
+
+lexer_t *create_lexer_from(srcbuf_t *const sb, unsigned int tabsiz)
+{
+    lexer_t *lex = alloc(lexer_t);
+
+    lex->sbuf = sb;
+    lex->ptab = create_hashtab(tabsiz, _get_id_hashcode, NULL);
+    lex->htab = create_hashtab(tabsiz, _get_id_hashcode, NULL);
+    lex->buck = NULL;
+    lex->look = TOK_INVAL;
+    lex->last = TOK_INVAL;
+
+    return lex;
+}
+
+void delete_lexer(lexer_t *const lex)
+{
+    delete_srcbuf(lex->sbuf);
+    delete_hashtab(lex->ptab);
+    delete_hashtab(lex->htab);
+
+    free(lex);
+
+    return;
+}
+
+hashbuc_t *ladd(lexer_t *const lex, char *const name)
+{
+    return hashtab_add(lex->ptab, name);
+}
+
+hashbuc_t *lget(lexer_t *const lex, char *const name)
+{
+    return hashtab_get(lex->ptab, name);
+}
+
+hashbuc_t *lset(lexer_t *const lex, char *const name, unsigned int data)
+{
+    return hashtab_set(lex->ptab, name, data);
+}
+
+tokcode_t llook(lexer_t *const lex)
+{
+    tokcode_t tokcode = _gettoken(lex->sbuf, NULL);
+
+    if (tokcode != TOK_INVAL)
+        sbretrt(lex->sbuf);
+    else
+        sbadvnc(lex->sbuf);
+
+    return lex->look = tokcode;
+}
+
+tokcode_t lnext(lexer_t *const lex)
+{
+    tokcode_t tokcode = _gettoken(lex->sbuf, &lex->lexm);
+
+    if (lex->lexm && (tokcode == TOK_IDENT))
+    {
+        if (hashtab_contains(lex->ptab, lex->lexm))
+            tokcode = TOK_RWORD, lex->buck = hashtab_get(lex->ptab, lex->lexm);
+        else
+            lex->buck = hashtab_add(lex->htab, strndcpy(NULL, lex->lexm, lex->sbuf->fwd));
+    }
+
+    sbadvnc(lex->sbuf);
+
+    return tokcode;
+}
+
+bool_t lmatch(lexer_t *const lex, tokcode_t match)
+{
+    tokcode_t tokcode = _gettoken(lex->sbuf, &lex->lexm);
+
+    if (tokcode == match)
+    {
+        if (lex->lexm && (tokcode == TOK_IDENT))
+        {
+            if (hashtab_contains(lex->ptab, lex->lexm))
+                tokcode = TOK_RWORD, lex->buck = hashtab_get(lex->ptab, lex->lexm);
+            else
+                lex->buck = hashtab_add(lex->htab, strndcpy(NULL, lex->lexm, lex->sbuf->fwd));
+        }
+
+        sbadvnc(lex->sbuf);
+
+        return TRUE;
+    }
+    else
+    {
+        return lex->lexm = NULL, lex->sbuf->fwd = 0, FALSE;
+    }
+}
+
+bool_t vlmatch(lexer_t *const lex, unsigned int count, ...)
+{
+    unsigned int i;
+    bool_t result = FALSE;
+    tokcode_t tokcode = _gettoken(lex->sbuf, &lex->lexm);
+    va_list list;
+
+    va_start(list, count);
+
+    for (i = 0; !result && (i < count); i++)
+    {
+        if (tokcode == va_arg(list, tokcode_t))
+        {
+            if (lex->lexm && (tokcode == TOK_IDENT))
+            {
+                if (hashtab_contains(lex->ptab, lex->lexm))
+                    tokcode = TOK_RWORD, lex->buck = hashtab_get(lex->ptab, lex->lexm);
+                else
+                    lex->buck = hashtab_add(lex->htab, strndcpy(NULL, lex->lexm, lex->sbuf->fwd));
+            }
+
+            sbadvnc(lex->sbuf);
+
+            lex->last = tokcode, result = TRUE;
+        }
+        else
+        {
+            continue;
+        }
+    }
+
+    va_end(list);
+
+    if (!result)
+        lex->sbuf->fwd = 0;
+
+    return result;
+}
 
 #pragma endregion
 
@@ -1193,3 +1369,4 @@ bool_t vlmatch(lexer_t *const lex, unsigned int count, ...);
 #pragma endregion
 
 /* =---- Syntactic Analyser ------------------------------------= */
+

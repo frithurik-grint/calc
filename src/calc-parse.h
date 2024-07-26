@@ -267,18 +267,10 @@ const char *const toktostr(const tokcode_t tok);
 ///         name, or an error message.
 const char *const tokname(const tokcode_t tok);
 
-/// @brief Tokenize an input stream. This function
+/// @brief Tokenize from input stream. This function
 ///        can be used as a lexical analyzer to find
-///        basic syntax errors and 
-/// @param stream Input stream.
-/// @return FALSE in case of errors, else TRUE.
-bool_t tokenize(FILE *const stream);
-/// @brief Tokenize an input stream to an output
-///        stream.
-/// @param stream Input stream.
-/// @param out Output stream.
-/// @return FALSE in case of errors, else TRUE.
-bool_t tokenzto(FILE *const stream, FILE *const out);
+///        basic lixical errors.
+void tokenize();
 
 #endif // _CALC_MINIMAL_BUILD
 
@@ -397,17 +389,136 @@ bool_t vlmatch(lexer_t *const lex, unsigned int count, ...);
 
 #pragma region Abstract Syntax Tree
 
+/// @brief Type data record.
+typedef struct _calc_ast_type type_t;
+/// @brief Symbol data record.
+typedef struct _calc_ast_symb symb_t;
+
+// +---- Types
+
+#pragma region Types
+
+// Data Types
+
+/// @brief Record for integer data types info.
+typedef struct _calc_ast_type_dt_intgr type_intgr_t;
+/// @brief Record for floating-poit data types info.
+typedef struct _calc_ast_type_dt_float type_float_t;
+
+/// @brief Record for sub-range (limited) data types info.
+typedef struct _calc_ast_type_dt_range type_range_t;
+/// @brief Record for pointer data types info.
+typedef struct _calc_ast_type_dt_pnter type_pnter_t;
+/// @brief Record for enumeration data types info.
+typedef struct _calc_ast_type_dt_enumr type_enumr_t;
+/// @brief Record for union data types info.
+typedef struct _calc_ast_type_dt_union type_union_t;
+
+// Structured Types
+
+/// @brief Record for array types info.
+typedef struct _calc_ast_type_st_array type_array_t;
+/// @brief Record for multi-dimensional array types info.
+typedef struct _calc_ast_type_st_multi type_multi_t;
+/// @brief Record for tuple types info.
+typedef struct _calc_ast_type_st_tuple type_tuple_t;
+/// @brief Record for structure types info.
+typedef struct _calc_ast_type_st_strct type_strct_t;
+
+// Referenced Types
+
+/// @brief Record for reference types info.
+typedef struct _calc_ast_type_rt_refrn type_refrn_t;
+/// @brief Record for function types info.
+typedef struct _calc_ast_type_rt_funct type_funct_t;
+/// @brief Record for functional types info.
+typedef struct _calc_ast_type_rt_funcl type_funcl_t;
+/// @brief Record for object types info.
+typedef struct _calc_ast_type_rt_objct type_objct_t;
+
+// +---- Data Types
+
+#pragma region Data Types
+
+
+
+#pragma endregion
+
+// +---- Data Types -- End
+
+// +---- Structured Types
+
+#pragma region Structured Types
+
+
+
+#pragma endregion
+
+// +---- Structured Types -- End
+
+// +---- Referenced Types
+
+#pragma region Referenced Types
+
+
+
+#pragma endregion
+
+// +---- Referenced Types -- End
+
+typedef enum _calc_ast_type_kind
+{
+    TYCOD_DT_INTGR,
+    TYCOD_DT_FLOAT,
+
+    TYCOD_DT_RANGE,
+    TYCOD_DT_PNTER,
+    TYCOD_DT_ENUMR,
+    TYCOD_DT_UNION,
+} tykind_t;
+
+#pragma endregion
+
+// +---- Types -- End
+
 // +---- Symbols
 
 #pragma region Symbols
+
+/// @brief Record for symbol prototypes info.
+typedef struct _calc_ast_symb_prototype symb_proto_t;
+
+/// @brief Record for immutable variables info. (global and local)
+typedef struct _calc_ast_symb_const symb_const_t;
+/// @brief Record for mutable variables info. (global and local)
+typedef struct _calc_ast_symb_mutbl symb_mutbl_t;
+/// @brief Record for functions info.
+typedef struct _calc_ast_symb_funct symb_funct_t;
+/// @brief Record for function paramters info.
+typedef struct _calc_ast_symb_param symb_param_t;
+/// @brief Record for modules info.
+typedef struct _calc_ast_symb_modle symb_modle_t;
 
 #pragma endregion
 
 // +---- Symbols -- End
 
+/// @brief AST expression node struct.
+typedef struct _calc_ast_expr ast_expr_t;
+/// @brief AST declaration node struct.
+typedef struct _calc_ast_decl ast_decl_t;
+/// @brief AST statement node struct.
+typedef struct _calc_ast_stmt ast_stmt_t;
+/// @brief AST pragma node struct.
+typedef struct _calc_ast_prgm ast_prgm_t;
+
 #pragma endregion
 
 // +---- Abstract Syntax Tree -- End
+
+#pragma endregion
+
+/* =------------------------------------------------------------= */
 
 CALC_C_HEADER_END
 

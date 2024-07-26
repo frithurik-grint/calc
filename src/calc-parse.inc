@@ -44,6 +44,8 @@ deftrv(SPACE,                                       "<wsp>")
 
 /// @brief Identifier trivia token.
 deftrv(IDENT,                                       "id")
+/// @brief Reserved word trivia token.
+deftrv(RWORD,                                       "reserved")
 
 #ifdef deftrv
 #   undef deftrv
