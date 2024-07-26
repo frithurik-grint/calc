@@ -1370,3 +1370,251 @@ bool_t vlmatch(lexer_t *const lex, unsigned int count, ...)
 
 /* =---- Syntactic Analyser ------------------------------------= */
 
+#pragma region Syntactic Analyser
+
+// +---- Abstract Syntax Tree
+
+#pragma region Abstract Syntax Tree
+
+// +---- Types
+
+#pragma region Types
+
+// +---- Data Types
+
+#pragma region Data Types
+
+// +---- Internal (Floating-Point Types)
+
+#pragma region Internal (Floating-Point Types)
+
+static type_t _ty_floats[] = {
+    {
+        .name = "binary16",
+        .code = TYCOD_DT_FLOAT,
+        .data = NULL
+    },
+    {
+        .name = "binary32",
+        .code = TYCOD_DT_FLOAT,
+        .data = NULL
+    },
+    {
+        .name = "binary64",
+        .code = TYCOD_DT_FLOAT,
+        .data = NULL
+    },
+    {
+        .name = "binary80",
+        .code = TYCOD_DT_FLOAT,
+        .data = NULL
+    },
+    {
+        .name = "binary128",
+        .code = TYCOD_DT_FLOAT,
+        .data = NULL
+    },
+    {
+        .name = "binary256",
+        .code = TYCOD_DT_FLOAT,
+        .data = NULL
+    },
+    {
+        .name = "decimal32",
+        .code = TYCOD_DT_FLOAT,
+        .data = NULL
+    },
+    {
+        .name = "decimal64",
+        .code = TYCOD_DT_FLOAT,
+        .data = NULL
+    },
+    {
+        .name = "decimal128",
+        .code = TYCOD_DT_FLOAT,
+        .data = NULL
+    }
+};
+
+static const type_t *const _get_flt_binary16()
+{
+    type_t *bin16 = &_ty_floats[TYFLT_BIN16];
+
+    if (!bin16->data.fltty)
+    {
+        bin16->data.fltty = alloc(type_float_t);
+
+        bin16->data.fltty->width = 16;
+        bin16->data.fltty->expnt = 5;
+        bin16->data.fltty->signf = 10;
+    }
+
+    return bin16;
+}
+
+static const type_t *const _get_flt_binary32()
+{
+    type_t *bin32 = &_ty_floats[TYFLT_BIN32];
+
+    if (!bin32->data.fltty)
+    {
+        bin32->data.fltty = alloc(type_float_t);
+
+        bin32->data.fltty->width = 32;
+        bin32->data.fltty->expnt = 8;
+        bin32->data.fltty->signf = 23;
+    }
+
+    return bin32;
+}
+
+static const type_t *const _get_flt_binary64()
+{
+    type_t *bin64 = &_ty_floats[TYFLT_BIN64];
+
+    if (!bin64->data.fltty)
+    {
+        bin64->data.fltty = alloc(type_float_t);
+
+        bin64->data.fltty->width = 64;
+        bin64->data.fltty->expnt = 11;
+        bin64->data.fltty->signf = 53;
+    }
+
+    return bin64;
+}
+
+static const type_t *const _get_flt_binary128()
+{
+    type_t *bin128 = &_ty_floats[TYFLT_BIN128];
+
+    if (!bin128->data.fltty)
+    {
+        bin128->data.fltty = alloc(type_float_t);
+
+        bin128->data.fltty->width = 128;
+        bin128->data.fltty->expnt = 15;
+        bin128->data.fltty->signf = 112;
+    }
+
+    return bin128;
+}
+
+static const type_t *const _get_flt_binary256()
+{
+    type_t *bin256 = &_ty_floats[TYFLT_BIN256];
+
+    if (!bin256->data.fltty)
+    {
+        bin256->data.fltty = alloc(type_float_t);
+
+        bin256->data.fltty->width = 256;
+        bin256->data.fltty->expnt = 19;
+        bin256->data.fltty->signf = 236;
+    }
+
+    return bin256;
+}
+
+static const type_t *const _get_flt_decimal32()
+{
+    type_t *dec32 = &_ty_floats[TYFLT_DEC32];
+
+    if (!dec32->data.fltty)
+    {
+        dec32->data.fltty = alloc(type_float_t);
+
+        dec32->data.fltty->width = 32;
+        dec32->data.fltty->expnt = 11;
+        dec32->data.fltty->signf = 20;
+    }
+
+    return dec32;
+}
+
+static const type_t *const _get_flt_decimal64()
+{
+    type_t *dec64 = &_ty_floats[TYFLT_DEC32];
+
+    if (!dec64->data.fltty)
+    {
+        dec64->data.fltty = alloc(type_float_t);
+
+        dec64->data.fltty->width = 64;
+        dec64->data.fltty->expnt = 13;
+        dec64->data.fltty->signf = 50;
+    }
+
+    return dec64;
+}
+
+static const type_t *const _get_flt_decimal128()
+{
+    type_t *dec128 = &_ty_floats[TYFLT_DEC128];
+
+    if (!dec128->data.fltty)
+    {
+        dec128->data.fltty = alloc(type_float_t);
+
+        dec128->data.fltty->width = 128;
+        dec128->data.fltty->expnt = 17;
+        dec128->data.fltty->signf = 110;
+    }
+
+    return dec128;
+}
+
+#pragma endregion
+
+// +---- Internal (Floating-Point Types) -- End
+
+type_t *get_type_float_by_format(tyflt_format_t format)
+{
+    
+}
+
+type_t *get_type_float_by_name(char *const name);
+
+#pragma endregion
+
+// +---- Data Types -- End
+
+// +---- Structured Types
+
+#pragma region Structured Types
+
+#pragma endregion
+
+// +---- Structured Types -- End
+
+// +---- Referenced Types
+
+#pragma region Referenced Types
+
+#pragma endregion
+
+// +---- Referenced Types -- End
+
+tydata_t alloc_tydata(tycode_t code);
+
+type_t *create_type(char *name, tycode_t code);
+
+#pragma endregion
+
+// +---- Types -- End
+
+// +---- Symbols
+
+#pragma region Symbols
+
+#pragma endregion
+
+// +---- Symbols -- End
+
+#pragma endregion
+
+// +---- Abstract Syntax Tree -- End
+
+#pragma endregion
+
+/* =------------------------------------------------------------= */

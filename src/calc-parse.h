@@ -389,58 +389,270 @@ bool_t vlmatch(lexer_t *const lex, unsigned int count, ...);
 
 #pragma region Abstract Syntax Tree
 
-/// @brief Type data record.
+/// @brief AST type data record.
 typedef struct _calc_ast_type type_t;
-/// @brief Symbol data record.
+/// @brief AST symbol data record.
 typedef struct _calc_ast_symb symb_t;
+
+/// @brief AST expression node struct.
+typedef struct _calc_ast_expr ast_expr_t, expr_t;
+/// @brief AST declaration node struct.
+typedef struct _calc_ast_decl ast_decl_t, decl_t;
+/// @brief AST statement node struct.
+typedef struct _calc_ast_stmt ast_stmt_t, stmt_t;
+/// @brief AST pragma node struct.
+typedef struct _calc_ast_prgm ast_prgm_t, prgm_t;
+
+// Common infos
+
+/// @brief Record for symbol limits info.
+typedef struct _calc_ast_limit
+{
+    /// @brief Minimum value.
+    expr_t *min;
+    /// @brief Maximum value.
+    expr_t *max;
+} limit_t;
+
+typedef struct _calc_ast_limit_array
+{
+    /// @brief Limits array.
+    limit_t *limv;
+    /// @brief Number of limits in the array.
+    unsigned int limc;
+} limits_t;
+
+/// @brief Gets a limits array.
+/// @param count Number of limits in the array.
+/// @param limits Limits array.
+/// @return A record containing the limits info.
+limits_t get_limits(unsigned int count, limit_t *const limits);
+/// @brief Gets a limits array.
+/// @param count Number of limits in the array.
+/// @param others Limits array. (min1, max1, ..., minN, maxN)
+/// @return A record containing the limits info.
+limits_t vget_limits(unsigned int count, ...);
+
+/// @brief Record for symbol prototypes info.
+typedef struct _calc_ast_proto
+{
+    /// @brief Name of the prototyped symbol. (can be NULL)
+    char *name;
+    /// @brief Type of the prototyped symbol.
+    type_t *type;
+} proto_t, param_t;
+
+typedef struct _calc_ast_proto_array
+{
+    /// @brief Prototypes array.
+    proto_t *array;
+    /// @brief Number of prototypes in the array.
+    unsigned int count;
+} protos_t, params_t;
+
+/// @brief Gets a params/prototypes array.
+/// @param count Number of params/prototypes in the array.
+/// @param params Params array.
+/// @return A record containing the params info.
+params_t get_params(unsigned int count, param_t *const params);
+/// @brief Gets a params array.
+/// @param count Number of params in the array.
+/// @param others Params array. (name1, type1, ..., nameN, typeN)
+/// @return A record containing the params info.
+params_t vget_params(unsigned int count, ...);
+
+/// @brief Record for symbol fields info.
+typedef struct _calc_ast_field
+{
+    /// @brief Name of the field.
+    char *name;
+    /// @brief Type of the field.
+    type_t *type;
+    /// @brief Default value of the field.
+    expr_t *dval;
+} field_t;
+
+typedef struct _calc_ast_filed_array
+{
+    /// @brief Fields array.
+    field_t *fldv;
+    /// @brief Number of fields.
+    unsigned int fldc;
+} fields_t;
+
+/// @brief Gets a fields array.
+/// @param count Number of fields in the array.
+/// @param fields Fileds array.
+/// @return A record containing the fields info.
+fields_t get_fields(unsigned int count, field_t *const fields);
+/// @brief Gets a fields array.
+/// @param count Number of fields in the array.
+/// @param others Fileds array. (name1, type1, dval1, ..., nameN, typeN, dvalN)
+/// @return A record containing the fields info.
+fields_t vget_fields(unsigned int count, ...);
 
 // +---- Types
 
 #pragma region Types
 
-// Data Types
-
-/// @brief Record for integer data types info.
-typedef struct _calc_ast_type_dt_intgr type_intgr_t;
-/// @brief Record for floating-poit data types info.
-typedef struct _calc_ast_type_dt_float type_float_t;
-
-/// @brief Record for sub-range (limited) data types info.
-typedef struct _calc_ast_type_dt_range type_range_t;
-/// @brief Record for pointer data types info.
-typedef struct _calc_ast_type_dt_pnter type_pnter_t;
-/// @brief Record for enumeration data types info.
-typedef struct _calc_ast_type_dt_enumr type_enumr_t;
-/// @brief Record for union data types info.
-typedef struct _calc_ast_type_dt_union type_union_t;
-
-// Structured Types
-
-/// @brief Record for array types info.
-typedef struct _calc_ast_type_st_array type_array_t;
-/// @brief Record for multi-dimensional array types info.
-typedef struct _calc_ast_type_st_multi type_multi_t;
-/// @brief Record for tuple types info.
-typedef struct _calc_ast_type_st_tuple type_tuple_t;
-/// @brief Record for structure types info.
-typedef struct _calc_ast_type_st_strct type_strct_t;
-
-// Referenced Types
-
-/// @brief Record for reference types info.
-typedef struct _calc_ast_type_rt_refrn type_refrn_t;
-/// @brief Record for function types info.
-typedef struct _calc_ast_type_rt_funct type_funct_t;
-/// @brief Record for functional types info.
-typedef struct _calc_ast_type_rt_funcl type_funcl_t;
-/// @brief Record for object types info.
-typedef struct _calc_ast_type_rt_objct type_objct_t;
-
 // +---- Data Types
 
 #pragma region Data Types
 
+/*
+ *  type_intgr
+ *    : ('signed'|'unsigned')? 'int' '::' liter_intgr_dec
+ *    | ('signed'|'unsigned')? 'int'
+ *    ;
+*/
 
+/// @brief Record for integer data types info.
+typedef struct _calc_ast_type_dt_intgr
+{
+    /// @brief Width (in bits) of the integer.
+    unsigned int width;
+    /// @brief Sign extension flag.
+    bool_t sign;
+    /// @brief Overflow checks flag.
+    bool_t ovfl;
+} type_intgr_t;
+
+/// @brief Create a new integer data type record.
+/// @param width Width (in bits) of the integer.
+/// @param sign Sign extension flag.
+/// @param ovfl Overflow checks flag.
+/// @return A pointer to the new integer type.
+type_t *create_type_intgr(unsigned int width, bool_t sign, bool_t ovfl);
+/// @brief Deletes an integer data type.
+/// @param ty Type to delete.
+void delete_type_intgr(type_t *const ty);
+
+/*
+ *  type_float_prec
+ *    : 'half'
+ *    | 'single'
+ *    | 'double'
+ *    | 'extended'
+ *    | 'quadruple'
+ *    | 'octuple'
+ *    ;
+ *
+ *  type_float
+ *    : 'real' '::' type_float_prec
+ *    | 'real'
+ *    ;
+*/
+
+/// @brief Record for floating-poit data types info.
+typedef struct _calc_ast_type_dt_float
+{
+    void *plcaeholder;
+} type_float_t;
+
+/*
+ *  type_range_limit
+ *    : ('['|'(') expr_const '..' expr_const (']'|')')
+ *    | ('['|'(') expr_const '...' (']'|')')
+ *    | ('['|'(') '...' expr_const (']'|')')
+ *
+ *  type_range
+ *    : type_range_limit ':' type
+ *    | type_range_limit
+ *    ;
+*/
+
+/// @brief Record for sub-range (limited) data types info.
+typedef struct _calc_ast_type_dt_range // 
+{
+    /// @brief Base data type.
+    type_t *base;
+    /// @brief Limits of the range.
+    limit_t lim;
+} type_range_t;
+
+/// @brief Creates a new sub-range type.
+/// @param ty Base data type.
+/// @param min Inferior limit of the set.
+/// @param max Superior limit of the set.
+/// @return A pointer to the new sub-range type.
+type_t *create_type_range(type_t *const ty, expr_t *const min, expr_t *const max);
+/// @brief Creates a new sub-range type.
+/// @param ty Base data type.
+/// @param limits Limits of the set.
+/// @return A pointer to the new sub-range type.
+type_t *create_type_range_limited(type_t *const ty, limit_t *const limits);
+/// @brief Deletes a sub-range type.
+/// @param ty Sub-range type to delete.
+void delete_type_range(type_t *const ty);
+
+/*
+ *  type_pnter
+ *    : type '*'
+ *    | '*' type
+ *    ;
+*/
+
+/// @brief Record for pointer data types info.
+typedef struct _calc_ast_type_dt_pnter
+{
+    /// @brief Base data type.
+    type_t *base;
+}type_pnter_t;
+
+/*
+ *  type_enumr_field
+ *    : ident '=' expr_const
+ *    | ident
+ *    ;
+ * 
+ *  type_enumr_fields
+ *    : type_enumr_field ',' type_enumr_fields
+ *    | type_enumr_field
+ *    ;
+ *
+ *  type_enumr_block
+ *    : '{' type_enumr_fields '}'
+ *    | '{' '}'
+ *    ;
+ *
+ *  type_enumr
+ *    : 'enum' ident? ':' type type_enumr_block
+ *    | 'enum' type_enumr_block
+ *    ;
+*/
+
+/// @brief Record for enumeration data types info.
+typedef struct _calc_ast_type_dt_enumr
+{
+    /// @brief Base data type.
+    type_t *base;
+    /// @brief Body of the enumeration.
+    fields_t body;
+} type_enumr_t;
+
+/*
+ *  type_union_fields
+ *    : decl ',' type_union_fields
+ *    | decl
+ *    ;
+ *
+ *  type_union_block
+ *    : '{' type_union_fields '}'
+ *    | '{' '}'
+ *    ;
+ *
+ *  type_union
+ *    : 'union' ident? type_union_block
+ *    | 'union' type_union_block
+ *    ;
+*/
+
+/// @brief Record for union data types info.
+typedef struct _calc_ast_type_dt_union
+{
+    /// @brief Body of the union.
+    fields_t body;
+} type_union_t;
 
 #pragma endregion
 
@@ -450,7 +662,96 @@ typedef struct _calc_ast_type_rt_objct type_objct_t;
 
 #pragma region Structured Types
 
+/*
+ *  type_array_bound
+ *    : expr_const '..' expr_const
+ *    | expr_const
+ *    ;
+ *
+ *  type_array
+ *    : type '[' type_array_bound ']'
+ *    | type '[' ']'
+ *    ;
+*/
 
+/// @brief Record for array types info.
+typedef struct _calc_ast_type_st_array
+{
+    /// @brief Base data type.
+    type_t *base;
+    /// @brief Limits of the array index.
+    limit_t lim;
+} type_array_t;
+
+/*
+ *  type_multi_bound
+ *    : type_array_bound ',' type_multi_bound
+ *    | type_array_bound
+ *    ;
+ *
+ *  type_multi_bounds
+ *    : type_array_bound ',' type_multi_bound
+ *    | ','+
+ *    ;
+ * 
+ *  type_multi
+ *    : type '[' type_multi_bounds ']'
+ *    ;
+*/
+
+/// @brief Record for multi-dimensional array types info.
+typedef struct _calc_ast_type_st_multi
+{
+    /// @brief Base data type.
+    type_t *base;
+    /// @brief Array of dimensions limits.
+    limit_t *limv;
+    /// @brief Number of array dimensions. (rank)
+    unsigned int limc;
+} type_multi_t;
+
+/*
+ *  type_tuple_items
+ *    : decl ',' type_tuple_items
+ *    | type ',' type_tuple_items
+ *    | decl
+ *    | type
+ *    ;
+ * 
+ *  type_tuple
+ *    : '(' type_tuple_items ')'
+ *    | '(' ')'
+ *    ;
+*/
+
+/// @brief Record for tuple types info.
+typedef struct _calc_ast_type_st_tuple
+{
+    /// @brief Member prototypes.
+    proto_t *mbrv;
+    /// @brief Number of members.
+    unsigned int mbrc;
+} type_tuple_t;
+
+/*
+ *  type_strct_fields
+ *    : decl ',' type_strct_fields
+ *    | decl
+ *    ;
+ *
+ *  type_strct_block
+ *    : '{' type_strct_fields '}'
+ *    | '{' '}'
+ *    ;
+ *
+ *  type_strct
+ *    : 'struct' ident? ':' type type_strct_block
+ *    | 'struct' type_strct_block
+ *    ;
+*/
+
+/// @brief Record for structure types info.
+typedef struct _calc_ast_type_st_strct type_strct_t;
 
 #pragma endregion
 
@@ -460,22 +761,169 @@ typedef struct _calc_ast_type_rt_objct type_objct_t;
 
 #pragma region Referenced Types
 
+/*
+ *  type_refrn
+ *    : '&' type
+ *    | type '&'
+ *    ;
+*/
 
+/// @brief Record for reference types info.
+typedef struct _calc_ast_type_rt_refrn
+{
+    /// @brief Base type.
+    type_t *base;
+} type_refrn_t;
+
+/*
+ *  type_funct_params
+ *    : decl ',' type_funct_params
+ *    | type ',' type_funct_params
+ *    | '...' decl
+ *    | '...' type
+ *    | '...'
+ *    | decl
+ *    | type
+ *    ;
+ * 
+ *  type_funct
+ *    : '(' type_funct_params ')' '->' type
+ *    | '(' ')' '->' type
+ *    | type '->' type
+ *    ;
+*/
+
+/// @brief Record for function types info.
+typedef struct _calc_ast_type_rt_funct
+{
+    /// @brief Return type.
+    type_t *ret;
+    /// @brief Param prototypes.
+    param_t *params;
+    /// @brief Number of paramters.
+    unsigned int paramc;
+    /// @brief Variadic function flag. (last is variadic)
+    bool_t vararg;
+} type_funct_t;
+
+/// @brief Record for Symbolic types info.
+typedef struct _calc_ast_type_rt_symbl type_symbl_t;
+
+/// @brief Record for object types info.
+typedef struct _calc_ast_type_rt_objct type_objct_t;
 
 #pragma endregion
 
 // +---- Referenced Types -- End
 
-typedef enum _calc_ast_type_kind
+/// @brief Type codes enumeration.
+typedef enum _calc_ast_type_code
 {
+    /// @brief Integer data type code.
     TYCOD_DT_INTGR,
+    /// @brief Floating-pont data type code.
     TYCOD_DT_FLOAT,
 
+    /// @brief Sub-range data type code.
     TYCOD_DT_RANGE,
+    /// @brief Pointer data type code.
     TYCOD_DT_PNTER,
+    /// @brief Enumeration data type code.
     TYCOD_DT_ENUMR,
+    /// @brief Union data type code.
     TYCOD_DT_UNION,
-} tykind_t;
+
+    /// @brief Array structured type code.
+    TYCOD_ST_ARRAY,
+    /// @brief Multi-dimensional array type code.
+    TYCOD_ST_MULTI,
+    /// @brief Tuple structured type code.
+    TYCOD_ST_TUPLE,
+    /// @brief Structure structured type code.
+    TYCOD_RT_STRCT,
+
+    /// @brief Reference referenced type code.
+    TYCOD_RT_REFRN,
+    /// @brief Function referenced type code.
+    TYCOD_RT_FUNCT,
+    /// @brief Functional referenced type code.
+    TYCOD_RT_FUNCC,
+    /// @brief Object referenced type code.
+    TYCOD_RT_OBJCT,
+} tycode_t;
+
+#ifndef isdattype
+/// @brief Checks if a type code is a data type.
+#   define isdattype(value) ((bool_t)((value >= TYCOD_DT_INTGR) && (value <= TYCOD_DT_UNION)))
+#endif // isdattype
+
+#ifndef isstrtype
+/// @brief Checks if a type code is a structured type.
+#   define isstrtype(value) ((bool_t)((value >= TYCOD_ST_ARRAY) && (value <= TYCODE_ST_STRCT)))
+#endif // isstrtype
+
+#ifndef isreftype
+/// @brief Checks if a type code is a referenced type.
+#   define isreftype(value) ((bool_t)((value >= TYCOD_RT_REFRN) && (value <= TYCOD_RT_OBJCT)))
+#endif // isreftype
+
+/// @brief Type data pointers union.
+typedef union _calc_ast_type_data
+{
+    /// @brief Interger type record pointer.
+    type_intgr_t *intgr;
+    /// @brief Floating-point type record pointer.
+    type_float_t *fltty;
+    /// @brief Sub-range type recrod pointer.
+    type_range_t *range;
+    /// @brief Pointer type record pointer.
+    type_pnter_t *pnter;
+    /// @brief Enumeration type record pointer.
+    type_enumr_t *enumr;
+    /// @brief Union type record pointer.
+    type_union_t *unnty;
+    /// @brief Array type record pointer.
+    type_array_t *array;
+    /// @brief Multi-dimensional array type record pointer.
+    type_multi_t *multi;
+    /// @brief Tuple type record pointer.
+    type_tuple_t *tuple;
+    /// @brief Structure type record pointer.
+    type_strct_t *strct;
+    /// @brief Reference type record pointer.
+    type_refrn_t *refrn;
+    /// @brief Function type record pointer.
+    type_funct_t *funct;
+    /// @brief Symbolic type record pointer.
+    type_symbl_t *symbl;
+    /// @brief Object type record pointer.
+    type_objct_t *objct;
+} tydata_t;
+
+/// @brief Allocates the specific record for the
+///        type kind specified by the code.
+/// @param code Code of the type.
+/// @return A the type record pointers union.
+tydata_t alloc_tydata(tycode_t code);
+
+struct _calc_ast_type
+{
+    /// @brief Name of the type.
+    char *name;
+    /// @brief Constant type flag.
+    bool_t cnst;
+    /// @brief Type code.
+    tycode_t code;
+    /// @brief Type data pointer.
+    tydata_t data;
+};
+
+/// @brief Creates a new type record.
+/// @param name Name of the type.
+/// @param code Code of the type.
+/// @return A pointer to the new allocated type
+///         record.
+type_t *create_type(char *name, tycode_t code);
 
 #pragma endregion
 
@@ -484,9 +932,6 @@ typedef enum _calc_ast_type_kind
 // +---- Symbols
 
 #pragma region Symbols
-
-/// @brief Record for symbol prototypes info.
-typedef struct _calc_ast_symb_prototype symb_proto_t;
 
 /// @brief Record for immutable variables info. (global and local)
 typedef struct _calc_ast_symb_const symb_const_t;
@@ -503,14 +948,7 @@ typedef struct _calc_ast_symb_modle symb_modle_t;
 
 // +---- Symbols -- End
 
-/// @brief AST expression node struct.
-typedef struct _calc_ast_expr ast_expr_t;
-/// @brief AST declaration node struct.
-typedef struct _calc_ast_decl ast_decl_t;
-/// @brief AST statement node struct.
-typedef struct _calc_ast_stmt ast_stmt_t;
-/// @brief AST pragma node struct.
-typedef struct _calc_ast_prgm ast_prgm_t;
+
 
 #pragma endregion
 

@@ -58,6 +58,8 @@ deftrv(RWORD,                                       "reserved")
 #   define defkey(name, lexeme) deftok(name, lexeme) defstr(name, lexeme)
 #endif // defkey
 
+/// @brief 'abstract' keyword token.
+defkey(KWORD_ABSTRACT,                              "abstract")
 /// @brief 'bool' keyword token.
 defkey(KWORD_BOOL,                                  "bool")
 /// @brief 'break' keyword token.
