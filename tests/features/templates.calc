@@ -1,6 +1,0 @@
-f(x) : 'T -> real, 'T : int
-//      ^        ^^^^^^^^^^-- templated type constraits (T must be a subset of int)
-//     / \
-//      |
-//      --------------------- templated type
-    = x + 1;
