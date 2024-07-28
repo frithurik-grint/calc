@@ -1,0 +1,5 @@
+if(_CALC_USE_DYNAMIC_LIBRARY)
+	add_library(liber SHARED "calc-liber.c")
+else()
+	add_library(liber STATIC "calc-liber.c")
+endif()
