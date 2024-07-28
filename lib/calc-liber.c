@@ -8,7 +8,7 @@
 
 #include <windows.h>
 
-_LOC unsigned int _CDECL _getpagsiz()
+_API unsigned int _CDECL _getpagesiz()
 {
     static SYSTEM_INFO sys_info = { 0 };
 

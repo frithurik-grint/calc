@@ -43,9 +43,11 @@ deftrv(NULCH,                                       "<nul>")
 deftrv(SPACE,                                       "<wsp>")
 
 /// @brief Identifier trivia token.
-deftrv(IDENT,                                       "id")
+deftrv(IDENT,                                       "ident")
+/// @brief Template identifier trivia token.
+deftrv(TEMPL,                                       "templ")
 /// @brief Reserved word trivia token.
-deftrv(RWORD,                                       "rw")
+deftrv(RWORD,                                       "rword")
 
 #ifdef deftrv
 #   undef deftrv
@@ -80,6 +82,10 @@ deftrv(RWORD,                                       "rw")
 /// @brief Using keywords context. Keywords with this
 ///        context are valid only in use statements.
 #   define CTX_USING 0x0400
+/// @brief Template keywords contrext. Keywords with
+///        this context are valid only in tempated
+///        declarations.
+#   define CTX_TEMPL 0x0800
 #endif // CALC_PARSE_INC_
 
 #ifndef defkey
@@ -88,11 +94,11 @@ deftrv(RWORD,                                       "rw")
 #endif // defkey
 
 /// @brief 'abstract' keyword token.
-defkey(KWORD_ABSTRACT,                              "abstract",             CTX_OBJCT | CTX_DTYPE)
+defkey(KWORD_ABSTRACT,                              "abstract",             CTX_OBJCT | CTX_DTYPE | CTX_TEMPL)
 /// @brief 'auto' keyword token.
-defkey(KWORD_AUTO,                                  "auto",                 CTX_GNRIC | CTX_DTYPE)
+defkey(KWORD_AUTO,                                  "auto",                 CTX_GNRIC | CTX_DTYPE | CTX_TEMPL)
 /// @brief 'bool' keyword token.
-defkey(KWORD_BOOL,                                  "bool",                 CTX_GNRIC | CTX_DTYPE)
+defkey(KWORD_BOOL,                                  "bool",                 CTX_GNRIC | CTX_DTYPE | CTX_TEMPL)
 /// @brief 'break' keyword token.
 defkey(KWORD_BREAK,                                 "break",                CTX_SWTCH | CTX_CYCLE)
 /// @brief 'call' keyword token.
@@ -100,11 +106,11 @@ defkey(KWORD_CALL,                                  "call",                 CTX_
 /// @brief 'case' keyword token.
 defkey(KWORD_CASE,                                  "case",                 CTX_SWTCH)
 /// @brief 'char' keyword token.
-defkey(KWORD_CHAR,                                  "char",                 CTX_GNRIC | CTX_DTYPE)
+defkey(KWORD_CHAR,                                  "char",                 CTX_GNRIC | CTX_DTYPE | CTX_TEMPL)
 /// @brief 'checked' keyword token.
-defkey(KWORD_CHECKED,                               "checked",              CTX_DTYPE)
+defkey(KWORD_CHECKED,                               "checked",              CTX_DTYPE | CTX_TEMPL)
 /// @brief 'const' keyword token.
-defkey(KWORD_CONST,                                 "const",                CTX_GNRIC | CTX_DTYPE)
+defkey(KWORD_CONST,                                 "const",                CTX_GNRIC | CTX_DTYPE | CTX_TEMPL)
 /// @brief 'continue' keyword token.
 defkey(KWORD_CONTINUE,                              "continue",             CTX_CYCLE)
 /// @brief 'default' keyword token.
@@ -116,29 +122,33 @@ defkey(KWORD_ELSE,                                  "else",                 CTX_
 /// @brief 'end' keyword token.
 defkey(KWORD_END,                                   "end",                  CTX_GNRIC | CTX_CYCLE)
 /// @brief 'enum' keyword token.
-defkey(KWORD_ENUM,                                  "enum",                 CTX_GNRIC | CTX_DTYPE | CTX_USING)
+defkey(KWORD_ENUM,                                  "enum",                 CTX_GNRIC | CTX_DTYPE | CTX_USING | CTX_TEMPL)
 /// @brief 'extern' keyword token.
 defkey(KWORD_EXTERN,                                "extern",               CTX_GNRIC | CTX_USING)
 /// @brief 'final' keyword token.
 defkey(KWORD_FINAL,                                 "final",                CTX_OBJCT | CTX_DTYPE)
 /// @brief 'float' keyword token.
-defkey(KWORD_FLOAT,                                 "float",                CTX_DTYPE)
+defkey(KWORD_FLOAT,                                 "float",                CTX_DTYPE | CTX_TEMPL)
 /// @brief 'for' keyword token.
 defkey(KWORD_FOR,                                   "for",                  CTX_GNRIC)
+/// @brief 'func' keyword token.
+defkey(KWORD_FUNC,                                  "func",                 CTX_TEMPL)
 /// @brief 'goto' keyword token.
 defkey(KWORD_GOTO,                                  "goto",                 CTX_GNRIC)
 /// @brief 'if' keyword token.
 defkey(KWORD_IF,                                    "if",                   CTX_GNRIC)
 /// @brief 'int' keyword token.
-defkey(KWORD_INT,                                   "int",                  CTX_GNRIC | CTX_DTYPE)
+defkey(KWORD_INT,                                   "int",                  CTX_GNRIC | CTX_DTYPE | CTX_TEMPL)
 /// @brief 'let' keyword token. (constant declaration)
 defkey(KWORD_LET,                                   "let",                  CTX_GNRIC)
 /// @brief 'match' keyword token.
 defkey(KWORD_MATCH,                                 "match",                CTX_GNRIC)
 /// @brief 'module' keyword token.
-defkey(KWORD_MODULE,                                "module",               CTX_GNRIC | CTX_USING)
+defkey(KWORD_MODULE,                                "module",               CTX_GNRIC | CTX_USING | CTX_TEMPL)
+/// @brief 'nameof' keyword token.
+defkey(KWORD_NAMEOF,                                "nameof",               CTX_GNRIC)
 /// @brief 'object' keyword token.
-defkey(KWORD_OBJECT,                                "object",               CTX_GNRIC | CTX_DTYPE | CTX_USING)
+defkey(KWORD_OBJECT,                                "object",               CTX_GNRIC | CTX_DTYPE | CTX_USING | CTX_TEMPL)
 /// @brief 'override' keyword token.
 defkey(KWORD_OVERRIDE,                              "override",             CTX_OBJCT)
 /// @brief 'pragma' keyword token.
@@ -150,29 +160,37 @@ defkey(KWORD_PROTECTED,                             "protected",            CTX_
 /// @brief 'public' keyword token.
 defkey(KWORD_PUBLIC,                                "public",               CTX_OBJCT | CTX_USING)
 /// @brief 'real' keyword token.
-defkey(KWORD_REAL,                                  "real",                 CTX_GNRIC | CTX_DTYPE)
+defkey(KWORD_REAL,                                  "real",                 CTX_GNRIC | CTX_DTYPE | CTX_TEMPL)
 /// @brief 'return' keyword token.
 defkey(KWORD_RETURN,                                "return",               CTX_GNRIC)
 /// @brief 'signed' keyword token.
-defkey(KWORD_SIGNED,                                "signed",               CTX_DTYPE)
+defkey(KWORD_SIGNED,                                "signed",               CTX_DTYPE | CTX_TEMPL)
+/// @brief 'sizeof' keyword token.
+defkey(KWORD_SIZEOF,                                "sizeof",               CTX_GNRIC)
 /// @brief 'static' keyword token.
 defkey(KWORD_STATIC,                                "static",               CTX_GNRIC | CTX_USING)
 /// @brief 'struct' keyword token.
-defkey(KWORD_STRUCT,                                "struct",               CTX_GNRIC | CTX_DTYPE | CTX_USING)
+defkey(KWORD_STRUCT,                                "struct",               CTX_GNRIC | CTX_DTYPE | CTX_USING | CTX_TEMPL)
 /// @brief 'switch' keyword token.
 defkey(KWORD_SWITCH,                                "switch",               CTX_GNRIC)
+/// @brief 'type' keyword token.
+defkey(KWORD_TYPE,                                  "type",                 CTX_TEMPL)
+/// @brief 'typeof' keyword token.
+defkey(KWORD_TYPEOF,                                "typeof",               CTX_GNRIC)
 /// @brief 'undef' keyword token.
-defkey(KWORD_UNDEF,                                 "undef",                CTX_GNRIC | CTX_DTYPE)
+defkey(KWORD_UNDEF,                                 "undef",                CTX_GNRIC | CTX_DTYPE | CTX_TEMPL)
 /// @brief 'union' keyword token.
-defkey(KWORD_UNION,                                 "union",                CTX_GNRIC | CTX_DTYPE | CTX_USING)
+defkey(KWORD_UNION,                                 "union",                CTX_GNRIC | CTX_DTYPE | CTX_USING | CTX_TEMPL)
 /// @brief 'unsigned' keyword token.
-defkey(KWORD_UNSIGNED,                              "unsigned",             CTX_DTYPE)
+defkey(KWORD_UNSIGNED,                              "unsigned",             CTX_DTYPE | CTX_TEMPL)
 /// @brief 'use' keyword token.
 defkey(KWORD_USE,                                   "use",                  CTX_GLOBL)
 /// @brief 'void' keyword token.
-defkey(KWORD_VOID,                                  "void",                 CTX_GNRIC)
+defkey(KWORD_VOID,                                  "void",                 CTX_GNRIC | CTX_TEMPL)
 /// @brief 'while' keyword token.
 defkey(KWORD_WHILE,                                 "while",                CTX_GNRIC)
+/// @brief 'with' keyword token.
+defkey(KWORD_WITH,                                  "with",                 CTX_GNRIC | CTX_TEMPL)
 
 #ifndef CALC_CONTXT_KEYWORDS
 /// @brief If its value is 1, keywords have a specific context

@@ -185,7 +185,7 @@ CALC_C_HEADER_BEGIN
 
 /// @brief Gets the system memory page size.
 /// @return The system meory page size in bytes.
-_LOC unsigned int _CDECL _getpagsiz();
+_API unsigned int _CDECL _getpagesiz();
 
 CALC_C_HEADER_END
 
