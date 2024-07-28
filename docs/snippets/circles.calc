@@ -1,0 +1,22 @@
+use module std::lib.math;
+
+Circle <- struct {
+    r : f32;
+};
+
+let PrintTotalArea(circles[] : Circle) {
+    area : f32 = 0;
+ 
+    for c :: circles
+        => area += PI * c.r * c.r;
+
+    printfn("Total area: {0}", area);
+}
+
+let Main() -> i32 {
+    let circles[] : Circle = [{.r = 1.0}, {.r = 2.0}];
+  
+    PrintTotalArea(circles);
+
+    return 0;
+}
