@@ -497,7 +497,7 @@ typedef struct _calc_exception
     /// @brief Exception kind.
     exkind_t kind;
     /// @brief Unique identifier of the exception.
-    unsigned int code;
+    excode_t code;
     /// @brief Function from which is thrown the
     ///        exception.
     char *func;
@@ -517,7 +517,7 @@ typedef struct _calc_exception
 /// @param message Error message.
 /// @param code Unique code of the exception.
 /// @return A pinter to the new allocated exception.
-_API ex_t *_CDECL create_exception(char *const message, unsigned int code);
+_API ex_t *_CDECL create_exception(char *const message, excode_t code);
 /// @brief Creates a new exception informations record
 ///        to store informations on thrown exception,
 ///        included the location from where is thrown.
@@ -527,12 +527,24 @@ _API ex_t *_CDECL create_exception(char *const message, unsigned int code);
 /// @param file File from where is thrown the exception.
 /// @param line Line from where is thrown the exception.
 /// @return A pointer to the new allocated exception.
-_API ex_t *_CDECL create_exception_located(char *const message, unsigned int code, char *const func, char *const file, unsigned int line);
+_API ex_t *_CDECL create_exception_located(char *const message, excode_t code, char *const func, char *const file, unsigned int line);
 /// @brief Deletes an exception informations record.
 /// @param exception Exception to delete.
-void _CDECL delete_exception(ex_t *const exception);
+_API ex_t *_CDECL delete_exception(ex_t *const exception);
 
 // Exception Stack
+
+#ifndef EXIT_SUCCESS
+#   define EXIT_SUCCESS 0
+#endif
+
+#ifndef EXIT_FAILURE
+#   define EXIT_FAILURE 1
+#endif
+
+#ifndef EXIT_ABORTED
+#   define EXIT_ABORTED 3
+#endif
 
 /// @brief Thrown exceptions stack data structure.
 typedef struct _calc_exception_stack
@@ -583,7 +595,7 @@ _API ex_t *_CDECL peekex(ex_stack_t *const stack);
 /// @param line Line from which the exception has been throwed.
 /// @param code Code of the exception.
 /// @param message Error message.
-_API void _CDECL _ex_throw(ex_stack_t *const stack, const char *const file, const char *const func, unsigned int line, unsigned int code, const char *const message);
+_API void _CDECL _ex_throw(ex_stack_t *const stack, const char *const file, const char *const func, unsigned int line, excode_t code, const char *const message);
 /// @brief Pushes an exception on the exceptions stack.
 /// @param stack Stack on which push the exception.
 /// @param file File from which the exception has been throwed.
@@ -592,7 +604,7 @@ _API void _CDECL _ex_throw(ex_stack_t *const stack, const char *const file, cons
 /// @param code Code of the exception.
 /// @param format Format of the exception error message.
 /// @param others Format messages.
-_API void _CDECL _ex_throwf(ex_stack_t *const stack, const char *const file, const char *const func, unsigned int line, unsigned int code, const char *const format, ...);
+_API void _CDECL _ex_throwf(ex_stack_t *const stack, const char *const file, const char *const func, unsigned int line, excode_t code, const char *const format, ...);
 
 #ifndef ex_throw
 /// @brief Throws an exception on the specified exceptions stack.
@@ -617,10 +629,11 @@ typedef int (*_calc_exception_callback)(ex_t *const), (*ex_callback_t)(ex_t *con
 
 /// @brief Catches the last thrown exception passing it to the
 ///        callback function.
+/// @param stack Thrown exceptions stack.
 /// @param code Code of the exception to catch.
 /// @param callback Callback function.
 /// @return The returned code from the callback function.
-_API int _CDECL except(unsigned int code, ex_callback_t callback);
+_API int _CDECL except(ex_stack_t *const stack, excode_t code, ex_callback_t callback);
 
 #pragma endregion
 
@@ -691,36 +704,36 @@ typedef CALC_BYTE_T byte_t;
 /// @param str2 Second string.
 /// @return TRUE if the strings have the same content and the same
 ///         length, or if are the same. (also if are both NULL)
-bool_t streq(const char *const str1, const char *const str2);
+_API bool_t _CDECL streq(const char *const str1, const char *const str2);
 /// @brief Equals two strings ignoring letters case.
 /// @param str1 First string. (is better to use a costant)
 /// @param str2 Second string.
 /// @return TRUE if the strings have the same content and the same
 ///         length, or if are the same. (also if are both NULL)
-bool_t strieq(const char *const str1, const char *const str2);
+_API bool_t _CDECL strieq(const char *const str1, const char *const str2);
 
 /// @brief Converts a string to lower case.
 /// @param dest Destination buffer (if NULL duplicate).
 /// @param source Source string.
 /// @param length Number of characters.
 /// @return A pointer to dest or the new string.
-char *strntolower(char *const dest, const char *const source, size_t length);
+_API char *_CDECL strntolower(char *const dest, const char *const source, size_t length);
 /// @brief Converts a string to lower case.
 /// @param dest Destination buffer (if NULL duplicate).
 /// @param source Source string.
 /// @return A pointer to dest or the new string.
-char *strtolower(char *const dest, const char *const source);
+_API char *_CDECL strtolower(char *const dest, const char *const source);
 /// @brief Converts a string to lower case.
 /// @param dest Destination buffer (if NULL duplicate).
 /// @param source Source string.
 /// @param length Number of characters.
 /// @return A pointer to dest or the new string.
-char *strntoupper(char *const dest, const char *const source, size_t length);
+_API char *_CDECL strntoupper(char *const dest, const char *const source, size_t length);
 /// @brief Converts a string to lower case.
 /// @param dest Destination buffer (if NULL duplicate).
 /// @param source Source string.
 /// @return A pointer to dest or the new string.
-char *strtoupper(char *const dest, const char *const source);
+_API char *_CDECL strtoupper(char *const dest, const char *const source);
 
 /// @brief Create a duplicate of a string or copy it in
 ///        dest.
@@ -728,44 +741,44 @@ char *strtoupper(char *const dest, const char *const source);
 /// @param source Source string.
 /// @param length Number of character to copy.
 /// @return A pointer to a new string or dest.
-char *strndcpy(char *const dest, const char *const source, size_t length);
+_API char *_CDECL strndcpy(char *const dest, const char *const source, size_t length);
 /// @brief Create a duplicate of a string or copy it in
 ///        dest.
 /// @param dest Destination buffer (if NULL duplicate).
 /// @param source Source string.
 /// @return A pointer to a new string or dest.
-char *strdcpy(char *const dest, const char *const source);
+_API char *_CDECL strdcpy(char *const dest, const char *const source);
 
 /// @brief Unescape a character.
 /// @param str Source char.
 /// @return The pointer to unescaped str.
-char *unesc(char *const dest, int c);
+_API char *_CDECL unesc(char *const dest, int c);
 
 /// @brief Formats a format string with a list of args.
 /// @param format String containing result format.
 /// @param arglist List of arguments to use to format
 ///                the final value.
 /// @return The formatted string.
-char *vformat(char *const dest, const char *const format, va_list arglist);
+_API char *_CDECL vformat(char *const dest, const char *const format, va_list arglist);
 /// @brief Formats a format string with some arguments.
 /// @param format String containing result format.
 /// @param others List of arguments to use to format
 ///               the final value.
 /// @return The formatted string.
-char *format(char *const dest, const char *const format, ...);
+_API char *_CDECL format(char *const dest, const char *const format, ...);
 
 /// @brief Formats a format string with a list of args.
 /// @param format String containing result format.
 /// @param arglist List of arguments to use to format
 ///                the final value.
 /// @return The formatted string.
-char *vformatn(const char *const format, va_list arglist);
+_API char *_CDECL vformatn(const char *const format, va_list arglist);
 /// @brief Formats a format string with some arguments.
 /// @param format String containing result format.
 /// @param others List of arguments to use to format
 ///               the final value.
 /// @return The formatted string.
-char *formatn(const char *const format, ...);
+_API char *_CDECL formatn(const char *const format, ...);
 
 #pragma endregion
 
@@ -796,7 +809,7 @@ typedef unsigned int hash_t;
 /// @brief Hashing function data type.
 typedef hash_t(*hashfnc_t)(char *const);
 
-// Hash Table
+// Hash Bucket
 
 /// @brief Hash table bucket structure.
 typedef struct _calc_hash_table_bucket
@@ -824,13 +837,15 @@ typedef struct _calc_hash_table_bucket
 ///             to the colliding bucket.
 /// @return A pointer to the new hash table
 ///         bucket.
-hashbuc_t *create_hashbuc(char *const name, hash_t hash, unsigned int data, hashbuc_t *const prev);
+_API hashbuc_t *_CDECL create_hashbuc(char *const name, hash_t hash, unsigned int data, hashbuc_t *const prev);
 /// @brief Deletes the specified hash table
 ///        bucket, releasing its memory. (this
 ///        frees name pointer)
 /// @param bucket Bucket to delete.
 /// @return A pointer to the colliding bucket.
-hashbuc_t *delete_hashbuc(hashbuc_t *const bucket);
+_API hashbuc_t *_CDECL delete_hashbuc(hashbuc_t *const bucket);
+
+// Hash Table
 
 #ifndef CALC_HASHTAB_BUCKSNUM
 /// @brief Default number of buckets in a chunk
@@ -862,48 +877,48 @@ typedef struct _calc_hash_table
 ///             CALC_HASHTAB_BUCKSNUM buckets)
 /// @param prev Pointer to the previous chunk.
 /// @return A pointer to the new hash table chunk.
-hashtab_t *create_hashtab(unsigned int size, hashfnc_t func, hashtab_t *const prev);
+_API hashtab_t *_CDECL create_hashtab(unsigned int size, hashfnc_t func, hashtab_t *const prev);
 /// @brief Deletes the specified hash table with
 ///        its buckets, releasing all used memory.
 /// @param tab Pointer to table to delete.
 /// @return A pointer to the previous hash table chunk.
-hashtab_t *delete_hashtab(hashtab_t *const tab);
+_API hashtab_t *_CDECL delete_hashtab(hashtab_t *const tab);
 
 /// @brief If specified key is not inserted in the hash table
 ///        chunk, inserts it, else gets it.
 /// @param tab Pointer to the hash table chunk on which operate.
 /// @param key Key to add or get.
 /// @return A pointer to the new (or old) hash bucket.
-hashbuc_t *hashtab_add(hashtab_t *const tab, char *const key);
+_API hashbuc_t *_CDECL hashtab_add(hashtab_t *const tab, char *const key);
 /// @brief Gets bucket with the specified key.
 /// @param tab Pointer to the hash table chunk on which operate.
 /// @param key Key to find.
 /// @return A pointer to the found bucket or null if not found.
-hashbuc_t *hashtab_get(hashtab_t *const tab, char *const key);
+_API hashbuc_t *_CDECL hashtab_get(hashtab_t *const tab, char *const key);
 /// @brief Sets the data address of the bucket at the specified
 ///        key.
 /// @param tab Pointer to the hash table chunk on which operate.
 /// @param key Key to find.
 /// @param data Data address to set to the found bucket.
 /// @return A pointer to the found bucket or null if not found.
-hashbuc_t *hashtab_set(hashtab_t *const tab, char *const key, unsigned int data);
+_API hashbuc_t *_CDECL hashtab_set(hashtab_t *const tab, char *const key, unsigned int data);
 
 /// @brief Checks if hash table contains a specified key.
 /// @param tab Pointer to the hash table chunk on which operate.
 /// @param key Key to check.
 /// @return TRUE if the hash table contains the value, else FALSE.
-bool_t hashtab_contains(hashtab_t *const tab, char *const key);
+_API bool_t _CDECL hashtab_contains(hashtab_t *const tab, char *const key);
 
 /// @brief Removes an hash bucket from the table.
 /// @param tab Pointer to the hash table chunk on which operate.
 /// @param key Key of the bucket to remove.
 /// @return A pointer to the removed hash bucket.
-hashbuc_t *hashtab_remove(hashtab_t *const tab, char *const key);
+_API hashbuc_t *_CDECL hashtab_remove(hashtab_t *const tab, char *const key);
 /// @brief Deletes an hash bucket from the table.
 /// @param tab Pointer to the hash table chunk on which operate.
 /// @param key Key of the bucket to delete.
 /// @return A pointer to the colliding bucket.
-hashbuc_t *hashtab_delete(hashtab_t *const tab, char *const key);
+_API hashbuc_t *_CDECL hashtab_delete(hashtab_t *const tab, char *const key);
 
 #ifndef _CALC_MINIMAL_BUILD
 
@@ -912,7 +927,7 @@ hashbuc_t *hashtab_delete(hashtab_t *const tab, char *const key);
 ///               table.
 /// @param tab Pointer to the last hash table chunk of the
 ///            hash table to dump on the selected stream.
-void hashtab_dump(FILE *const stream, hashtab_t *const tab);
+_API void _CDECL hashtab_dump(FILE *const stream, hashtab_t *const tab);
 
 #endif // _CALC_MINIMAL_BUILD
 
