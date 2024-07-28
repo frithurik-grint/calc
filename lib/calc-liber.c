@@ -14,13 +14,40 @@
 
 #pragma region System Outputting Functions
 
-_API int fputln(FILE *const stream)
+// +---- Internal
+
+#pragma region Internal
+
+static inline int _fputln(FILE *const stream)
 {
 #ifdef _CALC_USE_CRLF
     return fputs("\r\n", stream);
 #else
     return fputc('\n', stream), 1;
 #endif // _CALC_USE_CRLF
+}
+
+static inline int _putln()
+{
+#ifdef _CALC_USE_CRLF
+    return puts("\r\n");
+#else
+    return putchar('\n'), 1;
+#endif // _CALC_USE_CRLF
+}
+
+#pragma endregion
+
+// +---- Internal -- End
+
+_API int _CDECL fputln(FILE *const stream)
+{
+    return _fputln(stream);
+}
+
+_API int _CDECL putln()
+{
+    return _putln();
 }
 
 #pragma endregion

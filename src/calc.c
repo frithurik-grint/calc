@@ -2,6 +2,8 @@
 
 int main()
 {
-    fputln(stdin);
+    fputln(stdout);
+    fputln(stdout);
+
     return 0;
 }
