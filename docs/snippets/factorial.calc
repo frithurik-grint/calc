@@ -1,0 +1,2 @@
+fac(n) : int -> int
+    = (n >= 2) ? n * fac(n - 1) : 1;
