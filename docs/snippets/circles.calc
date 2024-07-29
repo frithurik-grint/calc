@@ -1,3 +1,6 @@
+// This is the example of C++ code written in Carbon. This is
+// the version written in calc.
+
 use module std::lib.math;
 
 Circle <- struct {
