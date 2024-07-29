@@ -1,0 +1,25 @@
+{
+  "name": "calc",
+  "displayName": "calc",
+  "description": "",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.91.0"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "contributes": {
+    "languages": [{
+      "id": "calc",
+      "aliases": ["calc-lang", "calc"],
+      "extensions": [".calc",".cl"],
+      "configuration": "./language-configuration.json"
+    }],
+    "grammars": [{
+      "language": "calc",
+      "scopeName": "source.calc",
+      "path": "./syntaxes/calc.tmLanguage.json"
+    }]
+  }
+}

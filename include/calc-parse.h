@@ -64,16 +64,16 @@ typedef struct _calc_source_buffer
 ///               memory page size (or BUFSIZ,
 //                if is defined macro _CALC_USE_BUFSIZ).
 /// @return A pointer to the new source buffer.
-_API srcbuf_t *create_srcbuf(char *const buffer, unsigned int length);
+_API srcbuf_t *_CDECL create_srcbuf(char *const buffer, unsigned int length);
 /// @brief Creates a new auto size source buffer
 ///        reader. (the same as create_srcbuf(NULL, 0))
 /// @return A pointer to the new source buffer.
-_API srcbuf_t *create_srcbuf_auto();
+_API srcbuf_t *_CDECL create_srcbuf_auto();
 /// @brief Deletes a source buffer reader and
 ///        releases any memory resource used by
 ///        it.
 /// @param sb Source buffer reader to delete.
-_API void delete_srcbuf(srcbuf_t *const sb);
+_API void _CDECL delete_srcbuf(srcbuf_t *const sb);
 
 /// @brief Gets the top character from the source
 ///        buffer reader. (peeks the char)
@@ -81,7 +81,7 @@ _API void delete_srcbuf(srcbuf_t *const sb);
 /// @return The top character of the buffer or, in
 ///         case of failure or if reached the end of
 ///         the file, EOF.
-_API int sbtopc(srcbuf_t *const sb);
+_API int _CDECL sbtopc(srcbuf_t *const sb);
 /// @brief Gets the top character from the source
 ///        buffer reader and increases forward
 ///        position counter. (reads the char)
@@ -89,7 +89,7 @@ _API int sbtopc(srcbuf_t *const sb);
 /// @return The top character of the buffer or, in
 ///         case of failure or if reached the end of
 ///         the file, EOF.
-_API int sbgetc(srcbuf_t *const sb);
+_API int _CDECL sbgetc(srcbuf_t *const sb);
 /// @brief Sets the top character of the source buffer
 ///        reader. (writes the char)
 /// @param sb Pointer to the source buffer reader.
@@ -97,7 +97,7 @@ _API int sbgetc(srcbuf_t *const sb);
 /// @return The top character of the buffer or, in
 ///         case of failure or if reached the end of
 ///         the file, EOF.
-_API int sbsetc(srcbuf_t *const sb, int c);
+_API int _CDECL sbsetc(srcbuf_t *const sb, int c);
 /// @brief Sets the top character of the source buffer
 ///        reader and increases forward position
 ///        counter.
@@ -106,7 +106,7 @@ _API int sbsetc(srcbuf_t *const sb, int c);
 /// @return The put character in the buffer or, in
 ///         case of failure or if reached the end of
 ///         the file, EOF.
-_API int sbputc(srcbuf_t *const sb, int c);
+_API int _CDECL sbputc(srcbuf_t *const sb, int c);
 
 /// @brief Reads a string from the source buffer in the
 ///        destination buffer. It reads a line or until it
@@ -118,7 +118,7 @@ _API int sbputc(srcbuf_t *const sb, int c);
 /// @param sb Pointer to the source buffer reader.
 /// @param count Maximum number of characters to read.
 /// @return A pointer to the destination buffer.
-_API char *sbtops(char *const dst, srcbuf_t *const sb, unsigned int count);
+_API char *_CDECL sbtops(char *const dst, srcbuf_t *const sb, unsigned int count);
 /// @brief Reads a string from the source buffer in the
 ///        destination buffer and increases forward postion
 ///        counter. It reads a line or it reads until it
@@ -130,7 +130,7 @@ _API char *sbtops(char *const dst, srcbuf_t *const sb, unsigned int count);
 /// @param sb Pointer to the source buffer reader.
 /// @param count Maximum number of characters to read.
 /// @return A pointer to the destination buffer.
-_API char *sbgets(char *const dst, srcbuf_t *const sb, unsigned int count);
+_API char *_CDECL sbgets(char *const dst, srcbuf_t *const sb, unsigned int count);
 /// @brief Writes a string from the source buffer in the
 ///        destination buffer. It writes a line or until it
 ///        reaches the max number of characters to write.
@@ -141,7 +141,7 @@ _API char *sbgets(char *const dst, srcbuf_t *const sb, unsigned int count);
 /// @param count Maximum number of characters to write.
 /// @return A pointer to the source string or NULL in case
 ///         of error.
-_API char *sbsets(srcbuf_t *const sb, char *const src, unsigned int count);
+_API char *_CDECL sbsets(srcbuf_t *const sb, char *const src, unsigned int count);
 /// @brief Writes a string from the source buffer in the
 ///        destination buffer and increases forward position
 ///        counter. It writes a line or until it
@@ -153,14 +153,14 @@ _API char *sbsets(srcbuf_t *const sb, char *const src, unsigned int count);
 /// @param count Maximum number of characters to write.
 /// @return A pointer to the source string or NULL in case
 ///         of error.
-_API char *sbputs(srcbuf_t *const sb, char *const src, unsigned int count);
+_API char *_CDECL sbputs(srcbuf_t *const sb, char *const src, unsigned int count);
 
 /// @brief Chops buffer content from begin postion to
 ///        forward position.
 /// @param sb Pointer to the source buffer reader.
 /// @return A pointer to a new string containing the
 ///         chopped content.
-_API char *sbchop(srcbuf_t *const sb);
+_API char *_CDECL sbchop(srcbuf_t *const sb);
 /// @brief Chops buffer content from begin postion to
 ///        forward position writing chopped content into
 ///        destination buffer, or if it's NULL into a new
@@ -168,7 +168,7 @@ _API char *sbchop(srcbuf_t *const sb);
 /// @param dst Pointer to the destination buffer.
 /// @param sb Pointer to the source buffer reader.
 /// @return A pointer to the destination buffer.
-_API char *sbchto(char *const dst, srcbuf_t *const sb);
+_API char *_CDECL sbchto(char *const dst, srcbuf_t *const sb);
 /// @brief Chops buffer content from begin postion of a
 ///        specified number of characters writing chopped
 ///        content into destination buffer, or if it's
@@ -177,26 +177,26 @@ _API char *sbchto(char *const dst, srcbuf_t *const sb);
 /// @param sb Pointer to the source buffer reader.
 /// @param count Number of characters to chop.
 /// @return A pointer to the destination buffer.
-_API char *sbchof(char *const dst, srcbuf_t *const sb, unsigned int count);
+_API char *_CDECL sbchof(char *const dst, srcbuf_t *const sb, unsigned int count);
 
 /// @brief Gets the beginning of the internal source
 ///        buffer.
 /// @param sb Pointer to the source buffer reader.
 /// @return A pointer to the source buffer.
-_API char *sbgetbuf(srcbuf_t *const sb);
+_API char *_CDECL sbgetbuf(srcbuf_t *const sb);
 
 /// @brief Advances position counter to reach the
 ///        forward position. While CALC_DEBUG is defined
 ///        it advances also the buffer pointer.
 /// @param sb Pointer to the source buffer reader.
-_API void sbadvnc(srcbuf_t *const sb);
+_API void _CDECL sbadvnc(srcbuf_t *const sb);
 /// @brief Retreats position counter to zero.
 /// @param sb Pointer to the source buffer reader.
-_API void sbretrt(srcbuf_t *const sb);
+_API void _CDECL sbretrt(srcbuf_t *const sb);
 /// @brief Resets position counters to zero and
 ///        resets buffer to the beginning.
 /// @param sb Pointer to the source buffer reader.
-_API void sbrewnd(srcbuf_t *const sb);
+_API void _CDECL sbrewnd(srcbuf_t *const sb);
 
 #pragma endregion
 
@@ -234,14 +234,14 @@ typedef enum _calc_token_code
 /// @param lexeme Lexeme to search.
 /// @return Keyword code, if lexeme is a valid keyword,
 ///         else it returns identifier code.
-tokcode_t getkword(char *const lexeme);
+_API tokcode_t _CDECL getkword(char *const lexeme, unsigned int context);
 /// @brief Gets the corresponding token code to the
 ///        specified lexeme, searching into the pragmatic
 ///        words table.
 /// @param lexeme Lexeme to search.
 /// @return Pragmatic code, if lexeme is a valid pragmatic
 ///         word, else it returns identifier code.
-tokcode_t getpragm(char *const lexeme);
+_API tokcode_t _CDECL getpragm(char *const lexeme);
 
 /// @brief Gets the next token in the source stream
 ///        without advancing position.
@@ -250,7 +250,7 @@ tokcode_t getpragm(char *const lexeme);
 ///               lexeme is set there, else this is
 ///               set to NULL.
 /// @return Code of the next scanned token.
-tokcode_t gettoken(srcbuf_t *const sb, char **const lexeme);
+_API tokcode_t _CDECL gettoken(srcbuf_t *const sb, char **const lexeme);
 
 #ifndef _CALC_MINIMAL_BUILD
 
@@ -259,17 +259,17 @@ tokcode_t gettoken(srcbuf_t *const sb, char **const lexeme);
 /// @param tok Code of the token.
 /// @return A constant string containing the lexeme
 ///         or the lexeme format, or an error message.
-const char *const toktostr(const tokcode_t tok);
+_API const char *const _CDECL toktostr(const tokcode_t tok);
 /// @brief Gets the name of the token.
 /// @param tok Code of the token.
 /// @return A constant string containing the token
 ///         name, or an error message.
-const char *const tokname(const tokcode_t tok);
+_API const char *const _CDECL tokname(const tokcode_t tok);
 
 /// @brief Tokenize from input stream. This function
 ///        can be used as a lexical analyzer to find
 ///        basic lixical errors.
-void tokenize();
+_API void _CDECL tokenize();
 
 #endif // _CALC_MINIMAL_BUILD
 

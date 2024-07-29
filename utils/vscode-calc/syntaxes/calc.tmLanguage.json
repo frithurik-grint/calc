@@ -1,0 +1,286 @@
+{
+	"$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+	"name": "calc",
+	"scopeName": "source.calc",
+	"foldingStartMarker": "\\{\\s*$",
+	"foldingStopMarker": "^\\s*\\}",
+	"fileTypes": ["calc","cl"],
+	"patterns": [
+		{
+			"include": "#comments"
+		},
+		{
+			"include": "#comments-invalid"
+		},
+		{
+			"include": "#characters"
+		},
+		{
+			"include": "#characters-invalid"
+		},
+		{
+			"include": "#strings"
+		},
+		{
+			"include": "#numerics"
+		},
+		{
+			"include": "#numerics-invalid"
+		},
+		{
+			"include": "#keywords"
+		},
+		{
+			"include": "#iterators"
+		},
+		{
+			"include": "#types"
+		},
+		{
+			"include": "#meta-types"
+		},
+		{
+			"include": "#functions"
+		},
+		{
+			"include": "#variables"
+		}
+	],
+	"repository": {
+		"comments": {
+			"patterns": [
+				{
+					"name": "comment.block.documentation.calc",
+					"begin": "[/][/][*]",
+					"end": "[*][/][/]",
+					"applyEndPatternLast": 0
+				},
+				{
+					"name": "comment.block.calc",
+					"begin": "[/][*]",
+					"end": "[*][/]"
+				},
+				{
+					"name": "comment.line.documentation.calc",
+					"begin": "[/][/][/]",
+					"end": "$"
+				},
+				{
+					"name": "comment.line.calc",
+					"begin": "[/][/]",
+					"end": "$"
+				}
+			]
+		},
+		"comments-invalid": {
+			"patterns": [
+				{
+					"name": "invalid.comment.block.documentation.calc",
+					"match": "([/][/][*]|[*][/][/])"
+				},
+				{
+					"name": "invalid.comment.block.calc",
+					"match": "([/][*]|[*][/])"
+				}
+			]
+		},
+		"characters": {
+			"name": "string.quoted.single.calc",
+			"match": "\\'([^\\'\\\\]|(\\\\([0-9]{1,3}|[Xx][0-9A-Fa-f]{1,2}|[Uu][+][0-9A-Fa-f]{1,4}|.)))\\'",
+			"captures": {
+				"1": {
+					"patterns": [
+						{
+							"include": "#characters-escape"
+						},
+						{
+							"include": "#characters-escape-invalid"
+						}
+					]
+				}
+			}
+		},
+		"characters-invalid": {
+			"name": "invalid.string.quoted.single.calc",
+			"match": "\\'.*\\'"
+		},
+		"characters-escape": {
+			"name": "constant.character.escape.calc",
+			"match": "\\\\([0-9]{1,3}|[Xx][0-9A-Fa-f]{1,2}|[Uu][+][0-9A-Fa-f]{1,4}|[abefnrstv]|\\\\|[\\'\\\"\\?])"
+		},
+		"characters-escape-invalid": {
+			"name": "invalid.illegal.constant.character.escape.calc",
+			"match": "\\\\."
+		},
+		"strings": {
+			"name": "string.quoted.double.calc",
+			"begin": "\"",
+			"end": "\"",
+			"patterns": [
+				{
+					"include": "#characters-escape"
+				},
+				{
+					"include": "#characters-escape-invalid"
+				},
+				{
+					"name": "constant.other.placeholder.calc",
+					"match": "[{][0-9]*[}]"
+				}
+			]
+		},
+		"numerics": {
+			"patterns": [
+				{
+					"name": "constant.numeric.real.calc",
+					"match": "\\b([0-9]+[.][0-9]+([Ee][+-]?[0-9]+)?)\\b"
+				},
+				{
+					"name": "constant.numeric.integer.binary.calc",
+					"match": "\\b(0+[Bb][01]+)\\b"
+				},
+				{
+					"name": "constant.numeric.integer.octal.calc",
+					"match": "\\b(0+[Cc][0-7]+)\\b"
+				},
+				{
+					"name": "constant.numeric.integer.decimal.calc",
+					"match": "\\b((0+[Dd])?[0-9]+)\\b"
+				},
+				{
+					"name": "constant.numeric.integer.hexadecimal.calc",
+					"match": "\\b(0+[Xx][0-9A-Fa-f]+)\\b"
+				}
+			]
+		},
+		"numerics-invalid": {
+			"patterns": [
+				{
+					"name": "invalid.constant.numeric.integer.binary.calc",
+					"match": "\\b(0+[Bb]|0+[Bb][0-9]+)\\b"
+				},
+				{
+					"name": "invalid.constant.numeric.integer.octal.calc",
+					"match": "\\b(0+[Cc]|0+[Cc][0-9]+)\\b"
+				},
+				{
+					"name": "invalid.constant.numeric.integer.decimal.calc",
+					"match": "\\b(0+[Dd])\\b"
+				},
+				{
+					"name": "invalid.constant.numeric.integer.hexadecimal.calc",
+					"match": "\\b(0+[Xx])\\b"
+				}
+			]
+		},
+		"keywords": {
+			"patterns": [
+				{
+					"name": "keyword.control.selection.simple.calc",
+					"match": "\\b(if|else)\\b"
+				},
+				{
+					"name": "keyword.control.selection.multiple.calc",
+					"match": "\\b(switch|case|default)\\b"
+				},
+				{
+					"name": "keyword.control.loop.calc",
+					"match": "\\b(for|do|while)\\b"
+				},
+				{
+					"name": "keyword.control.jump.calc",
+					"match": "\\b(call|end|return|goto|break|continue)\\b"
+				},
+				{
+					"name": "keyword.operator.calc",
+					"match": "\\b(sizeof|nameof|typeof)\\b"
+				},
+				{
+					"name": "keyword.other.declarator.calc",
+					"match": "\\b(let)\\b"
+				},
+				{
+					"name": "keyword.other.directive.calc",
+					"match": "\\b(use)\\b"
+				},
+				{
+					"name": "keyword.other.pattern.calc",
+					"match": "\\b(match|with)\\b"
+				},
+				{
+					"name": "keyword.other.modifier.calc",
+					"match": "\\b(final|abstract|override|checked|const)\\b"
+				},
+				{
+					"name": "keyword.other.modifier.access.calc",
+					"match": "\\b(private|protected|public)\\b"
+				},
+				{
+					"name": "keyword.other.modifier.storage.calc",
+					"match": "\\b(auto|extern|static|register)\\b"
+				}
+			]
+		},
+		"iterators": {
+			"name": "support.variable.iterable.calc",
+			"match": "(?<=\\s*([:][:])\\s*)([$_A-Za-z][$_A-Za-z0-9]*)\\b"
+		},
+		"types": {
+			"patterns": [
+				{
+					"name": "keyword.other.type.immaginary.calc",
+					"match": "\\b(void|undef)\\b"
+				},
+				{
+					"name": "keyword.other.type.numeric.integer.calc",
+					"match": "(\\b(unsigned|signed)\\b\\s+)?\\b(int)\\b"
+				},
+				{
+					"name": "keyword.other.type.numeric.float.calc",
+					"match": "\\b(float|real)\\b"
+				},
+				{
+					"name": "keyword.other.type.other.calc",
+					"match": "\\b(char|bool)\\b"
+				},
+				{
+					"name": "keyword.other.type.compose.calc",
+					"match": "\\b(enum|union|struct|object)\\b"
+				},
+				{
+					"name": "support.type.calc",
+					"match": "(?<=\\s*([:]|[-][>])\\s*)([$_A-Za-z][$_A-Za-z0-9]*)\\b"
+				},
+				{
+					"name": "support.type.definition.calc",
+					"match": "\\b([$_A-Za-z][$_A-Za-z0-9]*)(?=\\s*([<][-])\\s*)"
+				}
+			]
+		},
+		"meta-types": {
+			"patterns": [
+				{
+					"name": "keyword.other.meta.calc",
+					"match": "\\b(module|function|type)\\b"
+				},
+				{
+					"name": "support.other.module.calc",
+					"match": "(?<=\\b(module)\\s+)(([$_A-Za-z][$_A-Za-z0-9]*)[:][:])?([$_A-Za-z][$_A-Za-z0-9]*[.])*([$_A-Za-z][$_A-Za-z0-9]*)\\b",
+					"captures": {
+						"3": {
+							"name": "support.other.module.location.calc support.type.module.location.calc"
+						}
+					}
+				}
+			]
+		},
+		"functions": {
+			"name": "support.function.calc",
+			"match": "\\b([$_A-Za-z][$_A-Za-z0-9]*)(?=\\s*[(])"
+		},
+		"variables": {
+			"name": "support.variable.calc",
+			"match": "\\b([$_A-Za-z][$_A-Za-z0-9]*)\\b"
+		}
+	}
+}

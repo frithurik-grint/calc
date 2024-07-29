@@ -1,0 +1,39 @@
+calc-liber-def        -- Common definitions
+calc-liber-sys        -- System definitions
+calc-liber-out        -- Output Functions
+calc-liber-mem        -- Memory Management
+calc-liber-exc        -- Exceptions Management
+calc-liber-dsa        -- Data Management
+calc-liber            -- Common API
+
+calc/liber/def.h
+          /sys.h
+          /out.h
+          /mem.h
+          /exc.h
+          /dsa.h
+    /liber.h
+
+calc-parse-src        -- Sources
+calc-parse-tok        -- Tokenizer
+calc-parse-lex        -- Lexer
+calc-parse-ast-base   -- AST Common Basics
+calc-parse-ast-term   -- AST Terminals (Types and Symbols)
+calc-parse-ast-expr   -- AST Non-Terminal Expressions
+calc-parse-ast-decl   -- AST Non-Terminal Declarations
+calc-parse-ast-stmt   -- AST Non-Terminal Statements
+calc-parse-ast-prgm   -- AST Non-Terminal Pragmatics
+calc-parse-ast        -- AST Full
+calc-parse            -- Parser and API
+
+calc/parse/src.h
+          /tok.h
+          /lex.h
+          /ast/base.h
+              /term.h
+              /expr.h
+              /decl.h
+              /stmt.h
+              /prgm.h
+          /ast.h
+    /parse.h

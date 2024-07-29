@@ -131,8 +131,8 @@ defkey(KWORD_FINAL,                                 "final",                CTX_
 defkey(KWORD_FLOAT,                                 "float",                CTX_DTYPE | CTX_TEMPL)
 /// @brief 'for' keyword token.
 defkey(KWORD_FOR,                                   "for",                  CTX_GNRIC)
-/// @brief 'func' keyword token.
-defkey(KWORD_FUNC,                                  "func",                 CTX_TEMPL)
+/// @brief 'function' keyword token.
+defkey(KWORD_FUNC,                                  "function",             CTX_TEMPL)
 /// @brief 'goto' keyword token.
 defkey(KWORD_GOTO,                                  "goto",                 CTX_GNRIC)
 /// @brief 'if' keyword token.
