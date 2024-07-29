@@ -1,3 +1,3 @@
-# calc programming language
+# The calc programming language
 
 Coming soon...
