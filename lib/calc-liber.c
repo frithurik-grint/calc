@@ -8,7 +8,7 @@
 
 #include <windows.h>
 
-_API unsigned int _CDECL _getpagesiz()
+unsigned int _CDECL _getpagesiz()
 {
     static SYSTEM_INFO sys_info = { 0 };
 
@@ -64,44 +64,44 @@ static inline int _vprintfn(const char *const format, va_list arglist)
 
 // +---- Internal (Output Functions) ---- End ------------------+
 
-_API int _CDECL fputln(FILE *const stream)
+int _CDECL fputln(FILE *const stream)
 {
     return _fputln(stream);
 }
 
-_API int _CDECL putln()
+int _CDECL putln()
 {
     return _putln();
 }
 
 // Print Functions
 
-_API int _CDECL fprint(FILE *const stream, const char *const message)
+int _CDECL fprint(FILE *const stream, const char *const message)
 {
     return fputs(message, stream);
 }
 
-_API int _CDECL fprintln(FILE *const stream, const char *const message)
+int _CDECL fprintln(FILE *const stream, const char *const message)
 {
     return fputs(message, stream) + _fputln(stream);
 }
 
-_API int _CDECL print(const char *const message)
+int _CDECL print(const char *const message)
 {
     return puts(message);
 }
 
-_API int _CDECL println(const char *const message)
+int _CDECL println(const char *const message)
 {
     return puts(message) + _putln();
 }
 
-_API int _CDECL vfprintfn(FILE *const stream, const char *const format, va_list arglist)
+int _CDECL vfprintfn(FILE *const stream, const char *const format, va_list arglist)
 {
     return _vfprintfn(stream, format, arglist);
 }
 
-_API int _CDECL fprintfn(FILE *const stream, const char *const format, ...)
+int _CDECL fprintfn(FILE *const stream, const char *const format, ...)
 {
     int result;
     va_list arglist;
@@ -115,12 +115,12 @@ _API int _CDECL fprintfn(FILE *const stream, const char *const format, ...)
     return result;
 }
 
-_API int _CDECL vprintfn(const char *const format, va_list arglist)
+int _CDECL vprintfn(const char *const format, va_list arglist)
 {
     return _vprintfn(format, arglist);
 }
 
-_API int _CDECL printfn(const char *const format, ...)
+int _CDECL printfn(const char *const format, ...)
 {
     int result;
     va_list arglist;
@@ -136,27 +136,27 @@ _API int _CDECL printfn(const char *const format, ...)
 
 // Error Print Functions
 
-_API int _CDECL error(const char *const message)
+int _CDECL error(const char *const message)
 {
     return fprint(stderr, message);
 }
 
-_API int _CDECL errorln(const char *const message)
+int _CDECL errorln(const char *const message)
 {
     return fprintln(stderr, message);
 }
 
-_API int _CDECL verrorf(const char *const format, va_list arglist)
+int _CDECL verrorf(const char *const format, va_list arglist)
 {
     return vfprintf(stderr, format, arglist);
 }
 
-_API int _CDECL verrorfn(const char *const format, va_list arglist)
+int _CDECL verrorfn(const char *const format, va_list arglist)
 {
     return vfprintfn(stderr, format, arglist);
 }
 
-_API int _CDECL errorf(const char *const format, ...)
+int _CDECL errorf(const char *const format, ...)
 {
     int result;
     va_list arglist;
@@ -170,7 +170,7 @@ _API int _CDECL errorf(const char *const format, ...)
     return result;
 }
 
-_API int _CDECL errorfn(const char *const format, ...)
+int _CDECL errorfn(const char *const format, ...)
 {
     int result;
     va_list arglist;
@@ -246,7 +246,7 @@ static inline void *_zerofy_block(void *block, size_t size)
 
 // +---- Internal (Memory Checks) ------- End ------------------+
 
-_API void *_CDECL malloc_s(size_t size)
+void *_CDECL malloc_s(size_t size)
 {
     return _safety_check(
 #ifdef CALC_DEBUG
@@ -256,7 +256,7 @@ _API void *_CDECL malloc_s(size_t size)
     );
 }
 
-_API void *_CDECL calloc_s(size_t count, size_t size)
+void *_CDECL calloc_s(size_t count, size_t size)
 {
     return _safety_check(
 #ifdef CALC_DEBUG
@@ -266,7 +266,7 @@ _API void *_CDECL calloc_s(size_t count, size_t size)
     );
 }
 
-_API void *_CDECL mallocz_s(size_t size)
+void *_CDECL mallocz_s(size_t size)
 {
     return _zerofy_block(_safety_check(
 #ifdef CALC_DEBUG
@@ -276,7 +276,7 @@ _API void *_CDECL mallocz_s(size_t size)
     ), size);
 }
 
-_API void *_CDECL callocz_s(size_t count, size_t size)
+void *_CDECL callocz_s(size_t count, size_t size)
 {
     return _zerofy_block(_safety_check(
 #ifdef CALC_DEBUG
@@ -286,7 +286,7 @@ _API void *_CDECL callocz_s(size_t count, size_t size)
     ), count * size);
 }
 
-_API void *_CDECL malloca_s(size_t size, size_t alignment)
+void *_CDECL malloca_s(size_t size, size_t alignment)
 {
     return _safety_check(
 #ifdef CALC_DEBUG
@@ -296,7 +296,7 @@ _API void *_CDECL malloca_s(size_t size, size_t alignment)
     );
 }
 
-_API void *_CDECL calloca_s(size_t count, size_t size, size_t alignment)
+void *_CDECL calloca_s(size_t count, size_t size, size_t alignment)
 {
     return _safety_check(
 #ifdef CALC_DEBUG
@@ -306,7 +306,7 @@ _API void *_CDECL calloca_s(size_t count, size_t size, size_t alignment)
     );
 }
 
-_API void *_CDECL mallocaz_s(size_t size, size_t alignment)
+void *_CDECL mallocaz_s(size_t size, size_t alignment)
 {
     return size = alignto(size, alignment), _zerofy_block(_safety_check(
 #ifdef CALC_DEBUG
@@ -316,7 +316,7 @@ _API void *_CDECL mallocaz_s(size_t size, size_t alignment)
     ), size);
 }
 
-_API void *_CDECL callocaz_s(size_t count, size_t size, size_t alignment)
+void *_CDECL callocaz_s(size_t count, size_t size, size_t alignment)
 {
     return size = alignto(size, alignment), _zerofy_block(_safety_check(
 #ifdef CALC_DEBUG
@@ -328,7 +328,7 @@ _API void *_CDECL callocaz_s(size_t count, size_t size, size_t alignment)
 
 // Strings
 
-_API char *_CDECL stralloc(size_t length)
+char *_CDECL stralloc(size_t length)
 {
     return _zerofy_block(_safety_check(
 #ifdef CALC_DEBUG
@@ -375,7 +375,7 @@ static ex_t *_build_from_code(excode_t code)
 
 // +---- Internal (Exceptions Builder) -- End ------------------+
 
-_API ex_t *_CDECL create_exception(char *const message, excode_t code)
+ex_t *_CDECL create_exception(char *const message, excode_t code)
 {
     ex_t *ex = _build_from_code(code);
 
@@ -390,7 +390,7 @@ _API ex_t *_CDECL create_exception(char *const message, excode_t code)
     return ex;
 }
 
-_API ex_t *_CDECL create_exception_located(char *const message, excode_t code, char *const func, char *const file, unsigned int line)
+ex_t *_CDECL create_exception_located(char *const message, excode_t code, char *const func, char *const file, unsigned int line)
 {
     ex_t *ex = _build_from_code(code);
 
@@ -405,7 +405,7 @@ _API ex_t *_CDECL create_exception_located(char *const message, excode_t code, c
     return ex;
 }
 
-_API ex_t *_CDECL delete_exception(ex_t *const exception)
+ex_t *_CDECL delete_exception(ex_t *const exception)
 {
     ex_t *prev = exception->prev;
 
@@ -416,7 +416,7 @@ _API ex_t *_CDECL delete_exception(ex_t *const exception)
 
 // Exception Stack
 
-_API ex_stack_t *_CDECL create_ex_stack()
+ex_stack_t *_CDECL create_ex_stack()
 {
     ex_stack_t *stack = alloc(ex_stack_t);
 
@@ -427,7 +427,7 @@ _API ex_stack_t *_CDECL create_ex_stack()
     return stack;
 }
 
-_API void _CDECL delete_ex_stack(ex_stack_t *const stack)
+void _CDECL delete_ex_stack(ex_stack_t *const stack)
 {
     ex_t *ex = stack->excpt;
 
@@ -441,7 +441,7 @@ _API void _CDECL delete_ex_stack(ex_stack_t *const stack)
 
 #ifndef _CALC_MINIMAL_BUILD
 
-_API void _CDECL ex_stack_dump(FILE *const stream, ex_stack_t *const stack)
+void _CDECL ex_stack_dump(FILE *const stream, ex_stack_t *const stack)
 {
     if (stack->count == 0)
         return;
@@ -475,7 +475,7 @@ _API void _CDECL ex_stack_dump(FILE *const stream, ex_stack_t *const stack)
 
 #endif // _CALC_MINIMAL_BUILD
 
-_API void _CDECL pushex(ex_stack_t *const stack, ex_t *const exception)
+void _CDECL pushex(ex_stack_t *const stack, ex_t *const exception)
 {
     exception->prev = stack->excpt;
 
@@ -485,7 +485,7 @@ _API void _CDECL pushex(ex_stack_t *const stack, ex_t *const exception)
     return;
 }
 
-_API ex_t *_CDECL popex(ex_stack_t *const stack)
+ex_t *_CDECL popex(ex_stack_t *const stack)
 {
     ex_t *ex = stack->excpt;
 
@@ -495,12 +495,12 @@ _API ex_t *_CDECL popex(ex_stack_t *const stack)
     return ex;
 }
 
-_API ex_t *_CDECL peekex(ex_stack_t *const stack)
+ex_t *_CDECL peekex(ex_stack_t *const stack)
 {
     return stack->excpt;
 }
 
-_API void _CDECL _ex_throw(ex_stack_t *const stack, const char *const file, const char *const func, unsigned int line, excode_t code, const char *const message)
+void _CDECL _ex_throw(ex_stack_t *const stack, const char *const file, const char *const func, unsigned int line, excode_t code, const char *const message)
 {
     if (stack->extcd == EXIT_SUCCESS)
         stack->excpt = EXIT_FAILURE;
@@ -510,7 +510,7 @@ _API void _CDECL _ex_throw(ex_stack_t *const stack, const char *const file, cons
     return;
 }
 
-_API void _CDECL _ex_throwf(ex_stack_t *const stack, const char *const file, const char *const func, unsigned int line, excode_t code, const char *const format, ...)
+void _CDECL _ex_throwf(ex_stack_t *const stack, const char *const file, const char *const func, unsigned int line, excode_t code, const char *const format, ...)
 {
     if (stack->extcd == EXIT_SUCCESS)
         stack->excpt = EXIT_FAILURE;
@@ -526,7 +526,7 @@ _API void _CDECL _ex_throwf(ex_stack_t *const stack, const char *const file, con
     return;
 }
 
-_API int _CDECL except(ex_stack_t *const stack, excode_t code, ex_callback_t callback)
+int _CDECL except(ex_stack_t *const stack, excode_t code, ex_callback_t callback)
 {
     ex_t *ex;
 
@@ -548,7 +548,7 @@ _API int _CDECL except(ex_stack_t *const stack, excode_t code, ex_callback_t cal
 
 // String
 
-_API bool_t _CDECL streq(const char *const str1, const char *const str2)
+bool_t _CDECL streq(const char *const str1, const char *const str2)
 {
     if (str1 == str2)
         return TRUE;
@@ -572,7 +572,7 @@ _API bool_t _CDECL streq(const char *const str1, const char *const str2)
     return TRUE;
 }
 
-_API bool_t _CDECL strieq(const char *const str1, const char *const str2)
+bool_t _CDECL strieq(const char *const str1, const char *const str2)
 {
     if (str1 == str2)
         return TRUE;
@@ -596,7 +596,7 @@ _API bool_t _CDECL strieq(const char *const str1, const char *const str2)
     return TRUE;
 }
 
-_API char *_CDECL strntolower(char *const dest, const char *const source, size_t length)
+char *_CDECL strntolower(char *const dest, const char *const source, size_t length)
 {
     char *buf;
 
@@ -613,12 +613,12 @@ _API char *_CDECL strntolower(char *const dest, const char *const source, size_t
     return buf;
 }
 
-_API char *_CDECL strtolower(char *const dest, const char *const source)
+char *_CDECL strtolower(char *const dest, const char *const source)
 {
     return strntolower(dest, source, strlen(source));
 }
 
-_API char *_CDECL strntoupper(char *const dest, const char *const source, size_t length)
+char *_CDECL strntoupper(char *const dest, const char *const source, size_t length)
 {
     char *buf;
 
@@ -635,12 +635,12 @@ _API char *_CDECL strntoupper(char *const dest, const char *const source, size_t
     return buf;
 }
 
-_API char *_CDECL strtoupper(char *const dest, const char *const source)
+char *_CDECL strtoupper(char *const dest, const char *const source)
 {
     return strntoupper(dest, source, strlen(source));
 }
 
-_API char *_CDECL strndcpy(char *const dest, const char *const source, size_t length)
+char *_CDECL strndcpy(char *const dest, const char *const source, size_t length)
 {
     char *buf;
 
@@ -652,12 +652,12 @@ _API char *_CDECL strndcpy(char *const dest, const char *const source, size_t le
     return strncpy(buf, source, length);
 }
 
-_API char *_CDECL strdcpy(char *const dest, const char *const source)
+char *_CDECL strdcpy(char *const dest, const char *const source)
 {
     return strndcpy(dest, source, strlen(source));
 }
 
-_API char *_CDECL unesc(char *const dest, int c)
+char *_CDECL unesc(char *const dest, int c)
 {
     char buf[3] = { '\\', '\0', '\0' };
 
@@ -719,7 +719,7 @@ _API char *_CDECL unesc(char *const dest, int c)
     return strdcpy(dest, buf);
 }
 
-_API char *_CDECL vformat(char *const dest, const char *const format, va_list arglist)
+char *_CDECL vformat(char *const dest, const char *const format, va_list arglist)
 {
     static char buf[BUFSIZ] = { 0 };
 
@@ -734,7 +734,7 @@ _API char *_CDECL vformat(char *const dest, const char *const format, va_list ar
         return "";
 }
 
-_API char *_CDECL format(char *const dest, const char *const format, ...)
+char *_CDECL format(char *const dest, const char *const format, ...)
 {
     char *result;
     va_list arglist;
@@ -746,12 +746,12 @@ _API char *_CDECL format(char *const dest, const char *const format, ...)
     return result;
 }
 
-_API char *_CDECL vformatn(const char *const format, va_list arglist)
+char *_CDECL vformatn(const char *const format, va_list arglist)
 {
     return vformat(NULL, format, arglist);
 }
 
-_API char *_CDECL formatn(const char *const format, ...)
+char *_CDECL formatn(const char *const format, ...)
 {
     char *result;
     va_list arglist;
@@ -773,7 +773,7 @@ _API char *_CDECL formatn(const char *const format, ...)
 
 // Hash Bucket
 
-_API hashbuc_t *_CDECL create_hashbuc(char *const name, hash_t hash, unsigned int data, hashbuc_t *const prev)
+hashbuc_t *_CDECL create_hashbuc(char *const name, hash_t hash, unsigned int data, hashbuc_t *const prev)
 {
     hashbuc_t *bucket = alloc(hashbuc_t);
 
@@ -789,7 +789,7 @@ _API hashbuc_t *_CDECL create_hashbuc(char *const name, hash_t hash, unsigned in
     return bucket;
 }
 
-_API hashbuc_t *_CDECL delete_hashbuc(hashbuc_t *const bucket)
+hashbuc_t *_CDECL delete_hashbuc(hashbuc_t *const bucket)
 {
     hashbuc_t *next = bucket->next;
 
@@ -801,7 +801,7 @@ _API hashbuc_t *_CDECL delete_hashbuc(hashbuc_t *const bucket)
 
 // Hash Table
 
-_API hashtab_t *_CDECL create_hashtab(unsigned int size, hashfnc_t func, hashtab_t *const prev)
+hashtab_t *_CDECL create_hashtab(unsigned int size, hashfnc_t func, hashtab_t *const prev)
 {
     hashtab_t *tab = alloc(hashtab_t);
 
@@ -817,7 +817,7 @@ _API hashtab_t *_CDECL create_hashtab(unsigned int size, hashfnc_t func, hashtab
     return tab;
 }
 
-_API hashtab_t *_CDECL delete_hashtab(hashtab_t *const tab)
+hashtab_t *_CDECL delete_hashtab(hashtab_t *const tab)
 {
     unsigned int i;
 
@@ -840,7 +840,7 @@ _API hashtab_t *_CDECL delete_hashtab(hashtab_t *const tab)
     return prev;
 }
 
-_API hashbuc_t *_CDECL hashtab_add(hashtab_t *const tab, char *const key)
+hashbuc_t *_CDECL hashtab_add(hashtab_t *const tab, char *const key)
 {
     hash_t hash = tab->func(key) % tab->size;
     hashbuc_t *prev;
@@ -865,7 +865,7 @@ _API hashbuc_t *_CDECL hashtab_add(hashtab_t *const tab, char *const key)
     return tab->used++, tab->buck[hash] = create_hashbuc(key, hash, 0, prev);
 }
 
-_API hashbuc_t *_CDECL hashtab_get(hashtab_t *const tab, char *const key)
+hashbuc_t *_CDECL hashtab_get(hashtab_t *const tab, char *const key)
 {
     hash_t hash = tab->func(key) % tab->size;
     hashtab_t *tbp = tab;
@@ -891,7 +891,7 @@ _API hashbuc_t *_CDECL hashtab_get(hashtab_t *const tab, char *const key)
     return NULL;
 }
 
-_API hashbuc_t *_CDECL hashtab_set(hashtab_t *const tab, char *const key, unsigned int data)
+hashbuc_t *_CDECL hashtab_set(hashtab_t *const tab, char *const key, unsigned int data)
 {
     hash_t hash = tab->func(key) % tab->size;
     hashtab_t *tbp = tab;
@@ -917,7 +917,7 @@ _API hashbuc_t *_CDECL hashtab_set(hashtab_t *const tab, char *const key, unsign
     return NULL;
 }
 
-_API bool_t _CDECL hashtab_contains(hashtab_t *const tab, char *const key)
+bool_t _CDECL hashtab_contains(hashtab_t *const tab, char *const key)
 {
     hash_t hash = tab->func(key) % tab->size;
     hashtab_t *tbp = tab;
@@ -943,7 +943,7 @@ _API bool_t _CDECL hashtab_contains(hashtab_t *const tab, char *const key)
     return FALSE;
 }
 
-_API hashbuc_t *_CDECL hashtab_remove(hashtab_t *const tab, char *const key)
+hashbuc_t *_CDECL hashtab_remove(hashtab_t *const tab, char *const key)
 {
     hash_t hash = tab->func(key) % tab->size;
     hashtab_t *tbp = tab;
@@ -969,7 +969,7 @@ _API hashbuc_t *_CDECL hashtab_remove(hashtab_t *const tab, char *const key)
     return NULL;
 }
 
-_API hashbuc_t *_CDECL hashtab_delete(hashtab_t *const tab, char *const key)
+hashbuc_t *_CDECL hashtab_delete(hashtab_t *const tab, char *const key)
 {
     hash_t hash = tab->func(key) % tab->size;
     hashtab_t *tbp = tab;
@@ -997,7 +997,7 @@ _API hashbuc_t *_CDECL hashtab_delete(hashtab_t *const tab, char *const key)
 
 #ifndef _CALC_MINIMAL_BUILD
 
-_API void _CDECL hashtab_dump(FILE *const stream, hashtab_t *const tab)
+void _CDECL hashtab_dump(FILE *const stream, hashtab_t *const tab)
 {
     unsigned int i, c, d;
 

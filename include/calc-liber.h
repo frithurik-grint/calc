@@ -91,12 +91,12 @@
 
 #ifdef _CALC_BUILD
 /// @brief Public API function specifier. (export)
-#   define _API _EXPORT
+#   define _EXPORT
 /// @brief Local API function specifier. (export)
 #   define _LOC _INTERN
 #else
 /// @brief Public API function specifier. (import)
-#   define _API _IMPORT
+#   define _IMPORT
 /// @brief Local API function specifier. (import)
 #   define _LOC _INTERN
 #endif // _CALC_BUILD
@@ -185,7 +185,7 @@ CALC_C_HEADER_BEGIN
 
 /// @brief Gets the system memory page size.
 /// @return The system meory page size in bytes.
-_API unsigned int _CDECL _getpagesiz();
+unsigned int _CDECL _getpagesiz();
 
 CALC_C_HEADER_END
 
@@ -243,10 +243,10 @@ CALC_C_HEADER_BEGIN
 /// @brief Puts endline character on stream.
 /// @param stream Stream on which print.
 /// @return The number of characters written.
-_API int _CDECL fputln(FILE *const stream);
+int _CDECL fputln(FILE *const stream);
 /// @brief Puts endline character.
 /// @return The number of characters written.
-_API int _CDECL putln();
+int _CDECL putln();
 
 // Print Functions
 
@@ -254,76 +254,76 @@ _API int _CDECL putln();
 /// @param stream Stream on which print.
 /// @param message Message to print.
 /// @return The number of characters written.
-_API int _CDECL fprint(FILE *const stream, const char *const message);
+int _CDECL fprint(FILE *const stream, const char *const message);
 /// @brief Prints a message on a stream on a
 ///        single line.
 /// @param stream Stream on which print.
 /// @param message Message to print.
 /// @return The number of characters written.
-_API int _CDECL fprintln(FILE *const stream, const char *const message);
+int _CDECL fprintln(FILE *const stream, const char *const message);
 /// @brief Prints a message on stdout.
 /// @param message Message to print.
 /// @return The number of characters written.
-_API int _CDECL print(const char *const message);
+int _CDECL print(const char *const message);
 /// @brief Prints a message on stdout on a line.
 /// @param message Message to print.
 /// @return The number of characters written.
-_API int _CDECL println(const char *const message);
+int _CDECL println(const char *const message);
 
 /// @brief Prints a formatted line on a stream.
 /// @param stream Stream on which print.
 /// @param format Format of the message to print.
 /// @param arglist List of format arguments.
 /// @return The number of characters written.
-_API int _CDECL vfprintfn(FILE *const stream, const char *const format, va_list arglist);
+int _CDECL vfprintfn(FILE *const stream, const char *const format, va_list arglist);
 /// @brief Prints a formatted line on a stream.
 /// @param stream Stream on which print.
 /// @param format Format of the message to print.
 /// @param others Format arguments.
 /// @return The number of characters written.
-_API int _CDECL fprintfn(FILE *const stream, const char *const format, ...);
+int _CDECL fprintfn(FILE *const stream, const char *const format, ...);
 /// @brief Prints a formatted line.
 /// @param format Format of the message to print.
 /// @param arglist List of format arguments.
 /// @return The number of characters written.
-_API int _CDECL vprintfn(const char *const format, va_list arglist);
+int _CDECL vprintfn(const char *const format, va_list arglist);
 /// @brief Prints a formatted line.
 /// @param format Format of the message to print.
 /// @param others Format arguments.
 /// @return The number of characters written.
-_API int _CDECL printfn(const char *const format, ...);
+int _CDECL printfn(const char *const format, ...);
 
 // Error Print Functions
 
 /// @brief Prints an error message on error stream.
 /// @param message Message to print.
 /// @return The number of characters written.
-_API int _CDECL error(const char *const message);
+int _CDECL error(const char *const message);
 /// @brief Prints an error line on error stream.
 /// @param message Message to print.
 /// @return The number of characters written.
-_API int _CDECL errorln(const char *const message);
+int _CDECL errorln(const char *const message);
 
 /// @brief Prints a formatted error message on error stream.
 /// @param format Format of the error message to print.
 /// @param arglist List of format arguments.
 /// @return The number of characters written.
-_API int _CDECL verrorf(const char *const format, va_list arglist);
+int _CDECL verrorf(const char *const format, va_list arglist);
 /// @brief Prints a formatted error line on error stream.
 /// @param format Format of the error message to print.
 /// @param arglist List of format arguments.
 /// @return The number of written characters.
-_API int _CDECL verrorfn(const char *const format, va_list arglist);
+int _CDECL verrorfn(const char *const format, va_list arglist);
 /// @brief Prints a formatted error message on error stream.
 /// @param format Format of the message to print.
 /// @param others Fromat arguments.
 /// @return The number of characters written.
-_API int _CDECL errorf(const char *const format, ...);
+int _CDECL errorf(const char *const format, ...);
 /// @brief Prints a formatted error line on error stream.
 /// @param format Format of the message to print.
 /// @param others Format arguments.
 /// @return The numbers of characters written.
-_API int _CDECL errorfn(const char *const format, ...);
+int _CDECL errorfn(const char *const format, ...);
 
 CALC_C_HEADER_END
 
@@ -341,14 +341,14 @@ CALC_C_HEADER_BEGIN
 /// @param size Number of bytes to allocate.
 /// @return Pointer to the beginning of the allocated
 ///			region of memory.
-_API void *_CDECL malloc_s(size_t size);
+void *_CDECL malloc_s(size_t size);
 /// @brief Allocates a series of contiguous blocks
 ///		   of memory in the heap.
 /// @param count Number of blocks to allocate.
 /// @param size Number of bytes in each block.
 /// @return Pointer to the beginning of the first
 ///			allocated block
-_API void *_CDECL calloc_s(size_t count, size_t size);
+void *_CDECL calloc_s(size_t count, size_t size);
 
 #ifndef alloc
 /// @brief Allocate a new instance of the specified
@@ -367,14 +367,14 @@ _API void *_CDECL calloc_s(size_t count, size_t size);
 /// @param size Number of bytes to allocate.
 /// @return Pointer to the beginning of the
 ///			allocated region of memory.
-_API void *_CDECL mallocz_s(size_t size);
+void *_CDECL mallocz_s(size_t size);
 /// @brief Allocates a series of coniguous block of
 ///		   bytes, all set to zero.
 /// @param count Number of blocks to allocate.
 /// @param size Number of bytes in each block
 ///		   of memory.
 /// @return Pointer to the first allocated block.
-_API void *_CDECL callocz_s(size_t count, size_t size);
+void *_CDECL callocz_s(size_t count, size_t size);
 
 #ifndef allocz
 /// @brief Allocate a new zero or default instance
@@ -400,7 +400,7 @@ _API void *_CDECL callocz_s(size_t count, size_t size);
 /// @param alignment Width of alignment.
 /// @return Pointer to the beginning of the allocated
 ///			block of memory.
-_API void *_CDECL malloca_s(size_t size, size_t alignment);
+void *_CDECL malloca_s(size_t size, size_t alignment);
 /// @brief Allocates a series of cotiguous blocks
 ///		   of memory in the heap aligned to a 
 ///		   specific width.
@@ -409,7 +409,7 @@ _API void *_CDECL malloca_s(size_t size, size_t alignment);
 /// @param alignment Width of the alignment.
 /// @return Pointer to the beginning of the
 ///			first allocated region.
-_API void *_CDECL calloca_s(size_t count, size_t size, size_t alignment);
+void *_CDECL calloca_s(size_t count, size_t size, size_t alignment);
 
 #ifndef alloca
 /// @brief Allocate a new instance of the specified
@@ -430,7 +430,7 @@ _API void *_CDECL calloca_s(size_t count, size_t size, size_t alignment);
 /// @param alignment Width of alignment.
 /// @return Pointer to the beginning of the allocated
 ///			block of memory.
-_API void *_CDECL mallocaz_s(size_t size, size_t alignment);
+void *_CDECL mallocaz_s(size_t size, size_t alignment);
 /// @brief Allocates a series of cotiguous blocks
 ///		   of memory in the heap aligned to a 
 ///		   specific width, all set to zero.
@@ -439,7 +439,7 @@ _API void *_CDECL mallocaz_s(size_t size, size_t alignment);
 /// @param alignment Width of the alignment.
 /// @return Pointer to the beginning of the
 ///			first allocated region.
-_API void *_CDECL callocaz_s(size_t count, size_t size, size_t alignment);
+void *_CDECL callocaz_s(size_t count, size_t size, size_t alignment);
 
 #ifndef allocaz
 /// @brief Allocates a new zero instance of the specified
@@ -459,7 +459,7 @@ _API void *_CDECL callocaz_s(size_t count, size_t size, size_t alignment);
 /// @brief Allocates a new NUL terminated empty string.
 /// @param length Number of characters of the string.
 /// @return A pointer to the new allocated string.
-_API char *_CDECL stralloc(size_t length);
+char *_CDECL stralloc(size_t length);
 
 #pragma endregion
 
@@ -517,7 +517,7 @@ typedef struct _calc_exception
 /// @param message Error message.
 /// @param code Unique code of the exception.
 /// @return A pinter to the new allocated exception.
-_API ex_t *_CDECL create_exception(char *const message, excode_t code);
+ex_t *_CDECL create_exception(char *const message, excode_t code);
 /// @brief Creates a new exception informations record
 ///        to store informations on thrown exception,
 ///        included the location from where is thrown.
@@ -527,10 +527,10 @@ _API ex_t *_CDECL create_exception(char *const message, excode_t code);
 /// @param file File from where is thrown the exception.
 /// @param line Line from where is thrown the exception.
 /// @return A pointer to the new allocated exception.
-_API ex_t *_CDECL create_exception_located(char *const message, excode_t code, char *const func, char *const file, unsigned int line);
+ex_t *_CDECL create_exception_located(char *const message, excode_t code, char *const func, char *const file, unsigned int line);
 /// @brief Deletes an exception informations record.
 /// @param exception Exception to delete.
-_API ex_t *_CDECL delete_exception(ex_t *const exception);
+ex_t *_CDECL delete_exception(ex_t *const exception);
 
 // Exception Stack
 
@@ -559,10 +559,10 @@ typedef struct _calc_exception_stack
 
 /// @brief Creates a new exception stack.
 /// @return A pointer to the new allocated exception stack.
-_API ex_stack_t *_CDECL create_ex_stack();
+ex_stack_t *_CDECL create_ex_stack();
 /// @brief Deletes an exception stack.
 /// @param stack Exceptions stack to delete.
-_API void _CDECL delete_ex_stack(ex_stack_t *const stack);
+void _CDECL delete_ex_stack(ex_stack_t *const stack);
 
 #ifndef _CALC_MINIMAL_BUILD
 
@@ -570,7 +570,7 @@ _API void _CDECL delete_ex_stack(ex_stack_t *const stack);
 ///        specified stream.
 /// @param stream Stream on which dump the exception stack.
 /// @param stack Thrown exceptions stack.
-_API void _CDECL ex_stack_dump(FILE *const stream, ex_stack_t *const stack);
+void _CDECL ex_stack_dump(FILE *const stream, ex_stack_t *const stack);
 
 #endif // _CALC_MINIMAL_BUILD
 
@@ -578,15 +578,15 @@ _API void _CDECL ex_stack_dump(FILE *const stream, ex_stack_t *const stack);
 ///        stack.
 /// @param stack Thrown exceptions stack.
 /// @param exception Exception to push.
-_API void _CDECL pushex(ex_stack_t *const stack, ex_t *const exception);
+void _CDECL pushex(ex_stack_t *const stack, ex_t *const exception);
 /// @brief Pops the last exception on the stack.
 /// @param stack Thrown exceptions stack.
 /// @return Pointer to the popped exception.
-_API ex_t *_CDECL popex(ex_stack_t *const stack);
+ex_t *_CDECL popex(ex_stack_t *const stack);
 /// @brief Peeks the last exception on the stack.
 /// @param stack Thrown exceptions stack.
 /// @return Pointer to the last exception.
-_API ex_t *_CDECL peekex(ex_stack_t *const stack);
+ex_t *_CDECL peekex(ex_stack_t *const stack);
 
 /// @brief Pushes an exception on the exceptions stack.
 /// @param stack Stack on which push the exception.
@@ -595,7 +595,7 @@ _API ex_t *_CDECL peekex(ex_stack_t *const stack);
 /// @param line Line from which the exception has been throwed.
 /// @param code Code of the exception.
 /// @param message Error message.
-_API void _CDECL _ex_throw(ex_stack_t *const stack, const char *const file, const char *const func, unsigned int line, excode_t code, const char *const message);
+void _CDECL _ex_throw(ex_stack_t *const stack, const char *const file, const char *const func, unsigned int line, excode_t code, const char *const message);
 /// @brief Pushes an exception on the exceptions stack.
 /// @param stack Stack on which push the exception.
 /// @param file File from which the exception has been throwed.
@@ -604,7 +604,7 @@ _API void _CDECL _ex_throw(ex_stack_t *const stack, const char *const file, cons
 /// @param code Code of the exception.
 /// @param format Format of the exception error message.
 /// @param others Format messages.
-_API void _CDECL _ex_throwf(ex_stack_t *const stack, const char *const file, const char *const func, unsigned int line, excode_t code, const char *const format, ...);
+void _CDECL _ex_throwf(ex_stack_t *const stack, const char *const file, const char *const func, unsigned int line, excode_t code, const char *const format, ...);
 
 #ifndef ex_throw
 /// @brief Throws an exception on the specified exceptions stack.
@@ -633,7 +633,7 @@ typedef int (*_calc_exception_callback)(ex_t *const), (*ex_callback_t)(ex_t *con
 /// @param code Code of the exception to catch.
 /// @param callback Callback function.
 /// @return The returned code from the callback function.
-_API int _CDECL except(ex_stack_t *const stack, excode_t code, ex_callback_t callback);
+int _CDECL except(ex_stack_t *const stack, excode_t code, ex_callback_t callback);
 
 #pragma endregion
 
@@ -704,36 +704,36 @@ typedef CALC_BYTE_T byte_t;
 /// @param str2 Second string.
 /// @return TRUE if the strings have the same content and the same
 ///         length, or if are the same. (also if are both NULL)
-_API bool_t _CDECL streq(const char *const str1, const char *const str2);
+bool_t _CDECL streq(const char *const str1, const char *const str2);
 /// @brief Equals two strings ignoring letters case.
 /// @param str1 First string. (is better to use a costant)
 /// @param str2 Second string.
 /// @return TRUE if the strings have the same content and the same
 ///         length, or if are the same. (also if are both NULL)
-_API bool_t _CDECL strieq(const char *const str1, const char *const str2);
+bool_t _CDECL strieq(const char *const str1, const char *const str2);
 
 /// @brief Converts a string to lower case.
 /// @param dest Destination buffer (if NULL duplicate).
 /// @param source Source string.
 /// @param length Number of characters.
 /// @return A pointer to dest or the new string.
-_API char *_CDECL strntolower(char *const dest, const char *const source, size_t length);
+char *_CDECL strntolower(char *const dest, const char *const source, size_t length);
 /// @brief Converts a string to lower case.
 /// @param dest Destination buffer (if NULL duplicate).
 /// @param source Source string.
 /// @return A pointer to dest or the new string.
-_API char *_CDECL strtolower(char *const dest, const char *const source);
+char *_CDECL strtolower(char *const dest, const char *const source);
 /// @brief Converts a string to lower case.
 /// @param dest Destination buffer (if NULL duplicate).
 /// @param source Source string.
 /// @param length Number of characters.
 /// @return A pointer to dest or the new string.
-_API char *_CDECL strntoupper(char *const dest, const char *const source, size_t length);
+char *_CDECL strntoupper(char *const dest, const char *const source, size_t length);
 /// @brief Converts a string to lower case.
 /// @param dest Destination buffer (if NULL duplicate).
 /// @param source Source string.
 /// @return A pointer to dest or the new string.
-_API char *_CDECL strtoupper(char *const dest, const char *const source);
+char *_CDECL strtoupper(char *const dest, const char *const source);
 
 /// @brief Create a duplicate of a string or copy it in
 ///        dest.
@@ -741,44 +741,44 @@ _API char *_CDECL strtoupper(char *const dest, const char *const source);
 /// @param source Source string.
 /// @param length Number of character to copy.
 /// @return A pointer to a new string or dest.
-_API char *_CDECL strndcpy(char *const dest, const char *const source, size_t length);
+char *_CDECL strndcpy(char *const dest, const char *const source, size_t length);
 /// @brief Create a duplicate of a string or copy it in
 ///        dest.
 /// @param dest Destination buffer (if NULL duplicate).
 /// @param source Source string.
 /// @return A pointer to a new string or dest.
-_API char *_CDECL strdcpy(char *const dest, const char *const source);
+char *_CDECL strdcpy(char *const dest, const char *const source);
 
 /// @brief Unescape a character.
 /// @param str Source char.
 /// @return The pointer to unescaped str.
-_API char *_CDECL unesc(char *const dest, int c);
+char *_CDECL unesc(char *const dest, int c);
 
 /// @brief Formats a format string with a list of args.
 /// @param format String containing result format.
 /// @param arglist List of arguments to use to format
 ///                the final value.
 /// @return The formatted string.
-_API char *_CDECL vformat(char *const dest, const char *const format, va_list arglist);
+char *_CDECL vformat(char *const dest, const char *const format, va_list arglist);
 /// @brief Formats a format string with some arguments.
 /// @param format String containing result format.
 /// @param others List of arguments to use to format
 ///               the final value.
 /// @return The formatted string.
-_API char *_CDECL format(char *const dest, const char *const format, ...);
+char *_CDECL format(char *const dest, const char *const format, ...);
 
 /// @brief Formats a format string with a list of args.
 /// @param format String containing result format.
 /// @param arglist List of arguments to use to format
 ///                the final value.
 /// @return The formatted string.
-_API char *_CDECL vformatn(const char *const format, va_list arglist);
+char *_CDECL vformatn(const char *const format, va_list arglist);
 /// @brief Formats a format string with some arguments.
 /// @param format String containing result format.
 /// @param others List of arguments to use to format
 ///               the final value.
 /// @return The formatted string.
-_API char *_CDECL formatn(const char *const format, ...);
+char *_CDECL formatn(const char *const format, ...);
 
 #pragma endregion
 
@@ -837,13 +837,13 @@ typedef struct _calc_hash_table_bucket
 ///             to the colliding bucket.
 /// @return A pointer to the new hash table
 ///         bucket.
-_API hashbuc_t *_CDECL create_hashbuc(char *const name, hash_t hash, unsigned int data, hashbuc_t *const prev);
+hashbuc_t *_CDECL create_hashbuc(char *const name, hash_t hash, unsigned int data, hashbuc_t *const prev);
 /// @brief Deletes the specified hash table
 ///        bucket, releasing its memory. (this
 ///        frees name pointer)
 /// @param bucket Bucket to delete.
 /// @return A pointer to the colliding bucket.
-_API hashbuc_t *_CDECL delete_hashbuc(hashbuc_t *const bucket);
+hashbuc_t *_CDECL delete_hashbuc(hashbuc_t *const bucket);
 
 // Hash Table
 
@@ -877,48 +877,48 @@ typedef struct _calc_hash_table
 ///             CALC_HASHTAB_BUCKSNUM buckets)
 /// @param prev Pointer to the previous chunk.
 /// @return A pointer to the new hash table chunk.
-_API hashtab_t *_CDECL create_hashtab(unsigned int size, hashfnc_t func, hashtab_t *const prev);
+hashtab_t *_CDECL create_hashtab(unsigned int size, hashfnc_t func, hashtab_t *const prev);
 /// @brief Deletes the specified hash table with
 ///        its buckets, releasing all used memory.
 /// @param tab Pointer to table to delete.
 /// @return A pointer to the previous hash table chunk.
-_API hashtab_t *_CDECL delete_hashtab(hashtab_t *const tab);
+hashtab_t *_CDECL delete_hashtab(hashtab_t *const tab);
 
 /// @brief If specified key is not inserted in the hash table
 ///        chunk, inserts it, else gets it.
 /// @param tab Pointer to the hash table chunk on which operate.
 /// @param key Key to add or get.
 /// @return A pointer to the new (or old) hash bucket.
-_API hashbuc_t *_CDECL hashtab_add(hashtab_t *const tab, char *const key);
+hashbuc_t *_CDECL hashtab_add(hashtab_t *const tab, char *const key);
 /// @brief Gets bucket with the specified key.
 /// @param tab Pointer to the hash table chunk on which operate.
 /// @param key Key to find.
 /// @return A pointer to the found bucket or null if not found.
-_API hashbuc_t *_CDECL hashtab_get(hashtab_t *const tab, char *const key);
+hashbuc_t *_CDECL hashtab_get(hashtab_t *const tab, char *const key);
 /// @brief Sets the data address of the bucket at the specified
 ///        key.
 /// @param tab Pointer to the hash table chunk on which operate.
 /// @param key Key to find.
 /// @param data Data address to set to the found bucket.
 /// @return A pointer to the found bucket or null if not found.
-_API hashbuc_t *_CDECL hashtab_set(hashtab_t *const tab, char *const key, unsigned int data);
+hashbuc_t *_CDECL hashtab_set(hashtab_t *const tab, char *const key, unsigned int data);
 
 /// @brief Checks if hash table contains a specified key.
 /// @param tab Pointer to the hash table chunk on which operate.
 /// @param key Key to check.
 /// @return TRUE if the hash table contains the value, else FALSE.
-_API bool_t _CDECL hashtab_contains(hashtab_t *const tab, char *const key);
+bool_t _CDECL hashtab_contains(hashtab_t *const tab, char *const key);
 
 /// @brief Removes an hash bucket from the table.
 /// @param tab Pointer to the hash table chunk on which operate.
 /// @param key Key of the bucket to remove.
 /// @return A pointer to the removed hash bucket.
-_API hashbuc_t *_CDECL hashtab_remove(hashtab_t *const tab, char *const key);
+hashbuc_t *_CDECL hashtab_remove(hashtab_t *const tab, char *const key);
 /// @brief Deletes an hash bucket from the table.
 /// @param tab Pointer to the hash table chunk on which operate.
 /// @param key Key of the bucket to delete.
 /// @return A pointer to the colliding bucket.
-_API hashbuc_t *_CDECL hashtab_delete(hashtab_t *const tab, char *const key);
+hashbuc_t *_CDECL hashtab_delete(hashtab_t *const tab, char *const key);
 
 #ifndef _CALC_MINIMAL_BUILD
 
@@ -927,7 +927,7 @@ _API hashbuc_t *_CDECL hashtab_delete(hashtab_t *const tab, char *const key);
 ///               table.
 /// @param tab Pointer to the last hash table chunk of the
 ///            hash table to dump on the selected stream.
-_API void _CDECL hashtab_dump(FILE *const stream, hashtab_t *const tab);
+void _CDECL hashtab_dump(FILE *const stream, hashtab_t *const tab);
 
 #endif // _CALC_MINIMAL_BUILD
 

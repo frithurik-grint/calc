@@ -218,6 +218,10 @@
 				{
 					"name": "keyword.other.modifier.storage.calc",
 					"match": "\\b(auto|extern|static|register)\\b"
+				},
+				{
+					"name": "keyword.other.literal.calc",
+					"match": "\\b(true|false|null)\\b"
 				}
 			]
 		},
