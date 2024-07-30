@@ -35,7 +35,7 @@ static ex_t *_build_from_code(excode_t code)
 
 // +---- Internal (Exceptions Builder) -- End ------------------+
 
-ex_t *_CDECL create_exception(char *const message, excode_t code)
+_API ex_t *_CDECL create_exception(char *const message, excode_t code)
 {
     ex_t *ex = _build_from_code(code);
 
@@ -50,7 +50,7 @@ ex_t *_CDECL create_exception(char *const message, excode_t code)
     return ex;
 }
 
-ex_t *_CDECL create_exception_located(char *const message, excode_t code, char *const func, char *const file, unsigned int line)
+_API ex_t *_CDECL create_exception_located(char *const message, excode_t code, char *const func, char *const file, unsigned int line)
 {
     ex_t *ex = _build_from_code(code);
 
@@ -65,7 +65,7 @@ ex_t *_CDECL create_exception_located(char *const message, excode_t code, char *
     return ex;
 }
 
-ex_t *_CDECL delete_exception(ex_t *const exception)
+_API ex_t *_CDECL delete_exception(ex_t *const exception)
 {
     ex_t *prev = exception->prev;
 
@@ -76,7 +76,7 @@ ex_t *_CDECL delete_exception(ex_t *const exception)
 
 // Exception Stack
 
-ex_stack_t *_CDECL create_ex_stack()
+_API ex_stack_t *_CDECL create_ex_stack()
 {
     ex_stack_t *stack = alloc(ex_stack_t);
 
@@ -87,7 +87,7 @@ ex_stack_t *_CDECL create_ex_stack()
     return stack;
 }
 
-void _CDECL delete_ex_stack(ex_stack_t *const stack)
+_API void _CDECL delete_ex_stack(ex_stack_t *const stack)
 {
     ex_t *ex = stack->excpt;
 
@@ -101,7 +101,7 @@ void _CDECL delete_ex_stack(ex_stack_t *const stack)
 
 #ifndef _CALC_MINIMAL_BUILD
 
-void _CDECL ex_stack_dump(FILE *const stream, ex_stack_t *const stack)
+_API void _CDECL ex_stack_dump(FILE *const stream, ex_stack_t *const stack)
 {
     if (stack->count == 0)
         return;
@@ -135,7 +135,7 @@ void _CDECL ex_stack_dump(FILE *const stream, ex_stack_t *const stack)
 
 #endif // _CALC_MINIMAL_BUILD
 
-void _CDECL pushex(ex_stack_t *const stack, ex_t *const exception)
+_API void _CDECL pushex(ex_stack_t *const stack, ex_t *const exception)
 {
     exception->prev = stack->excpt;
 
@@ -145,7 +145,7 @@ void _CDECL pushex(ex_stack_t *const stack, ex_t *const exception)
     return;
 }
 
-ex_t *_CDECL popex(ex_stack_t *const stack)
+_API ex_t *_CDECL popex(ex_stack_t *const stack)
 {
     ex_t *ex = stack->excpt;
 
@@ -155,41 +155,39 @@ ex_t *_CDECL popex(ex_stack_t *const stack)
     return ex;
 }
 
-ex_t *_CDECL peekex(ex_stack_t *const stack)
+_API ex_t *_CDECL peekex(ex_stack_t *const stack)
 {
     return stack->excpt;
 }
 
-void _CDECL _ex_throw(ex_stack_t *const stack, const char *const file, const char *const func, unsigned int line, excode_t code, const char *const message)
+_API void _CDECL _ex_throw(ex_stack_t *const stack, const char *const file, const char *const func, unsigned int line, excode_t code, const char *const message)
 {
     if (stack->extcd == EXIT_SUCCESS)
-        stack->excpt = EXIT_FAILURE;
+        stack->extcd = EXIT_FAILURE;
 
-    pushex(stack, create_exception_located(message, code, func, file, line));
+    pushex(stack, create_exception_located((char *)message, code, (char *)func, (char *)file, line));
 
     return;
 }
 
-void _CDECL _ex_throwf(ex_stack_t *const stack, const char *const file, const char *const func, unsigned int line, excode_t code, const char *const format, ...)
+_API void _CDECL _ex_throwf(ex_stack_t *const stack, const char *const file, const char *const func, unsigned int line, excode_t code, const char *const format, ...)
 {
     if (stack->extcd == EXIT_SUCCESS)
-        stack->excpt = EXIT_FAILURE;
+        stack->extcd = EXIT_FAILURE;
 
     va_list arglist;
 
     va_start(arglist, format);
 
-    pushex(stack, create_exception_located(vformatn(format, arglist), code, func, file, line));
+    pushex(stack, create_exception_located(vformatn(format, arglist), code, (char *)func, (char *)file, line));
 
     va_end(arglist);
 
     return;
 }
 
-int _CDECL except(ex_stack_t *const stack, excode_t code, ex_callback_t callback)
+_API int _CDECL except(ex_stack_t *const stack, excode_t code, ex_callback_t callback)
 {
-    ex_t *ex;
-
     if (stack->excpt->code == code)
         return callback(popex(stack));
     else

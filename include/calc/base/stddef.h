@@ -121,7 +121,7 @@
 
 #ifdef _CALC_BUILD
 /// @brief Public API function specifier. (export)
-#   define _EXPORT
+#   define _API _EXPORT
 /// @brief Local API function specifier. (export)
 #   define _LOC _INTERN
 #else
@@ -206,7 +206,7 @@ CALC_C_HEADER_BEGIN
 
 /// @brief Gets the system memory page size.
 /// @return The system meory page size in bytes.
-unsigned int _CDECL _getpagesiz();
+_API unsigned int _CDECL _getpagesiz();
 
 CALC_C_HEADER_END
 

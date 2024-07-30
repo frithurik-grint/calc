@@ -40,44 +40,44 @@ static inline int _vprintfn(const char *const format, va_list arglist)
 
 // +---- Internal (Output Functions) ---- End ------------------+
 
-int _CDECL fputln(FILE *const stream)
+_API int _CDECL fputln(FILE *const stream)
 {
     return _fputln(stream);
 }
 
-int _CDECL putln()
+_API int _CDECL putln()
 {
     return _putln();
 }
 
 // Print Functions
 
-int _CDECL fprint(FILE *const stream, const char *const message)
+_API int _CDECL fprint(FILE *const stream, const char *const message)
 {
     return fputs(message, stream);
 }
 
-int _CDECL fprintln(FILE *const stream, const char *const message)
+_API int _CDECL fprintln(FILE *const stream, const char *const message)
 {
     return fputs(message, stream) + _fputln(stream);
 }
 
-int _CDECL print(const char *const message)
+_API int _CDECL print(const char *const message)
 {
     return puts(message);
 }
 
-int _CDECL println(const char *const message)
+_API int _CDECL println(const char *const message)
 {
     return puts(message) + _putln();
 }
 
-int _CDECL vfprintfn(FILE *const stream, const char *const format, va_list arglist)
+_API int _CDECL vfprintfn(FILE *const stream, const char *const format, va_list arglist)
 {
     return _vfprintfn(stream, format, arglist);
 }
 
-int _CDECL fprintfn(FILE *const stream, const char *const format, ...)
+_API int _CDECL fprintfn(FILE *const stream, const char *const format, ...)
 {
     int result;
     va_list arglist;
@@ -91,12 +91,12 @@ int _CDECL fprintfn(FILE *const stream, const char *const format, ...)
     return result;
 }
 
-int _CDECL vprintfn(const char *const format, va_list arglist)
+_API int _CDECL vprintfn(const char *const format, va_list arglist)
 {
     return _vprintfn(format, arglist);
 }
 
-int _CDECL printfn(const char *const format, ...)
+_API int _CDECL printfn(const char *const format, ...)
 {
     int result;
     va_list arglist;
@@ -112,27 +112,27 @@ int _CDECL printfn(const char *const format, ...)
 
 // Error Print Functions
 
-int _CDECL error(const char *const message)
+_API int _CDECL error(const char *const message)
 {
     return fprint(stderr, message);
 }
 
-int _CDECL errorln(const char *const message)
+_API int _CDECL errorln(const char *const message)
 {
     return fprintln(stderr, message);
 }
 
-int _CDECL verrorf(const char *const format, va_list arglist)
+_API int _CDECL verrorf(const char *const format, va_list arglist)
 {
     return vfprintf(stderr, format, arglist);
 }
 
-int _CDECL verrorfn(const char *const format, va_list arglist)
+_API int _CDECL verrorfn(const char *const format, va_list arglist)
 {
     return vfprintfn(stderr, format, arglist);
 }
 
-int _CDECL errorf(const char *const format, ...)
+_API int _CDECL errorf(const char *const format, ...)
 {
     int result;
     va_list arglist;
@@ -146,7 +146,7 @@ int _CDECL errorf(const char *const format, ...)
     return result;
 }
 
-int _CDECL errorfn(const char *const format, ...)
+_API int _CDECL errorfn(const char *const format, ...)
 {
     int result;
     va_list arglist;

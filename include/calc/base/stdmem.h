@@ -26,14 +26,14 @@ CALC_C_HEADER_BEGIN
 /// @param size Number of bytes to allocate.
 /// @return Pointer to the beginning of the allocated
 ///			region of memory.
-void *_CDECL malloc_s(size_t size);
+_API void *_CDECL malloc_s(size_t size);
 /// @brief Allocates a series of contiguous blocks
 ///		   of memory in the heap.
 /// @param count Number of blocks to allocate.
 /// @param size Number of bytes in each block.
 /// @return Pointer to the beginning of the first
 ///			allocated block
-void *_CDECL calloc_s(size_t count, size_t size);
+_API void *_CDECL calloc_s(size_t count, size_t size);
 
 #ifndef alloc
 /// @brief Allocate a new instance of the specified
@@ -52,14 +52,14 @@ void *_CDECL calloc_s(size_t count, size_t size);
 /// @param size Number of bytes to allocate.
 /// @return Pointer to the beginning of the
 ///			allocated region of memory.
-void *_CDECL mallocz_s(size_t size);
+_API void *_CDECL mallocz_s(size_t size);
 /// @brief Allocates a series of coniguous block of
 ///		   bytes, all set to zero.
 /// @param count Number of blocks to allocate.
 /// @param size Number of bytes in each block
 ///		   of memory.
 /// @return Pointer to the first allocated block.
-void *_CDECL callocz_s(size_t count, size_t size);
+_API void *_CDECL callocz_s(size_t count, size_t size);
 
 #ifndef allocz
 /// @brief Allocate a new zero or default instance
@@ -85,7 +85,7 @@ void *_CDECL callocz_s(size_t count, size_t size);
 /// @param alignment Width of alignment.
 /// @return Pointer to the beginning of the allocated
 ///			block of memory.
-void *_CDECL malloca_s(size_t size, size_t alignment);
+_API void *_CDECL malloca_s(size_t size, size_t alignment);
 /// @brief Allocates a series of cotiguous blocks
 ///		   of memory in the heap aligned to a 
 ///		   specific width.
@@ -94,7 +94,7 @@ void *_CDECL malloca_s(size_t size, size_t alignment);
 /// @param alignment Width of the alignment.
 /// @return Pointer to the beginning of the
 ///			first allocated region.
-void *_CDECL calloca_s(size_t count, size_t size, size_t alignment);
+_API void *_CDECL calloca_s(size_t count, size_t size, size_t alignment);
 
 #ifndef alloca
 /// @brief Allocate a new instance of the specified
@@ -115,7 +115,7 @@ void *_CDECL calloca_s(size_t count, size_t size, size_t alignment);
 /// @param alignment Width of alignment.
 /// @return Pointer to the beginning of the allocated
 ///			block of memory.
-void *_CDECL mallocaz_s(size_t size, size_t alignment);
+_API void *_CDECL mallocaz_s(size_t size, size_t alignment);
 /// @brief Allocates a series of cotiguous blocks
 ///		   of memory in the heap aligned to a 
 ///		   specific width, all set to zero.
@@ -124,7 +124,7 @@ void *_CDECL mallocaz_s(size_t size, size_t alignment);
 /// @param alignment Width of the alignment.
 /// @return Pointer to the beginning of the
 ///			first allocated region.
-void *_CDECL callocaz_s(size_t count, size_t size, size_t alignment);
+_API void *_CDECL callocaz_s(size_t count, size_t size, size_t alignment);
 
 #ifndef allocaz
 /// @brief Allocates a new zero instance of the specified
@@ -144,7 +144,7 @@ void *_CDECL callocaz_s(size_t count, size_t size, size_t alignment);
 /// @brief Allocates a new NUL terminated empty string.
 /// @param length Number of characters of the string.
 /// @return A pointer to the new allocated string.
-char *_CDECL stralloc(size_t length);
+_API char *_CDECL stralloc(size_t length);
 
 #pragma endregion
 

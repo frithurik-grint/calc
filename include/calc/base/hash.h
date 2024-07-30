@@ -10,6 +10,12 @@
 #include "calc/base/stdout.h"
 #include "calc/base/stdstr.h"
 
+CALC_C_HEADER_BEGIN
+
+/* =---- Hashing -----------------------------------------------= */
+
+#pragma region Hashing
+
 /// @brief Hash code data type.
 typedef unsigned int hash_t;
 
@@ -67,7 +73,9 @@ hashbuc_t *_CDECL create_hashbuc(char *const name, hash_t hash, unsigned int dat
 /// @return A pointer to the colliding bucket.
 hashbuc_t *_CDECL delete_hashbuc(hashbuc_t *const bucket);
 
-// Hash Table
+// +---- Hash Table --------------------------------------------+
+
+#pragma region Hash Table
 
 #ifndef CALC_HASHTAB_BUCKSNUM
 /// @brief Default number of buckets in a chunk
@@ -152,5 +160,15 @@ hashbuc_t *_CDECL hashtab_delete(hashtab_t *const tab, char *const key);
 void _CDECL hashtab_dump(FILE *const stream, hashtab_t *const tab);
 
 #endif // _CALC_MINIMAL_BUILD
+
+#pragma endregion
+
+// +---- Hash Table -------------------- End -------------------+
+
+#pragma endregion
+
+/* =------------------------------------------------------------= */
+
+CALC_C_HEADER_END
 
 #endif // CALC_BASE_HASH_H_

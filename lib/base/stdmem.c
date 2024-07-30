@@ -58,7 +58,7 @@ static inline void *_zerofy_block(void *block, size_t size)
 
 // +---- Internal (Memory Checks) ------- End ------------------+
 
-void *_CDECL malloc_s(size_t size)
+_API void *_CDECL malloc_s(size_t size)
 {
     return _safety_check(
 #ifdef CALC_DEBUG
@@ -68,7 +68,7 @@ void *_CDECL malloc_s(size_t size)
     );
 }
 
-void *_CDECL calloc_s(size_t count, size_t size)
+_API void *_CDECL calloc_s(size_t count, size_t size)
 {
     return _safety_check(
 #ifdef CALC_DEBUG
@@ -78,7 +78,7 @@ void *_CDECL calloc_s(size_t count, size_t size)
     );
 }
 
-void *_CDECL mallocz_s(size_t size)
+_API void *_CDECL mallocz_s(size_t size)
 {
     return _zerofy_block(_safety_check(
 #ifdef CALC_DEBUG
@@ -88,7 +88,7 @@ void *_CDECL mallocz_s(size_t size)
     ), size);
 }
 
-void *_CDECL callocz_s(size_t count, size_t size)
+_API void *_CDECL callocz_s(size_t count, size_t size)
 {
     return _zerofy_block(_safety_check(
 #ifdef CALC_DEBUG
@@ -98,7 +98,7 @@ void *_CDECL callocz_s(size_t count, size_t size)
     ), count * size);
 }
 
-void *_CDECL malloca_s(size_t size, size_t alignment)
+_API void *_CDECL malloca_s(size_t size, size_t alignment)
 {
     return _safety_check(
 #ifdef CALC_DEBUG
@@ -108,7 +108,7 @@ void *_CDECL malloca_s(size_t size, size_t alignment)
     );
 }
 
-void *_CDECL calloca_s(size_t count, size_t size, size_t alignment)
+_API void *_CDECL calloca_s(size_t count, size_t size, size_t alignment)
 {
     return _safety_check(
 #ifdef CALC_DEBUG
@@ -118,7 +118,7 @@ void *_CDECL calloca_s(size_t count, size_t size, size_t alignment)
     );
 }
 
-void *_CDECL mallocaz_s(size_t size, size_t alignment)
+_API void *_CDECL mallocaz_s(size_t size, size_t alignment)
 {
     return size = alignto(size, alignment), _zerofy_block(_safety_check(
 #ifdef CALC_DEBUG
@@ -128,7 +128,7 @@ void *_CDECL mallocaz_s(size_t size, size_t alignment)
     ), size);
 }
 
-void *_CDECL callocaz_s(size_t count, size_t size, size_t alignment)
+_API void *_CDECL callocaz_s(size_t count, size_t size, size_t alignment)
 {
     return size = alignto(size, alignment), _zerofy_block(_safety_check(
 #ifdef CALC_DEBUG
@@ -140,7 +140,7 @@ void *_CDECL callocaz_s(size_t count, size_t size, size_t alignment)
 
 // Strings
 
-char *_CDECL stralloc(size_t length)
+_API char *_CDECL stralloc(size_t length)
 {
     return _zerofy_block(_safety_check(
 #ifdef CALC_DEBUG

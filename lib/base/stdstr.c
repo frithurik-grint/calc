@@ -4,7 +4,7 @@
 
 #pragma region String Operatations Functions
 
-bool_t _CDECL streq(const char *const str1, const char *const str2)
+_API bool_t _CDECL streq(const char *const str1, const char *const str2)
 {
     if (str1 == str2)
         return TRUE;
@@ -28,7 +28,7 @@ bool_t _CDECL streq(const char *const str1, const char *const str2)
     return TRUE;
 }
 
-bool_t _CDECL strieq(const char *const str1, const char *const str2)
+_API bool_t _CDECL strieq(const char *const str1, const char *const str2)
 {
     if (str1 == str2)
         return TRUE;
@@ -52,7 +52,7 @@ bool_t _CDECL strieq(const char *const str1, const char *const str2)
     return TRUE;
 }
 
-char *_CDECL strntolower(char *const dest, const char *const source, size_t length)
+_API char *_CDECL strntolower(char *const dest, const char *const source, size_t length)
 {
     char *buf;
 
@@ -69,12 +69,12 @@ char *_CDECL strntolower(char *const dest, const char *const source, size_t leng
     return buf;
 }
 
-char *_CDECL strtolower(char *const dest, const char *const source)
+_API char *_CDECL strtolower(char *const dest, const char *const source)
 {
     return strntolower(dest, source, strlen(source));
 }
 
-char *_CDECL strntoupper(char *const dest, const char *const source, size_t length)
+_API char *_CDECL strntoupper(char *const dest, const char *const source, size_t length)
 {
     char *buf;
 
@@ -91,12 +91,12 @@ char *_CDECL strntoupper(char *const dest, const char *const source, size_t leng
     return buf;
 }
 
-char *_CDECL strtoupper(char *const dest, const char *const source)
+_API char *_CDECL strtoupper(char *const dest, const char *const source)
 {
     return strntoupper(dest, source, strlen(source));
 }
 
-char *_CDECL strndcpy(char *const dest, const char *const source, size_t length)
+_API char *_CDECL strndcpy(char *const dest, const char *const source, size_t length)
 {
     char *buf;
 
@@ -108,12 +108,12 @@ char *_CDECL strndcpy(char *const dest, const char *const source, size_t length)
     return strncpy(buf, source, length);
 }
 
-char *_CDECL strdcpy(char *const dest, const char *const source)
+_API char *_CDECL strdcpy(char *const dest, const char *const source)
 {
     return strndcpy(dest, source, strlen(source));
 }
 
-char *_CDECL unesc(char *const dest, int c)
+_API char *_CDECL unesc(char *const dest, int c)
 {
     char buf[3] = { '\\', '\0', '\0' };
 
@@ -175,7 +175,7 @@ char *_CDECL unesc(char *const dest, int c)
     return strdcpy(dest, buf);
 }
 
-char *_CDECL vformat(char *const dest, const char *const format, va_list arglist)
+_API char *_CDECL vformat(char *const dest, const char *const format, va_list arglist)
 {
     static char buf[BUFSIZ] = { 0 };
 
@@ -190,7 +190,7 @@ char *_CDECL vformat(char *const dest, const char *const format, va_list arglist
         return "";
 }
 
-char *_CDECL format(char *const dest, const char *const format, ...)
+_API char *_CDECL format(char *const dest, const char *const format, ...)
 {
     char *result;
     va_list arglist;
@@ -202,12 +202,12 @@ char *_CDECL format(char *const dest, const char *const format, ...)
     return result;
 }
 
-char *_CDECL vformatn(const char *const format, va_list arglist)
+_API char *_CDECL vformatn(const char *const format, va_list arglist)
 {
     return vformat(NULL, format, arglist);
 }
 
-char *_CDECL formatn(const char *const format, ...)
+_API char *_CDECL formatn(const char *const format, ...)
 {
     char *result;
     va_list arglist;

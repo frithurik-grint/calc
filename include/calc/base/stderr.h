@@ -8,6 +8,7 @@
 #include "calc/base/stddef.h"
 #include "calc/base/stdout.h"
 #include "calc/base/stdmem.h"
+#include "calc/base/stdstr.h"
 
 CALC_C_HEADER_BEGIN
 
@@ -65,7 +66,7 @@ typedef struct _calc_exception
 /// @param message Error message.
 /// @param code Unique code of the exception.
 /// @return A pinter to the new allocated exception.
-ex_t *_CDECL create_exception(char *const message, excode_t code);
+_API ex_t *_CDECL create_exception(char *const message, excode_t code);
 /// @brief Creates a new exception informations record
 ///        to store informations on thrown exception,
 ///        included the location from where is thrown.
@@ -75,10 +76,10 @@ ex_t *_CDECL create_exception(char *const message, excode_t code);
 /// @param file File from where is thrown the exception.
 /// @param line Line from where is thrown the exception.
 /// @return A pointer to the new allocated exception.
-ex_t *_CDECL create_exception_located(char *const message, excode_t code, char *const func, char *const file, unsigned int line);
+_API ex_t *_CDECL create_exception_located(char *const message, excode_t code, char *const func, char *const file, unsigned int line);
 /// @brief Deletes an exception informations record.
 /// @param exception Exception to delete.
-ex_t *_CDECL delete_exception(ex_t *const exception);
+_API ex_t *_CDECL delete_exception(ex_t *const exception);
 
 // Exception Stack
 
@@ -95,10 +96,10 @@ typedef struct _calc_exception_stack
 
 /// @brief Creates a new exception stack.
 /// @return A pointer to the new allocated exception stack.
-ex_stack_t *_CDECL create_ex_stack();
+_API ex_stack_t *_CDECL create_ex_stack();
 /// @brief Deletes an exception stack.
 /// @param stack Exceptions stack to delete.
-void _CDECL delete_ex_stack(ex_stack_t *const stack);
+_API void _CDECL delete_ex_stack(ex_stack_t *const stack);
 
 #ifndef _CALC_MINIMAL_BUILD
 
@@ -106,7 +107,7 @@ void _CDECL delete_ex_stack(ex_stack_t *const stack);
 ///        specified stream.
 /// @param stream Stream on which dump the exception stack.
 /// @param stack Thrown exceptions stack.
-void _CDECL ex_stack_dump(FILE *const stream, ex_stack_t *const stack);
+_API void _CDECL ex_stack_dump(FILE *const stream, ex_stack_t *const stack);
 
 #endif // _CALC_MINIMAL_BUILD
 
@@ -114,15 +115,15 @@ void _CDECL ex_stack_dump(FILE *const stream, ex_stack_t *const stack);
 ///        stack.
 /// @param stack Thrown exceptions stack.
 /// @param exception Exception to push.
-void _CDECL pushex(ex_stack_t *const stack, ex_t *const exception);
+_API void _CDECL pushex(ex_stack_t *const stack, ex_t *const exception);
 /// @brief Pops the last exception on the stack.
 /// @param stack Thrown exceptions stack.
 /// @return Pointer to the popped exception.
-ex_t *_CDECL popex(ex_stack_t *const stack);
+_API ex_t *_CDECL popex(ex_stack_t *const stack);
 /// @brief Peeks the last exception on the stack.
 /// @param stack Thrown exceptions stack.
 /// @return Pointer to the last exception.
-ex_t *_CDECL peekex(ex_stack_t *const stack);
+_API ex_t *_CDECL peekex(ex_stack_t *const stack);
 
 /// @brief Pushes an exception on the exceptions stack.
 /// @param stack Stack on which push the exception.
@@ -131,7 +132,7 @@ ex_t *_CDECL peekex(ex_stack_t *const stack);
 /// @param line Line from which the exception has been throwed.
 /// @param code Code of the exception.
 /// @param message Error message.
-void _CDECL _ex_throw(ex_stack_t *const stack, const char *const file, const char *const func, unsigned int line, excode_t code, const char *const message);
+_API void _CDECL _ex_throw(ex_stack_t *const stack, const char *const file, const char *const func, unsigned int line, excode_t code, const char *const message);
 /// @brief Pushes an exception on the exceptions stack.
 /// @param stack Stack on which push the exception.
 /// @param file File from which the exception has been throwed.
@@ -140,7 +141,7 @@ void _CDECL _ex_throw(ex_stack_t *const stack, const char *const file, const cha
 /// @param code Code of the exception.
 /// @param format Format of the exception error message.
 /// @param others Format messages.
-void _CDECL _ex_throwf(ex_stack_t *const stack, const char *const file, const char *const func, unsigned int line, excode_t code, const char *const format, ...);
+_API void _CDECL _ex_throwf(ex_stack_t *const stack, const char *const file, const char *const func, unsigned int line, excode_t code, const char *const format, ...);
 
 #ifndef ex_throw
 /// @brief Throws an exception on the specified exceptions stack.
@@ -169,7 +170,7 @@ typedef int (*_calc_exception_callback)(ex_t *const), (*ex_callback_t)(ex_t *con
 /// @param code Code of the exception to catch.
 /// @param callback Callback function.
 /// @return The returned code from the callback function.
-int _CDECL except(ex_stack_t *const stack, excode_t code, ex_callback_t callback);
+_API int _CDECL except(ex_stack_t *const stack, excode_t code, ex_callback_t callback);
 
 #pragma endregion
 

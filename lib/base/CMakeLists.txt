@@ -8,7 +8,11 @@ set(SOURCES
 	"stddef.c"
 	"stdout.c"
 	"stdmem.c"
- "stdstr.c" "stderr.c")
+	"stdstr.c"
+	"stderr.c"
+)
+
+set(WINDOWS_EXPORT_ALL_SYMBOLS ON)
 
 if(_CALC_USE_DYNAMIC_LIBRARY)
 	add_library(base SHARED ${SOURCES})
