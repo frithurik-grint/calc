@@ -5,7 +5,6 @@
 #ifndef CALC_BASE_STDMEM_H_
 #define CALC_BASE_STDMEM_H_
 
-#include "calc/base/stddef.h"
 #include "calc/base/stdout.h"
 
 #include <assert.h>

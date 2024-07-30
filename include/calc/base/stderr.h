@@ -5,9 +5,6 @@
 #ifndef CALC_BASE_STDERR_H_
 #define CALC_BASE_STDERR_H_
 
-#include "calc/base/stddef.h"
-#include "calc/base/stdout.h"
-#include "calc/base/stdmem.h"
 #include "calc/base/stdstr.h"
 
 CALC_C_HEADER_BEGIN

@@ -5,7 +5,6 @@
 #ifndef CALC_BASE_STDSTR_H_
 #define CALC_BASE_STDSTR_H_
 
-#include "calc/base/stddef.h"
 #include "calc/base/stdmem.h"
 #include "calc/base/types.h"
 
