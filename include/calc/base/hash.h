@@ -65,13 +65,13 @@ typedef struct _calc_hash_table_bucket
 ///             to the colliding bucket.
 /// @return A pointer to the new hash table
 ///         bucket.
-hashbuc_t *_CDECL create_hashbuc(char *const name, hash_t hash, unsigned int data, hashbuc_t *const prev);
+_API hashbuc_t *_CDECL create_hashbuc(char *const name, hash_t hash, unsigned int data, hashbuc_t *const prev);
 /// @brief Deletes the specified hash table
 ///        bucket, releasing its memory. (this
 ///        frees name pointer)
 /// @param bucket Bucket to delete.
 /// @return A pointer to the colliding bucket.
-hashbuc_t *_CDECL delete_hashbuc(hashbuc_t *const bucket);
+_API hashbuc_t *_CDECL delete_hashbuc(hashbuc_t *const bucket);
 
 // +---- Hash Table --------------------------------------------+
 
@@ -107,48 +107,48 @@ typedef struct _calc_hash_table
 ///             CALC_HASHTAB_BUCKSNUM buckets)
 /// @param prev Pointer to the previous chunk.
 /// @return A pointer to the new hash table chunk.
-hashtab_t *_CDECL create_hashtab(unsigned int size, hashfnc_t func, hashtab_t *const prev);
+_API hashtab_t *_CDECL create_hashtab(unsigned int size, hashfnc_t func, hashtab_t *const prev);
 /// @brief Deletes the specified hash table with
 ///        its buckets, releasing all used memory.
 /// @param tab Pointer to table to delete.
 /// @return A pointer to the previous hash table chunk.
-hashtab_t *_CDECL delete_hashtab(hashtab_t *const tab);
+_API hashtab_t *_CDECL delete_hashtab(hashtab_t *const tab);
 
 /// @brief If specified key is not inserted in the hash table
 ///        chunk, inserts it, else gets it.
 /// @param tab Pointer to the hash table chunk on which operate.
 /// @param key Key to add or get.
 /// @return A pointer to the new (or old) hash bucket.
-hashbuc_t *_CDECL hashtab_add(hashtab_t *const tab, char *const key);
+_API hashbuc_t *_CDECL hashtab_add(hashtab_t *const tab, char *const key);
 /// @brief Gets bucket with the specified key.
 /// @param tab Pointer to the hash table chunk on which operate.
 /// @param key Key to find.
 /// @return A pointer to the found bucket or null if not found.
-hashbuc_t *_CDECL hashtab_get(hashtab_t *const tab, char *const key);
+_API hashbuc_t *_CDECL hashtab_get(hashtab_t *const tab, char *const key);
 /// @brief Sets the data address of the bucket at the specified
 ///        key.
 /// @param tab Pointer to the hash table chunk on which operate.
 /// @param key Key to find.
 /// @param data Data address to set to the found bucket.
 /// @return A pointer to the found bucket or null if not found.
-hashbuc_t *_CDECL hashtab_set(hashtab_t *const tab, char *const key, unsigned int data);
+_API hashbuc_t *_CDECL hashtab_set(hashtab_t *const tab, char *const key, unsigned int data);
 
 /// @brief Checks if hash table contains a specified key.
 /// @param tab Pointer to the hash table chunk on which operate.
 /// @param key Key to check.
 /// @return TRUE if the hash table contains the value, else FALSE.
-bool_t _CDECL hashtab_contains(hashtab_t *const tab, char *const key);
+_API bool_t _CDECL hashtab_contains(hashtab_t *const tab, char *const key);
 
 /// @brief Removes an hash bucket from the table.
 /// @param tab Pointer to the hash table chunk on which operate.
 /// @param key Key of the bucket to remove.
 /// @return A pointer to the removed hash bucket.
-hashbuc_t *_CDECL hashtab_remove(hashtab_t *const tab, char *const key);
+_API hashbuc_t *_CDECL hashtab_remove(hashtab_t *const tab, char *const key);
 /// @brief Deletes an hash bucket from the table.
 /// @param tab Pointer to the hash table chunk on which operate.
 /// @param key Key of the bucket to delete.
 /// @return A pointer to the colliding bucket.
-hashbuc_t *_CDECL hashtab_delete(hashtab_t *const tab, char *const key);
+_API hashbuc_t *_CDECL hashtab_delete(hashtab_t *const tab, char *const key);
 
 #ifndef _CALC_MINIMAL_BUILD
 
@@ -157,7 +157,7 @@ hashbuc_t *_CDECL hashtab_delete(hashtab_t *const tab, char *const key);
 ///               table.
 /// @param tab Pointer to the last hash table chunk of the
 ///            hash table to dump on the selected stream.
-void _CDECL hashtab_dump(FILE *const stream, hashtab_t *const tab);
+_API void _CDECL hashtab_dump(FILE *const stream, hashtab_t *const tab);
 
 #endif // _CALC_MINIMAL_BUILD
 
