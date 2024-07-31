@@ -1,0 +1,2 @@
+let fib(n) : int -> int
+  = (n < 2) ? 1 : fib(n - 1) + fib(n - 2);
