@@ -136,6 +136,14 @@
 #   define _CDECL
 #endif // _CALC_USE_CDECL
 
+#if _CALC_BUILD_INLINES
+/// @brief Marks a possible inline function. (enabled)
+#   define _INLINE inline
+#else
+/// @brief Marks a possible inline function. (disabled)
+#   define _INLINE
+#endif // _INLINE
+
 // +---- System Dependent Definitions --------------------------+
 
 #pragma region System Dependent Definitions

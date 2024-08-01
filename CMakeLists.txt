@@ -14,6 +14,10 @@ if(CALC_BUILD_DYNAMIC_LIBRARY AND WIN32)
     set(WINDOWS_EXPORT_ALL_SYMBOLS ON)
 endif()
 
+add_compile_definitions(
+    "_CALC_BUILD_INLINES=1"
+)
+
 include_directories("include")
 
 add_subdirectory("lib")
