@@ -1,8 +1,8 @@
-#include "calc/base/stdout.h"
+#include "calc/base/stderr.h"
 
 int main()
 {
-    printfn("Hello, %s!", "CMake");
+    fail("error: i'm failed...");
 
     return pagesiz;
 }

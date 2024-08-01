@@ -21,7 +21,7 @@ CALC_C_HEADER_BEGIN
 // Printing Macros
 
 #ifndef _stdout_fputln
-#   define _stdout_fputln(stream) fputs("", (stream))
+#   define _stdout_fputln(stream) (fputc('\n', (stream)) - ('\n' - 1))
 #endif // _stdout_fputln
 
 #ifndef _stdout_putln
@@ -87,7 +87,7 @@ CALC_C_HEADER_BEGIN
     return _result;                     \
 }
 #   else
-#       define _VarArgReturn(result) ;
+#       define _VarArgReturn(x, result) ;
 #   endif // _CALC_BUILD_INLINES
 #endif // _VarArgReturn
 
