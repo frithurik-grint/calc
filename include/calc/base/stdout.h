@@ -95,33 +95,71 @@ CALC_C_HEADER_BEGIN
 
 // +---- Internal Macros ------------------------------ END ----+
 
+/// @brief Puts an empty line in the specified stream.
+/// @param stream Stream pointer on which put the empty
+///               line.
+/// @return Number of characters written.
 _INLINE int _CDECL fputln(FILE *const stream)
     _Return(_stdout_fputln(stream))
 
+/// @brief Puts an empty line in standard output stream.
+/// @return Number of characters written.
 _INLINE int _CDECL putln()
     _Return(_stdout_putln())
 
+/// @brief Prints a message in the specified stream.
+/// @param stream Stream pointer on which print the message.
+/// @param message Message to print.
+/// @return Number of characters written.
 _INLINE int _CDECL fprint(FILE *const stream, const char *const message)
     _Return(_stdout_fprint(stream, message))
 
+/// @brief Prints a message on a line in the specified stream.
+/// @param stream Stream pointer on which print the message.
+/// @param message Message to print.
+/// @return Number of characters written.
 _INLINE int _CDECL fprintln(FILE *const stream, const char *const message)
     _Return(_stdout_fprintln(stream, message))
 
+/// @brief Prints a message in standard output stream.
+/// @param message Message to print.
+/// @return Number of characters written.
 _INLINE int _CDECL print(const char *const message)
     _Return(_stdout_print(message))
 
+/// @brief Prints a message on a line in standard output stream.
+/// @param message Message to print.
+/// @return Number of characters written.
 _INLINE int _CDECL println(const char *const message)
     _Return(_stdout_println(message))
 
+/// @brief Prints a formatted message on a line in a stream.
+/// @param stream Stream pointer on which print the message.
+/// @param format Format of the message to print.
+/// @param arglist Format arguments.
+/// @return Number of characters written.
 _INLINE int _CDECL vfprintfn(FILE *const stream, const char *const format, va_list arglist)
     _Return(_stdout_vfprintfn(stream, format, arglist))
 
+/// @brief Prints a formatted message on a line in starndard output stream.
+/// @param format Format of the message to print.
+/// @param arglist Format arguments.
+/// @return Number of characters written.
 _INLINE int _CDECL vprintfn(const char *const format, va_list arglist)
     _Return(_stdout_vprintfn(format, arglist))
 
+/// @brief Prints a formatted message on a line in a stream.
+/// @param stream Stream pointer on which print the message.
+/// @param format Format of the message to print.
+/// @param others Format arguments.
+/// @return Number of characters written.
 _INLINE int _CDECL fprintfn(FILE *const stream, const char *const format, ...)
     _VarArgReturn(format, _stdout_vfprintfn(stream, format, _arglist))
 
+/// @brief Prints a formatted message on a line in starndard output stream.
+/// @param format Format of the message to print.
+/// @param others Format arguments.
+/// @return Number of characters written.
 _INLINE int _CDECL printfn(const char *const format, ...)
     _VarArgReturn(format, _stdout_vprintfn(format, _arglist))
 
