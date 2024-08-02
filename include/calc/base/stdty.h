@@ -7,6 +7,10 @@
 
 #include "calc/base/stddef.h"
 
+#include <limits.h>
+#include <stdint.h>
+#include <float.h>
+
 CALC_C_HEADER_BEGIN
 
 /* =---- Standard Datatypes Header -----------------------------= */
