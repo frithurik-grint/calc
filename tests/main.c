@@ -1,4 +1,4 @@
-#include "calc/base/stderr.h"
+#include "calc/base/stdmem.h"
 
 int main()
 {
