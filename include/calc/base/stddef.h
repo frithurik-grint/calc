@@ -152,6 +152,7 @@
 
 /* unistd.h useful ports on windows */
 
+#include <malloc.h>
 #include <process.h>
 #include <direct.h>
 #include <io.h>
@@ -189,7 +190,7 @@ typedef enum _access_mode
 /// @brief Allocates a block of memory on the stack.
 /// @param size Number of bytes to allocate.
 /// @return A pointer to the allocated block of memory.
-#   define malloca _alloca
+#   define malloca _malloca
 #endif // alloca
 
 #ifdef _WIN64

@@ -7,10 +7,6 @@
 
 #include "calc/base/stderr.h"
 
-#ifdef _WIN32
-#   include <malloc.h>  // on windows there is defined alloca function
-#endif // _WIN32
-
 #include <assert.h>
 #include <stdlib.h>
 
@@ -155,7 +151,13 @@ _INLINE void *_CDECL checked_aligned_callocz(size_t align, size_t count, size_t 
 // Stack Allocators
 
 #ifndef stackalloc
-#   ifdef alloca
+#   ifdef malloca
+/// @brief If its possible, allocates an instance of the specified
+///        type on the stack.
+/// @param type The type to instantiate.
+/// @return A pointer to the instanced block of memory.
+#       define stackalloc(type) malloca(sizeof(type))
+#   elif defined alloca
 /// @brief If its possible, allocates an instance of the specified
 ///        type on the stack. (can cause overflow)
 /// @param type The type to instantiate.
@@ -163,7 +165,7 @@ _INLINE void *_CDECL checked_aligned_callocz(size_t align, size_t count, size_t 
 #       define stackalloc(type) alloca(sizeof(type))
 #   else
 /// @brief If its possible, allocates an instance of the specified
-///        type on the stack. (can cause overflow)
+///        type on the stack.
 ///        
 ///        NOTE: Function alloca not found, currently this macro
 ///        allocates on the heap (using allocz).
@@ -171,11 +173,18 @@ _INLINE void *_CDECL checked_aligned_callocz(size_t align, size_t count, size_t 
 /// @param type The type to instantiate.
 /// @return A pointer to the instanced block of memory.
 #       define stackalloc(type) allocz(type)
-#   endif // alloca
+#   endif // malloca/alloca
 #endif // stackalloc
 
 #ifndef stackdim
-#   ifdef alloca
+#   ifdef malloca
+/// @brief If its possible, allocates an array of instances of the
+///        specified type.
+/// @param type The type to instantiate.
+/// @param count Number of instances to allocate.
+/// @return A pointer to the instanced block of memory.
+#       define stackdim(type, count) malloca(sizeof(type) * (count))
+#   elif defined alloca
 /// @brief If its possible, allocates an array of instances of the
 ///        specified type. (can cause overflow)
 /// @param type The type to instantiate.
@@ -184,7 +193,7 @@ _INLINE void *_CDECL checked_aligned_callocz(size_t align, size_t count, size_t 
 #       define stackdim(type, count) alloca(sizeof(type) * (count))
 #   else
 /// @brief If its possible, allocates an array of instances of the
-///        specified type. (can cause overflow)
+///        specified type.
 ///        
 ///        NOTE: Function alloca not found, currently this macro
 ///        allocates on the heap (using dimz).
@@ -193,7 +202,7 @@ _INLINE void *_CDECL checked_aligned_callocz(size_t align, size_t count, size_t 
 /// @param count Number of instances to allocate.
 /// @return A pointer to the instanced block of memory.
 #       define stackdim(type, count) dimz(type, count)
-#   endif // alloca
+#   endif // malloca/alloca
 #endif // stackdim
 
 /* =------------------------------------------------------------= */
