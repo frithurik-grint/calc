@@ -12,7 +12,7 @@
 
 CALC_C_HEADER_BEGIN
 
-/* =---- Memory Management -------------------------------------= */
+/* =---- Standard Memory Management Header ---------------------= */
 
 /// @brief Allocates a block of bytes on the heap.
 /// @param size Number of bytes to allocate.

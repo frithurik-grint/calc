@@ -9,7 +9,7 @@
 
 CALC_C_HEADER_BEGIN
 
-/* =---- Common Error Output Functions -------------------------= */
+/* =---- Standard Errors Output Header -------------------------= */
 
 // +---- Internal Macros ---------------------------------------+
 

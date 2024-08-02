@@ -12,7 +12,7 @@
 
 #include <stddef.h>
 
-/* =---- Common Definitions ------------------------------------= */
+/* =---- Standard Definitions Header ---------------------------= */
 
 #ifndef EXIT_SUCCESS
 /// @brief Succeful exit code.

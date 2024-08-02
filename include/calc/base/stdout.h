@@ -12,7 +12,7 @@
 
 CALC_C_HEADER_BEGIN
 
-/* =---- Common Output Functions -------------------------------= */
+/* =---- Standard Output Header --------------------------------= */
 
 // +---- Internal Macros ---------------------------------------+
 

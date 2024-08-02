@@ -9,7 +9,7 @@
 
 CALC_C_HEADER_BEGIN
 
-/* =---- Common Datatype Definitions ---------------------------= */
+/* =---- Standard Datatypes Header -----------------------------= */
 
 #ifndef numcmp
 /// @brief Compares two generic numbers.
