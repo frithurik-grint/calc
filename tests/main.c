@@ -3,4 +3,6 @@
 int main()
 {
     void *v = stackalloc(int);
+
+    return EXIT_SUCCESS;
 }

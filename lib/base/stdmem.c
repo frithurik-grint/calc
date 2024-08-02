@@ -15,7 +15,6 @@ static inline void *_safety_abort(
 #ifdef _DEBUG
     fail("fatal error: function %s cannot allocate memory", funcname);
 #else
-    raise(SIGSEGV);
     fail("fatal error: cannot allocate enough memory");
 #endif // _DEBUG
 

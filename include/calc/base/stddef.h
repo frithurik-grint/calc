@@ -137,8 +137,13 @@
 #endif // _CALC_USE_CDECL
 
 #if _CALC_BUILD_INLINES
+#   ifdef __GNUC__
 /// @brief Marks a possible inline function. (enabled)
-#   define _INLINE inline
+#       define _INLINE static inline
+#   else
+/// @brief Marks a possible inline function. (enabled)
+#       define _INLINE inline
+#   endif // __GNUC__
 #else
 /// @brief Marks a possible inline function. (disabled)
 #   define _INLINE
@@ -191,7 +196,7 @@ typedef enum _access_mode
 /// @param size Number of bytes to allocate.
 /// @return A pointer to the allocated block of memory.
 #   define malloca _malloca
-#endif // alloca
+#endif // malloca
 
 #ifdef _WIN64
 /// @brief Used for a count of bytes or an error indication.
@@ -229,6 +234,7 @@ _API CALC_C_EXTERN unsigned int _CDECL _getpagesiz();
 
 #else
 
+#include <stdlib.h>
 #include <unistd.h>
 
 #ifndef pagesiz

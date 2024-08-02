@@ -16,7 +16,7 @@ CALC_C_HEADER_BEGIN
 #pragma region Internal Macros
 
 #ifndef _stderr_error
-#   define _stderr_error(message) fprint((message), stderr)
+#   define _stderr_error(message) fprint(stderr, (message))
 #endif // _stderr_error
 
 #ifndef _stderr_errorln
