@@ -18,6 +18,8 @@ add_compile_definitions(
     "_CALC_BUILD_INLINES=1"
 )
 
+add_executable(calc "src/calc.c")
+
 include_directories("include")
 
 add_subdirectory("lib")
